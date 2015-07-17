@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Apache Celix</string>
+
+    <string name="btn_start">Start Celix</string>
+
+    <string name="settings_bundleUr">Change Bundle URL</string>
+    <string name="settings_editProperties">Edit Properties</string>
+
+    <string name="error_message_general">Error!</string>
+    <string name="error_message_bad_url">Error: misformed url</string>
+    <string name="error_message_file_not_found">Error: file not found</string>
+
+</resources>
