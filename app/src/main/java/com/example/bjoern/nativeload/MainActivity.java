@@ -1,10 +1,10 @@
 package com.example.bjoern.nativeload;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -24,6 +24,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -42,7 +44,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
     private LogCatReader lr;
 
     public ListView bundleListView;
-    public BundleItemAdapter aa;
+    public BundleItemAdapter bundleAdapter;
 
     private String CONFIG_PROPERTIES = "config.properties";
     private TextView textView_result;
@@ -265,7 +267,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        txt.downloadBundles();
+//                        txt.downloadBundles();
                     }
                 });
                 AlertDialog dialog = builder.create();
@@ -275,22 +277,66 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
     }
 
 
-    private void downloadBundles() {
-        ArrayList<BundleItem> bundleToBeDownLoaded = new ArrayList<>();
+//    private void downloadBundles() {
+//        ArrayList<BundleItem> bundleToBeDownLoaded = new ArrayList<>();
+//
+//        for(BundleItem bundle : bundles) {
+//            boolean fileExists =  new File(bundleLocation + "/" + bundle.getFilename()).isFile();
+//
+//            if (!fileExists) {
+//                bundleToBeDownLoaded.add(bundle);
+//            }
+//            else {
+//                bundle.setStatus(BundleItem.BUNDLE_LOCALLY_AVAILABLE);
+//            }
+//        }
+//
+//        if (!bundleToBeDownLoaded.isEmpty()) {
+//            (new DownloaderThread(this, bundleToBeDownLoaded, bundleLocation)).start();
+//        }
+//    }
 
-        for(BundleItem bundle : bundles) {
-            boolean fileExists =  new File(bundleLocation + "/" + bundle.getFilename()).isFile();
+    /**
+     * Method for moving the files from the assets to the internal storage
+     * so the C code can reach it
+     */
+    private void moveBundles() {
+        AssetManager assetManager = getResources().getAssets();
 
-            if (!fileExists) {
-                bundleToBeDownLoaded.add(bundle);
-            }
-            else {
-                bundle.setStatus(BundleItem.BUNDLE_LOCALLY_AVAILABLE);
-            }
+        String[] files = null;
+
+        try {
+            files = assetManager.list("celix_bundles"); //raw.celix_bundles
+        } catch (Exception e) {
+            Log.e("BundleMover", "ERROR: " + e.toString());
         }
 
-        if (!bundleToBeDownLoaded.isEmpty()) {
-            (new DownloaderThread(this, bundleToBeDownLoaded, bundleLocation)).start();
+//      Create dir /celix_bundle/ if not exists
+        File dir = new File(getFilesDir() + "/celix_bundles/");
+        dir.mkdirs();
+
+        for (int i = 0; i < files.length; i++) {
+
+            if (!new File(getFilesDir() + "/celix_bundles/" + files[i]).exists()) {
+                try {
+                    InputStream in = assetManager.open("celix_bundles/" + files[i]);
+                    OutputStream out = new FileOutputStream(getFilesDir() + "/celix_bundles/" + files[i]);
+
+                    byte[] buffer = new byte[65536 * 2];
+                    int read;
+                    while ((read = in.read(buffer)) >= 0) {
+                        out.write(buffer, 0, read);
+                    }
+                    in.close();
+                    out.flush();
+                    out.close();
+                    Log.i("BundleMover", files[i] + " copied to " + getFilesDir() + "/celix_bundles/");
+                } catch (Exception e) {
+                    Log.e("BundleMover", "ERROR: " + e.toString());
+                }
+            } else {
+                Log.i("BundleMover", files[i] + " already exists");
+            }
         }
     }
 
@@ -302,23 +348,32 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         setDefaultUncaughtExceptionHandler();
 
         bundleListView = (ListView) findViewById(R.id.bundleListView);
-        bundleLocation = getExternalFilesDir(null).toString();
+        bundleAdapter = new BundleItemAdapter(this, R.layout.bundle_item, bundles);
+        bundleListView.setAdapter(bundleAdapter);
 
-        bundles.add(new BundleItem("log_service.zip", "", true));
-        bundles.add(new BundleItem("log_writer.zip", "", true));
-        bundles.add(new BundleItem("echo_client.zip", "", false));
-        bundles.add(new BundleItem("echo_server.zip", "", false));
-        bundles.add(new BundleItem("topology_manager.zip", "", false));
-        bundles.add(new BundleItem("discovery_etcd.zip", "", false));
-        bundles.add(new BundleItem("remote_service_admin_http.zip", "", false));
-        bundles.add(new BundleItem("remote_shell.zip", "", false));
-        bundles.add(new BundleItem("calculator.zip", "", false));
-        bundles.add(new BundleItem("org.apache.celix.calc.api.Calculator_endpoint.zip", "", false));
-        bundles.add(new BundleItem("discovery_configured.zip", "", false));
-        bundles.add(new BundleItem("apache_celix_examples_hello_world.zip", "", false));
+        bundleLocation = getFilesDir() + "/celix_bundles/";
 
-        aa = new BundleItemAdapter(this, R.layout.bundle_item, bundles);
-        bundleListView.setAdapter(aa);
+        moveBundles(); //move files from assets to int. storage
+
+        String [] bundleFiles = new File(bundleLocation).list();
+
+        for(String bundle : bundleFiles) {
+            bundles.add(new BundleItem(bundle, "", false));
+        }
+
+//        bundles.add(new BundleItem("log_service.zip", "", true));
+//        bundles.add(new BundleItem("log_writer.zip", "", true));
+//        bundles.add(new BundleItem("echo_client.zip", "", false));
+//        bundles.add(new BundleItem("echo_server.zip", "", false));
+//        bundles.add(new BundleItem("topology_manager.zip", "", false));
+//        bundles.add(new BundleItem("discovery_etcd.zip", "", false));
+//        bundles.add(new BundleItem("remote_service_admin_http.zip", "", false));
+//        bundles.add(new BundleItem("remote_shell.zip", "", false));
+//        bundles.add(new BundleItem("calculator.zip", "", false));
+//        bundles.add(new BundleItem("org_apache_celix_calc_api_Calculator_endpoint.zip", "", false));
+//        bundles.add(new BundleItem("discovery_configured.zip", "", false));
+//        bundles.add(new BundleItem("apache_celix_examples_hello_world.zip", "", false));
+
 
         handler = new Handler();
 
@@ -346,7 +401,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         initJni();
         setupInitScreen();
 
-        downloadBundles();
+        //downloadBundles();
     }
 
     @Override
