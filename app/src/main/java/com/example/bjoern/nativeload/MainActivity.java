@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -219,8 +222,13 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         btn_start.setEnabled(true);
         btn_start.setText("START CELIX");
 
+
+
+
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
+                Log.d("Start button", "Started");
 
                 SharedPreferences prefs = getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
                 String cfgPath =  getApplicationContext().getFilesDir() + "/" + CONFIG_PROPERTIES;
@@ -290,7 +298,51 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         }
 
         if (!bundleToBeDownLoaded.isEmpty()) {
-            (new DownloaderThread(this, bundleToBeDownLoaded, bundleLocation)).start();
+//            (new DownloaderThread(this, bundleToBeDownLoaded, bundleLocation)).start();
+        }
+    }
+
+    /**
+     * Method for moving the files from the assets to the internal storage
+     * so the C code can reach it
+     */
+    private void moveBundles() {
+        AssetManager assetManager = getResources().getAssets();
+
+        String[] files = null;
+
+        try {
+            files = assetManager.list("celix_bundles"); //raw.celix_bundles
+        } catch (Exception e) {
+            Log.e("BundleMover", "ERROR: " + e.toString());
+        }
+
+//      Create dir /celix_bundle/ if not exists
+//        File bundleDir = getDir("celix_bundles", MODE_PRIVATE);
+
+        for (int i = 0; i < files.length; i++) {
+
+            if (!new File(bundleLocation + files[i]).isFile()) {
+                try {
+                    InputStream in = assetManager.open("celix_bundles/" + files[i]);
+//                    File newFile = new File(bundleLocation + "/"+ files[i]);
+//                    OutputStream out = new FileOutputStream(newFile);
+                    OutputStream out = openFileOutput(bundleLocation + "/" + files[i], MODE_PRIVATE);
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                    }
+                    in.close();
+                    out.flush();
+                    out.close();
+                    Log.i("BundleMover", files[i] + " copied to " + bundleLocation);
+                } catch (Exception e) {
+                    Log.e("BundleMover", "ERROR: " + e.toString());
+                }
+            } else {
+                Log.i("BundleMover", files[i] + " already exists");
+            }
         }
     }
 
@@ -301,21 +353,33 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
 
         setDefaultUncaughtExceptionHandler();
 
-        bundleListView = (ListView) findViewById(R.id.bundleListView);
-        bundleLocation = getExternalFilesDir(null).toString();
+//        getResources().openRawResource(R.raw.calculator);
 
-        bundles.add(new BundleItem("log_service.zip", "", true));
-        bundles.add(new BundleItem("log_writer.zip", "", true));
-        bundles.add(new BundleItem("echo_client.zip", "", false));
-        bundles.add(new BundleItem("echo_server.zip", "", false));
-        bundles.add(new BundleItem("topology_manager.zip", "", false));
-        bundles.add(new BundleItem("discovery_etcd.zip", "", false));
-        bundles.add(new BundleItem("remote_service_admin_http.zip", "", false));
-        bundles.add(new BundleItem("remote_shell.zip", "", false));
-        bundles.add(new BundleItem("calculator.zip", "", false));
-        bundles.add(new BundleItem("org.apache.celix.calc.api.Calculator_endpoint.zip", "", false));
-        bundles.add(new BundleItem("discovery_configured.zip", "", false));
-        bundles.add(new BundleItem("apache_celix_examples_hello_world.zip", "", false));
+        bundleListView = (ListView) findViewById(R.id.bundleListView);
+
+        bundleLocation = getDir("celix_bundles", MODE_PRIVATE).getAbsolutePath();
+//        bundleLocation = getExternalFilesDir(null).toString();
+
+        Log.d("Bundlelocation", bundleLocation);
+        Log.d("Bundlelocation", getApplicationContext().getFilesDir() + "      <- hier");
+
+        moveBundles();
+        for(String fileName : getExternalFilesDir(null).list()) {
+            bundles.add(new BundleItem(fileName, "", false));
+        }
+
+//        bundles.add(new BundleItem("log_service.zip", "", true));
+//        bundles.add(new BundleItem("log_writer.zip", "", true));
+//        bundles.add(new BundleItem("echo_client.zip", "", false));
+//        bundles.add(new BundleItem("echo_server.zip", "", false));
+//        bundles.add(new BundleItem("topology_manager.zip", "", false));
+//        bundles.add(new BundleItem("discovery_etcd.zip", "", false));
+//        bundles.add(new BundleItem("remote_service_admin_http.zip", "", false));
+//        bundles.add(new BundleItem("remote_shell.zip", "", false));
+//        bundles.add(new BundleItem("calculator.zip", "", false));
+//        bundles.add(new BundleItem("org.apache.celix.calc.api.Calculator_endpoint.zip", "", false));
+//        bundles.add(new BundleItem("discovery_configured.zip", "", false));
+//        bundles.add(new BundleItem("apache_celix_examples_hello_world.zip", "", false));
 
         aa = new BundleItemAdapter(this, R.layout.bundle_item, bundles);
         bundleListView.setAdapter(aa);
@@ -347,6 +411,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         setupInitScreen();
 
         downloadBundles();
+
     }
 
     @Override
@@ -371,10 +436,10 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
                          public void run() {
 
                              btn_start.setText("STOP CELIX");
-
                              btn_start.setOnClickListener(new View.OnClickListener() {
                                  public void onClick(View v) {
                                          btn_start.setEnabled(false);
+                                         Log.d("Start button", "Stopped");
                                          stopCelix();
                                  }
                              });

@@ -40,11 +40,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Message;
 import android.util.Log;
-
-import com.example.bjoern.nativeload.MainActivity;
-import com.example.bjoern.nativeload.R;
 
 /**
  * Downloads a file in a thread. Will send messages to the
