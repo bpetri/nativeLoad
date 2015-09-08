@@ -124,7 +124,7 @@ public class DownloaderThread extends Thread
             @Override
             public void run() {
                 Log.d("REFRESDH ", "refreshview now");
-                parentActivity.bundleAdapter.notifyDataSetChanged();
+                parentActivity.aa.notifyDataSetChanged();
                         //setProgressBarIndeterminateVisibility();
                 //parentActivity.bundleListView.postInvalidate();
             }
