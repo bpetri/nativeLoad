@@ -1,11 +1,11 @@
-package com.example.bjoern.nativeload;
+/**
+ * Licensed under Apache License v2. See LICENSE for more information.
+ */
 
+package com.example.bjoern.nativeload;
 
 import android.util.Log;
 
-/**
- * Created by bjoern on 29.05.15.
- */
 public class BundleItem {
 
     private final String TAG = BundleItem.class.getName();

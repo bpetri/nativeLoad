@@ -1,3 +1,7 @@
+/**
+ * Licensed under Apache License v2. See LICENSE for more information.
+ */
+
 package com.example.bjoern.nativeload;
 
 import java.io.BufferedReader;
@@ -6,10 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-
-/**
- * Created by bjoern on 28.05.15.
- */
 
 public class LogCatReader {
 
@@ -137,5 +137,3 @@ public class LogCatReader {
             }
         }
     }
-
-
