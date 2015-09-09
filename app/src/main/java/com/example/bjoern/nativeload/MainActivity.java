@@ -443,6 +443,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
                          public void run() {
 
                              btn_start.setText("STOP CELIX");
+                             btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
                              btn_start.setOnClickListener(new View.OnClickListener() {
                                  public void onClick(View v) {
                                          btn_start.setEnabled(false);

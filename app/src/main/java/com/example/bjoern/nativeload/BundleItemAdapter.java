@@ -25,36 +25,31 @@ import java.util.List;
 public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
 
     private final String TAG = BundleItemAdapter.class.getName();
+    private LayoutInflater inflater;
 
     int resource;
 
     public BundleItemAdapter(Context _context, int _resource, List<BundleItem> _items) {
         super(_context, _resource, _items);
+        inflater = LayoutInflater.from(_context);
         resource = _resource;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LinearLayout bundleView;
+        if (convertView == null) {
+            convertView = inflater.inflate(resource,parent,false);
+        }
+
         final BundleItem item = getItem(position);
 
         String fileName = item.getFilename();
         int status = item.getStatus();
         boolean isChecked = item.isChecked();
 
-        if (convertView == null) {
-            bundleView = new LinearLayout(getContext());
-            String inflater = Context.LAYOUT_INFLATER_SERVICE;
-            LayoutInflater vi;
-            vi = (LayoutInflater) getContext().getSystemService(inflater);
-            vi.inflate(resource, bundleView, true);
-        } else {
-            bundleView = (LinearLayout) convertView;
-        }
-
-        TextView bundleFileName = (TextView) bundleView.findViewById(R.id.bundleFileName);
-        CheckBox bundleCheckbox = (CheckBox) bundleView.findViewById(R.id.bundleCheckbox);
-        ProgressBar bundleProgressBar = (ProgressBar) bundleView.findViewById(R.id.bundleProgressBar);
+        TextView bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
+        CheckBox bundleCheckbox = (CheckBox) convertView.findViewById(R.id.bundleCheckbox);
+        ProgressBar bundleProgressBar = (ProgressBar) convertView.findViewById(R.id.bundleProgressBar);
 
         bundleFileName.setText(fileName);
 
@@ -126,7 +121,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         }
 
 
-        return bundleView;
+        return convertView;
     }
 
 }
