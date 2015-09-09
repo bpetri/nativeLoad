@@ -329,9 +329,9 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
             if (!new File(bundleLocation + files[i]).isFile()) {
                 try {
                     InputStream in = assetManager.open("celix_bundles/" + files[i]);
-//                    File newFile = new File(bundleLocation + "/"+ files[i]);
-//                    OutputStream out = new FileOutputStream(newFile);
-                    OutputStream out = openFileOutput(bundleLocation + "/" + files[i], MODE_PRIVATE);
+                    File newFile = new File(bundleLocation + "/"+ files[i]);
+                    OutputStream out = new FileOutputStream(newFile);
+//                    OutputStream out = openFileOutput(bundleLocation + "/" + files[i], MODE_PRIVATE);
                     byte[] buffer = new byte[1024];
                     int read;
                     while ((read = in.read(buffer)) != -1) {
@@ -361,10 +361,13 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
 
         bundleListView = (ListView) findViewById(R.id.bundleListView);
 
-        bundleLocation = getDir("celix_bundles", MODE_PRIVATE).getAbsolutePath();
-//        bundleLocation = getExternalFilesDir(null).toString();
+//        bundleLocation = getDir("celix_bundles", MODE_PRIVATE).getAbsolutePath();
+        bundleLocation = getExternalFilesDir(null).toString();
 
         Log.d("Bundlelocation", bundleLocation);
+        Log.d("Bundlelocation", getExternalFilesDir(null).toString());
+        Log.d("Bundlelocation", getFilesDir().toString());
+        Log.d("bundlelocation", getDir(null, MODE_PRIVATE).toString());
         Log.d("Bundlelocation", getApplicationContext().getFilesDir() + "      <- hier");
 
         moveBundles();
