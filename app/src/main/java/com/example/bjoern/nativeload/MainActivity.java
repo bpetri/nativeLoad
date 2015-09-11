@@ -316,13 +316,11 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         String[] files = null;
 
         try {
-            files = assetManager.list("celix_bundles"); //raw.celix_bundles
+            files = assetManager.list("celix_bundles"); //assets/celix_bundles
         } catch (Exception e) {
             Log.e("BundleMover", "ERROR: " + e.toString());
         }
 
-//      Create dir /celix_bundle/ if not exists
-//        File bundleDir = getDir("celix_bundles", MODE_PRIVATE);
 
         for (int i = 0; i < files.length; i++) {
 
@@ -357,7 +355,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
 
         setDefaultUncaughtExceptionHandler();
 
-//        getResources().openRawResource(R.raw.calculator);
+
 
         bundleListView = (ListView) findViewById(R.id.bundleListView);
 
@@ -413,6 +411,20 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
 
         // Load native library
         System.loadLibrary("jni_part");
+        //-----------------------
+
+        Log.e("---------", "Start of test");
+        System.err.println("This message comes from Java.");
+        new Thread() {
+            @Override
+            public void run() {
+                printCMessage();
+            }
+        }.start();
+        Log.e("---------", "End of test");
+
+
+        //-----------------------
 
         initJni();
         setupInitScreen();
@@ -573,6 +585,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
     public native int startCelix(String propertyString);
     public native int stopCelix();
     public native int initJni();
+    public native int printCMessage();
 
 
     @Override

@@ -5,6 +5,7 @@
 #include <libgen.h>
 #include <curl/curl.h>
 #include <android/log.h>
+#include <unistd.h>
 
 #include "framework.h"
 #include "linked_list_iterator.h"
@@ -43,6 +44,7 @@ callback_t cb[] = {
 JNIEXPORT jboolean JNICALL Java_com_example_bjoern_nativeload_MainActivity_initJni(JNIEnv*, jobject);
 JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_startCelix(JNIEnv*, jclass, jstring);
 JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_stopCelix(JNIEnv*, jobject);
+JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_printCMessage(JNIEnv*, jobject);
 
 int running = 0;
 
@@ -170,6 +172,21 @@ void* startCelix(void* param) {
                     if (bundleContext_installBundle(context, location, &current) == CELIX_SUCCESS) {
                         // Only add bundle if it is installed correctly
                         LOGI("bundle from %s sucessfully installed\n", location);
+                        //----------------------
+
+                        bundle_archive_pt archive = NULL;
+                        long id;
+                        char * stateString = NULL;
+                        module_pt module = NULL;
+                        char * name = NULL;
+
+                        bundle_getArchive(current, &archive);
+                        bundleArchive_getId(archive, &id);
+                        bundle_getCurrentModule(current, &module);
+                        module_getSymbolicName(module, &name);
+                        LOGI("  %-5ld %-12s %s\n", id, stateString, name);
+
+                        //----------------------
                         arrayList_add(installed, current);
                     } else {
                         LOGI("Could not install bundle from %s\n", location);
@@ -243,6 +260,7 @@ failure:
 JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_startCelix(JNIEnv* je, jclass jc, jstring i)
 {
     	// convert Java string to UTF-8
+    printf("Dit is een message van C");
     	const char *propertyString = (*je)->GetStringUTFChars(je, i, NULL);
 	pthread_t thread;
 	return pthread_create( &thread, NULL, startCelix, (void*) propertyString);
@@ -254,10 +272,38 @@ JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_stopCelix
 	bundle_pt fwBundle = NULL;
 	
 	framework_getFrameworkBundle(framework, &fwBundle);
+
+    //-----------------------
+    bundle_archive_pt archive = NULL;
+    long id;
+    char * stateString = NULL;
+    module_pt module = NULL;
+    char * name = NULL;
+
+    bundle_getArchive(fwBundle, &archive);
+    bundleArchive_getId(archive, &id);
+    bundle_getCurrentModule(fwBundle, &module);
+    module_getSymbolicName(module, &name);
+    LOGI("Stopping  %-5ld %s\n", id, name);
+    //-----------------------
+
+
 	bundle_stop(fwBundle);
         //framework_destroy(framework);
 	
 	return 0;
+}
+
+JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_printCMessage(JNIEnv *env, jobject obj) {
+    int pipes[2];
+    pipe(pipes);
+    dup2(pipes[1], STDOUT_FILENO);
+    FILE *inputFile = fdopen(pipes[0], "r");
+    char readBuffer[256];
+    while (1) {
+        fgets(readBuffer, sizeof(readBuffer), inputFile);
+        __android_log_write(2, "stdout", readBuffer);
+    }
 }
 
 
