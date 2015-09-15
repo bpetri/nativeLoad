@@ -13,6 +13,7 @@ import android.content.res.AssetManager;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +40,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 
-public class MainActivity extends ActionBarActivity implements  Runnable {
+public class MainActivity extends AppCompatActivity implements  Runnable {
 
 
     private final static String TAG = MainActivity.class.getName();
@@ -51,11 +52,142 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
     public ListView bundleListView;
     public BundleItemAdapter aa;
 
-    private String CONFIG_PROPERTIES = "config.properties";
-    private TextView textView_result;
+    private final String CONFIG_PROPERTIES = "config.properties";
 
-    private String string0;
     private Handler handler;
+
+    static {
+        System.loadLibrary("jni_part");
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        super.setContentView(R.layout.activity_main);
+
+        setDefaultUncaughtExceptionHandler();
+
+//        getResources().openRawResource(R.raw.calculator);
+
+        bundleListView = (ListView) findViewById(R.id.bundleListView);
+
+//        bundleLocation = getDir("celix_bundles", MODE_PRIVATE).getAbsolutePath();
+        bundleLocation = getExternalFilesDir(null).toString();
+
+        Log.d("Bundlelocation", bundleLocation);
+        Log.d("Bundlelocation", getExternalFilesDir(null).toString());
+        Log.d("Bundlelocation", getFilesDir().toString());
+        Log.d("bundlelocation", getDir(null, MODE_PRIVATE).toString());
+        Log.d("Bundlelocation", getApplicationContext().getFilesDir() + "      <- hier");
+
+        moveBundles();
+        for(String fileName : getExternalFilesDir(null).list()) {
+            BundleItem b = new BundleItem(fileName,"",false);
+            b.setStatus(BundleItem.BUNDLE_LOCALLY_AVAILABLE);
+            bundles.add(b);
+
+        }
+
+
+
+        aa = new BundleItemAdapter(this, R.layout.bundle_item, bundles);
+        bundleListView.setAdapter(aa);
+
+        handler = new Handler();
+
+        lr = new LogCatReader(new LogCatOut()
+        {
+            @Override
+            public void writeLogData(final String line) throws IOException
+            {
+                final EditText editText_log = (EditText) findViewById(R.id.editText_log);
+                handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        editText_log.append(line + System.getProperty("line.separator"));
+                    }
+                });
+            }
+        });
+
+        Log.d("Arch", System.getProperty("os.arch"));
+        initJni();
+        setupInitScreen();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+
+        final EditText edittext = new EditText(this.getApplicationContext());
+
+
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        final SharedPreferences pref = getApplicationContext().getSharedPreferences("celixAgent", MODE_PRIVATE);
+        String baseUrl = pref.getString("bundleUrl", null);
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings_bundelUrl) {
+
+            showInputDialog(edittext, "Change Bundle URL", "", baseUrl,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            pref.edit().putString("bundleUrl", edittext.getText().toString()).apply();
+                            Toast.makeText(getBaseContext(), "url sucessfully changed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+
+            return true;
+        }
+        else if (id == R.id.action_settings_editProperties) {
+            final SharedPreferences prefs = getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
+
+            String cfgStr  = prefs.getString("celixConfig", null);
+            Properties cfgProps =  (cfgStr != null) ?  generateConfiguration(stringToProperties(cfgStr))  : generateConfiguration(null);
+
+            showInputDialog(edittext, "Edit Properties", "", propertiesToString(cfgProps) ,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            prefs.edit().putString("celixConfig", edittext.getText().toString()).apply();
+                            Toast.makeText(getBaseContext(), "properties sucessfully changed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+
+            return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        handler.post(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // TODO: Check this
+        handler.removeCallbacks(this);
+    }
 
     private static void setDefaultUncaughtExceptionHandler() {
         try {
@@ -235,9 +367,9 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
                 Log.d("Start button", "Started");
 
                 SharedPreferences prefs = getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
-                String cfgPath =  getApplicationContext().getFilesDir() + "/" + CONFIG_PROPERTIES;
-                String cfgStr  = prefs.getString("celixConfig", null);
-                Properties cfgProps =  (cfgStr != null) ?  generateConfiguration(stringToProperties(cfgStr))  : generateConfiguration(null);
+                String cfgPath = getApplicationContext().getFilesDir() + "/" + CONFIG_PROPERTIES;
+                String cfgStr = prefs.getString("celixConfig", null);
+                Properties cfgProps = (cfgStr != null) ? generateConfiguration(stringToProperties(cfgStr)) : generateConfiguration(null);
 
                 if (writeConfiguration(getApplicationContext(), propertiesToString(cfgProps))) {
                     btn_start.setEnabled(false);
@@ -350,89 +482,6 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        super.setContentView(R.layout.activity_main);
-
-        setDefaultUncaughtExceptionHandler();
-
-//        getResources().openRawResource(R.raw.calculator);
-
-        bundleListView = (ListView) findViewById(R.id.bundleListView);
-
-//        bundleLocation = getDir("celix_bundles", MODE_PRIVATE).getAbsolutePath();
-        bundleLocation = getExternalFilesDir(null).toString();
-
-        Log.d("Bundlelocation", bundleLocation);
-        Log.d("Bundlelocation", getExternalFilesDir(null).toString());
-        Log.d("Bundlelocation", getFilesDir().toString());
-        Log.d("bundlelocation", getDir(null, MODE_PRIVATE).toString());
-        Log.d("Bundlelocation", getApplicationContext().getFilesDir() + "      <- hier");
-
-        moveBundles();
-        for(String fileName : getExternalFilesDir(null).list()) {
-            bundles.add(new BundleItem(fileName, "", false));
-        }
-
-//        bundles.add(new BundleItem("log_service.zip", "", true));
-//        bundles.add(new BundleItem("log_writer.zip", "", true));
-//        bundles.add(new BundleItem("echo_client.zip", "", false));
-//        bundles.add(new BundleItem("echo_server.zip", "", false));
-//        bundles.add(new BundleItem("topology_manager.zip", "", false));
-//        bundles.add(new BundleItem("discovery_etcd.zip", "", false));
-//        bundles.add(new BundleItem("remote_service_admin_http.zip", "", false));
-//        bundles.add(new BundleItem("remote_shell.zip", "", false));
-//        bundles.add(new BundleItem("calculator.zip", "", false));
-//        bundles.add(new BundleItem("org.apache.celix.calc.api.Calculator_endpoint.zip", "", false));
-//        bundles.add(new BundleItem("discovery_configured.zip", "", false));
-//        bundles.add(new BundleItem("apache_celix_examples_hello_world.zip", "", false));
-
-        aa = new BundleItemAdapter(this, R.layout.bundle_item, bundles);
-        bundleListView.setAdapter(aa);
-
-        handler = new Handler();
-
-        lr = new LogCatReader(new LogCatOut()
-        {
-            @Override
-            public void writeLogData(final String line) throws IOException
-            {
-                final EditText editText_log = (EditText) findViewById(R.id.editText_log);
-                handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        editText_log.append(line + System.getProperty("line.separator"));
-                    }
-                });
-            }
-        });
-
-
-
-        // Load native library
-        System.loadLibrary("jni_part");
-
-        initJni();
-        setupInitScreen();
-
-        downloadBundles();
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        handler.post(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // TODO: Check this
-        handler.removeCallbacks(this);
-    }
 
 
     public void confirmCelixStart() {
@@ -470,12 +519,9 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
 
                 try {
                     Thread.sleep(5000);
-                }
-                catch (InterruptedException ignored)
-                {
+                } catch (InterruptedException ignored) {
                     // I don't care
-                }
-                finally {
+                } finally {
                     btn_start.setOnClickListener(new View.OnClickListener() {
                         public void onClick(View v) {
                             lr.kill();
@@ -488,12 +534,6 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
 
 
     protected void showInputDialog(final EditText edittext, String title, String msg, String text, DialogInterface.OnClickListener positiveListener) {
@@ -502,6 +542,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
 
         if (text != null) {
             edittext.setText(text);
+            edittext.setTextColor(getResources().getColor(android.R.color.black));
         }
 
         alert.setTitle(title);
@@ -519,56 +560,7 @@ public class MainActivity extends ActionBarActivity implements  Runnable {
         alert.show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
 
-
-        final EditText edittext = new EditText(this.getApplicationContext());
-
-
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        final SharedPreferences pref = getApplicationContext().getSharedPreferences("celixAgent", MODE_PRIVATE);
-        String baseUrl = pref.getString("bundleUrl", null);
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings_bundelUrl) {
-
-            showInputDialog(edittext, "Change Bundle URL", "", baseUrl,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        pref.edit().putString("bundleUrl", edittext.getText().toString()).apply();
-                        Toast.makeText(getBaseContext(), "url sucessfully changed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            );
-
-            return true;
-        }
-        else if (id == R.id.action_settings_editProperties) {
-            final SharedPreferences prefs = getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
-
-            String cfgStr  = prefs.getString("celixConfig", null);
-            Properties cfgProps =  (cfgStr != null) ?  generateConfiguration(stringToProperties(cfgStr))  : generateConfiguration(null);
-
-            showInputDialog(edittext, "Edit Properties", "", propertiesToString(cfgProps) ,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            prefs.edit().putString("celixConfig", edittext.getText().toString()).apply();
-                            Toast.makeText(getBaseContext(), "properties sucessfully changed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-            );
-
-            return true;
-        }
-
-
-        return super.onOptionsItemSelected(item);
-    }
 
     public native int startCelix(String propertyString);
     public native int stopCelix();

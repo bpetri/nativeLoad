@@ -42,7 +42,6 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         }
 
         final BundleItem item = getItem(position);
-
         String fileName = item.getFilename();
         int status = item.getStatus();
         boolean isChecked = item.isChecked();
