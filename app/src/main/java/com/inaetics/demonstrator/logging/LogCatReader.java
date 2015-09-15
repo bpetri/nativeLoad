@@ -2,7 +2,7 @@
  * Licensed under Apache License v2. See LICENSE for more information.
  */
 
-package com.example.bjoern.nativeload;
+package com.inaetics.demonstrator.logging;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

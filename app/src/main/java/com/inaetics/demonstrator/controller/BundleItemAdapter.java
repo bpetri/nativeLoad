@@ -2,7 +2,7 @@
  * Licensed under Apache License v2. See LICENSE for more information.
  */
 
-package com.example.bjoern.nativeload;
+package com.inaetics.demonstrator.controller;
 
 import android.content.Context;
 import android.util.Log;
@@ -12,10 +12,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.inaetics.demonstrator.model.BundleItem;
+import com.inaetics.demonstrator.nativeload.R;
 
 import java.util.List;
 

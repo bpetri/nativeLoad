@@ -40,9 +40,9 @@ callback_t cb[] = {
 
 
 
-JNIEXPORT jboolean JNICALL Java_com_example_bjoern_nativeload_MainActivity_initJni(JNIEnv*, jobject);
-JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_startCelix(JNIEnv*, jclass, jstring);
-JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_stopCelix(JNIEnv*, jobject);
+JNIEXPORT jboolean JNICALL Java_com_inaetics_demonstrator_MainActivity_initJni(JNIEnv*, jobject);
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_startCelix(JNIEnv*, jclass, jstring);
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_stopCelix(JNIEnv*, jobject);
 
 int running = 0;
 
@@ -209,7 +209,7 @@ void* startCelix(void* param) {
 
 
 
-JNIEXPORT jboolean JNICALL Java_com_example_bjoern_nativeload_MainActivity_initJni(JNIEnv* je, jobject thiz)
+JNIEXPORT jboolean JNICALL Java_com_inaetics_demonstrator_MainActivity_initJni(JNIEnv* je, jobject thiz)
 {
 	jboolean retVal = true;
 
@@ -240,7 +240,7 @@ failure:
 }
 
 
-JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_startCelix(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_startCelix(JNIEnv* je, jclass jc, jstring i)
 {
     	// convert Java string to UTF-8
     	const char *propertyString = (*je)->GetStringUTFChars(je, i, NULL);
@@ -249,7 +249,7 @@ JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_startCeli
 }
 
 
-JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_stopCelix(JNIEnv* je, jobject thiz)
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_stopCelix(JNIEnv* je, jobject thiz)
 {
 	bundle_pt fwBundle = NULL;
 	

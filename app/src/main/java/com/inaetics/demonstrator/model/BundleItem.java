@@ -2,9 +2,7 @@
  * Licensed under Apache License v2. See LICENSE for more information.
  */
 
-package com.example.bjoern.nativeload;
-
-import android.util.Log;
+package com.inaetics.demonstrator.model;
 
 public class BundleItem {
 

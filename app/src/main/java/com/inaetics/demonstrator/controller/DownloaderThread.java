@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.example.bjoern.nativeload;
+package com.inaetics.demonstrator.controller;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -41,6 +41,10 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+
+import com.inaetics.demonstrator.MainActivity;
+import com.inaetics.demonstrator.model.BundleItem;
+import com.inaetics.demonstrator.nativeload.R;
 
 /**
  * Downloads a file in a thread. Will send messages to the
