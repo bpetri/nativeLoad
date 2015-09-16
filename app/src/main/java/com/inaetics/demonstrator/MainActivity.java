@@ -79,11 +79,11 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
 //        bundleLocation = getDir("celix_bundles", MODE_PRIVATE).getAbsolutePath();
         bundleLocation = getExternalFilesDir(null).toString();
 
-        Log.d("Bundlelocation", bundleLocation);
+        Log.d("Bundlelocation", bundleLocation + "  <---- Used");
         Log.d("Bundlelocation", getExternalFilesDir(null).toString());
         Log.d("Bundlelocation", getFilesDir().toString());
         Log.d("bundlelocation", getDir(null, MODE_PRIVATE).toString());
-        Log.d("Bundlelocation", getApplicationContext().getFilesDir() + "      <- hier");
+        Log.d("Bundlelocation", getApplicationContext().getFilesDir() + "");
 
         moveBundles();
         for(String fileName : getExternalFilesDir(null).list()) {
@@ -458,13 +458,13 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
             Log.e("BundleMover", "ERROR: " + e.toString());
         }
 
+        //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
+        for (String fileName : files) {
 
-        for (int i = 0; i < files.length; i++) {
-
-            if (!new File(bundleLocation + files[i]).isFile()) {
+            File newFile = new File(bundleLocation + "/" + fileName);
+            if (!newFile.isFile()) {
                 try {
-                    InputStream in = assetManager.open("celix_bundles/" + files[i]);
-                    File newFile = new File(bundleLocation + "/"+ files[i]);
+                    InputStream in = assetManager.open("celix_bundles/" + fileName);
                     OutputStream out = new FileOutputStream(newFile);
 //                    OutputStream out = openFileOutput(bundleLocation + "/" + files[i], MODE_PRIVATE);
                     byte[] buffer = new byte[1024];
@@ -475,14 +475,45 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
                     in.close();
                     out.flush();
                     out.close();
-                    Log.i("BundleMover", files[i] + " copied to " + bundleLocation);
+                    Log.i("BundleMover", fileName + " copied to " + bundleLocation);
                 } catch (Exception e) {
                     Log.e("BundleMover", "ERROR: " + e.toString());
                 }
             } else {
-                Log.i("BundleMover", files[i] + " already exists");
+                Log.i("BundleMover", fileName + " already exists");
             }
         }
+
+//        External storage
+//        for (int i = 0; i < files.length; i++) {
+//
+//            if (!new File(bundleLocation + files[i]).isFile()) {
+//                try {
+//                    InputStream in = assetManager.open("celix_bundles/" + files[i]);
+//                    File newFile = new File(bundleLocation + "/"+ files[i]);
+//                    OutputStream out = new FileOutputStream(newFile);
+////                    OutputStream out = openFileOutput(bundleLocation + "/" + files[i], MODE_PRIVATE);
+//                    byte[] buffer = new byte[1024];
+//                    int read;
+//                    while ((read = in.read(buffer)) != -1) {
+//                        out.write(buffer, 0, read);
+//                    }
+//                    in.close();
+//                    out.flush();
+//                    out.close();
+//                    Log.i("BundleMover", files[i] + " copied to " + bundleLocation);
+//                } catch (Exception e) {
+//                    Log.e("BundleMover", "ERROR: " + e.toString());
+//                }
+//            } else {
+//                Log.i("BundleMover", files[i] + " already exists");
+//            }
+//        }
+
+//        Internal storage
+
+
+
     }
 
 
