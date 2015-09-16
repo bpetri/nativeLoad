@@ -68,10 +68,9 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activity_main);
 
-        setDefaultUncaughtExceptionHandler();
         bundleListView = (ListView) findViewById(R.id.bundleListView);
-        model.moveBundles(getResources());
         model = Model.getInstance();
+        model.moveBundles(getResources().getAssets());
         config = model.getConfig();
         model.setBundleLocation(getExternalFilesDir(null).toString());
         for(String fileName : getExternalFilesDir(null).list()) {
@@ -163,20 +162,6 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
         super.onPause();
         // TODO: Check this
         handler.removeCallbacks(this);
-    }
-
-    private static void setDefaultUncaughtExceptionHandler() {
-        try {
-            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-
-                @Override
-                public void uncaughtException(Thread t, Throwable e) {
-                    Log.e(TAG, "Uncaught Exception detected in thread {}" + t + " -- " + e);
-                }
-            });
-        } catch (SecurityException e) {
-            Log.e(TAG, "Could not set the Default Uncaught Exception Handler", e);
-        }
     }
 
 

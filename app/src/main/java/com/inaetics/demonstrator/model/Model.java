@@ -23,6 +23,7 @@ public class Model {
 
     private Model() {
         config = new Config();
+        bundles = new ArrayList<>();
     }
 
     public static Model getInstance() {
@@ -62,8 +63,7 @@ public class Model {
      * Method for moving the files from the assets to the internal storage
      * so the C code can reach it
      */
-    public void moveBundles(Resources res) {
-        AssetManager assetManager = res.getAssets();
+    public void moveBundles(AssetManager assetManager) {
 
         String[] files = null;
 
