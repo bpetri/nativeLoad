@@ -64,9 +64,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                 bundleCheckbox.setChecked(false);
                 break;
             case BundleItem.BUNDLE_DOWNLOAD_COMPLETE:
-                Log.e("BundleItem", "COMPLETE:  " + fileName);
             case BundleItem.BUNDLE_LOCALLY_AVAILABLE:
-                Log.e("BundleItem", "LOC_AV:  " + fileName);
 
                 bundleProgressBar.setVisibility(View.GONE);
 

@@ -128,7 +128,7 @@ public class DownloaderThread extends Thread
             @Override
             public void run() {
                 Log.d("REFRESDH ", "refreshview now");
-                parentActivity.aa.notifyDataSetChanged();
+                parentActivity.bundleAdapter.notifyDataSetChanged();
                         //setProgressBarIndeterminateVisibility();
                 //parentActivity.bundleListView.postInvalidate();
             }
@@ -241,7 +241,7 @@ public class DownloaderThread extends Thread
             }
         }
         else {
-            parentActivity.showNoConnectionDialog(parentActivity);
+//            parentActivity.showNoConnectionDialog(parentActivity);
         }
     }
 }
