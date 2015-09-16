@@ -8,9 +8,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -30,23 +29,13 @@ import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
 
-import org.apache.http.conn.util.InetAddressUtils;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringReader;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Properties;
 
 
-public class MainActivity extends AppCompatActivity implements  Runnable {
+public class MainActivity extends AppCompatActivity implements Observer{
 
 
     private final static String TAG = MainActivity.class.getName();
@@ -69,16 +58,22 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activity_main);
 
-        bundleListView = (ListView) findViewById(R.id.bundleListView);
         model = Model.getInstance();
-        config = model.getConfig();
+        model.addObserver(this);
         model.setBundleLocation(getExternalFilesDir(null).toString());
         model.moveBundles(getResources().getAssets());
         for(String fileName : getExternalFilesDir(null).list()) {
             model.addBundle(fileName).setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
         }
+        model.initJNI();
+
+        config = model.getConfig();
+
+        bundleListView = (ListView) findViewById(R.id.bundleListView);
         bundleAdapter = new BundleItemAdapter(this, R.layout.bundle_item, model.getBundles());
         bundleListView.setAdapter(bundleAdapter);
+
+
 
         handler = new Handler();
 
@@ -97,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
                 });
             }
         });
-        initJni();
         setupInitScreen();
 
     }
@@ -151,22 +145,6 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
         return super.onOptionsItemSelected(item);
     }
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        handler.post(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // TODO: Check this
-        handler.removeCallbacks(this);
-    }
-
-
-
     private void setupInitScreen() {
         final EditText editText_log = (EditText) findViewById(R.id.editText_log);
         final Button btn_start = (Button) findViewById(R.id.button1);
@@ -187,9 +165,9 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
                 String cfgStr = prefs.getString("celixConfig", null);
                 Properties cfgProps = null;
                 if (cfgStr != null)
-                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr), model.getBundles(), model.getBundleLocation(), getBaseContext());
+                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getBaseContext());
                 else
-                    cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getBaseContext());
+                    cfgProps = config.generateConfiguration(null,model.getBundles(),model.getBundleLocation(),getBaseContext());
 
                 if (config.writeConfiguration(getApplicationContext(), config.propertiesToString(cfgProps))) {
                     btn_start.setEnabled(false);
@@ -197,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
                     editText_log.setText("");
                     editText_log.setVisibility(View.VISIBLE);
                     lr.start();
-                    startCelix(cfgPath);
+                    model.getJniCommunicator().startCelix(cfgPath);
                 }
             }
         });
@@ -208,68 +186,68 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
 
 
 
-    public void confirmCelixStart() {
-        final Button btn_start = (Button) findViewById(R.id.button1);
-
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-
-                btn_start.setText("STOP CELIX");
-                btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-                btn_start.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        btn_start.setEnabled(false);
-//                        Log.d("Start button", "Stopped");
-                        installBundle(model.getBundleLocation() + "/echo_client.zip");
-                        installBundle(model.getBundleLocation() + "/echo_server.zip");
-//                                         stopCelix();
-                    }
-                });
-
-                btn_start.setEnabled(true);
-            }
-        });
-    }
-
-
-    public void confirmCelixStop() {
-
-        final Button btn_start = (Button) findViewById(R.id.button1);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-
-
-                Toast.makeText(getBaseContext(), "Celix has stopped", Toast.LENGTH_SHORT).show();
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ignored) {
-                    // I don't care
-                } finally {
-                    btn_start.setOnClickListener(new View.OnClickListener() {
-                        public void onClick(View v) {
-                            lr.kill();
-                            setupInitScreen();
-                        }
-                    });
-                }
-
-            }
-        });
-    }
-    public void confirmBundleStart(String location) {
-
-        String[] words = location.split("/");
-        String fileName = words[words.length - 1];
-        for (BundleItem b : model.getBundles()) {
-            if (fileName.equals(b.getFilename())) {
-                b.setStatus(BundleStatus.BUNDLE_INSTALLED);
-                Log.e("installed bundle JAVA", fileName);
-            }
-        }
-    }
+//    public void confirmCelixStart() {
+//        final Button btn_start = (Button) findViewById(R.id.button1);
+//
+//        handler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                btn_start.setText("STOP CELIX");
+//                btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+//                btn_start.setOnClickListener(new View.OnClickListener() {
+//                    public void onClick(View v) {
+//                        btn_start.setEnabled(false);
+////                        Log.d("Start button", "Stopped");
+//                        installBundle(model.getBundleLocation() + "/echo_client.zip");
+//                        installBundle(model.getBundleLocation() + "/echo_server.zip");
+////                                         stopCe1lix();
+//                    }
+//                });
+//
+//                btn_start.setEnabled(true);
+//            }
+//        });
+//    }
+//
+//
+//    public void confirmCelixStop() {
+//
+//        final Button btn_start = (Button) findViewById(R.id.button1);
+//        handler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//
+//                Toast.makeText(getBaseContext(), "Celix has stopped", Toast.LENGTH_SHORT).show();
+//
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException ignored) {
+//                    // I don't care
+//                } finally {
+//                    btn_start.setOnClickListener(new View.OnClickListener() {
+//                        public void onClick(View v) {
+//                            lr.kill();
+//                            setupInitScreen();
+//                        }
+//                    });
+//                }
+//
+//            }
+//        });
+//    }
+//    public void confirmBundleStart(String location) {
+//
+//        String[] words = location.split("/");
+//        String fileName = words[words.length - 1];
+//        for (BundleItem b : model.getBundles()) {
+//            if (fileName.equals(b.getFilename())) {
+//                b.setStatus(BundleStatus.BUNDLE_INSTALLED);
+//                Log.e("installed bundle JAVA", fileName);
+//            }
+//        }
+//    }
 
 
 
@@ -297,15 +275,24 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
         alert.show();
     }
 
-
-
-    public native int startCelix(String propertyString);
-    public native int stopCelix();
-    public native int initJni();
-    public native int installBundle(String path);
-
     @Override
-    public void run() {
-
+    public void update(Observable observable, Object data) {
+        if(data != null && data instanceof BundleStatus) {
+            switch((BundleStatus)data) {
+                case CELIX_RUNNING:
+                    Log.d("MainActivity", "Celix running");
+                    break;
+                case CELIX_STOPPED:
+                    Log.d("MainActivity", "Celix stopped");
+                    break;
+                default: return;
+            }
+        }
     }
+
+
+//    public native int startCelix(String propertyString);
+//    public native int stopCelix();
+//    public native int initJni();
+//    public native int installBundle(String path);
 }
