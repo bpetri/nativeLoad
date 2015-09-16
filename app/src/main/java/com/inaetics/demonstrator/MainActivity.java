@@ -25,6 +25,7 @@ import com.inaetics.demonstrator.controller.BundleItemAdapter;
 import com.inaetics.demonstrator.logging.LogCatOut;
 import com.inaetics.demonstrator.logging.LogCatReader;
 import com.inaetics.demonstrator.model.BundleItem;
+import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
@@ -70,11 +71,11 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
 
         bundleListView = (ListView) findViewById(R.id.bundleListView);
         model = Model.getInstance();
-        model.moveBundles(getResources().getAssets());
         config = model.getConfig();
         model.setBundleLocation(getExternalFilesDir(null).toString());
+        model.moveBundles(getResources().getAssets());
         for(String fileName : getExternalFilesDir(null).list()) {
-            model.addBundle(fileName).setStatus(BundleItem.BUNDLE_LOCALLY_AVAILABLE);
+            model.addBundle(fileName).setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
         }
         bundleAdapter = new BundleItemAdapter(this, R.layout.bundle_item, model.getBundles());
         bundleListView.setAdapter(bundleAdapter);
@@ -186,9 +187,9 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
                 String cfgStr = prefs.getString("celixConfig", null);
                 Properties cfgProps = null;
                 if (cfgStr != null)
-                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getBaseContext());
+                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr), model.getBundles(), model.getBundleLocation(), getBaseContext());
                 else
-                    cfgProps = config.generateConfiguration(null,model.getBundles(),model.getBundleLocation(),getBaseContext());
+                    cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getBaseContext());
 
                 if (config.writeConfiguration(getApplicationContext(), config.propertiesToString(cfgProps))) {
                     btn_start.setEnabled(false);
@@ -211,22 +212,24 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
         final Button btn_start = (Button) findViewById(R.id.button1);
 
         handler.post(new Runnable() {
-                         @Override
-                         public void run() {
+            @Override
+            public void run() {
 
-                             btn_start.setText("STOP CELIX");
-                             btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-                             btn_start.setOnClickListener(new View.OnClickListener() {
-                                 public void onClick(View v) {
-                                         btn_start.setEnabled(false);
-                                         Log.d("Start button", "Stopped");
-                                         stopCelix();
-                                 }
-                             });
+                btn_start.setText("STOP CELIX");
+                btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+                btn_start.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        btn_start.setEnabled(false);
+//                        Log.d("Start button", "Stopped");
+                        installBundle(model.getBundleLocation() + "/echo_client.zip");
+                        installBundle(model.getBundleLocation() + "/echo_server.zip");
+//                                         stopCelix();
+                    }
+                });
 
-                             btn_start.setEnabled(true);
-                         }
-                     });
+                btn_start.setEnabled(true);
+            }
+        });
     }
 
 
@@ -255,6 +258,17 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
 
             }
         });
+    }
+    public void confirmBundleStart(String location) {
+
+        String[] words = location.split("/");
+        String fileName = words[words.length - 1];
+        for (BundleItem b : model.getBundles()) {
+            if (fileName.equals(b.getFilename())) {
+                b.setStatus(BundleStatus.BUNDLE_INSTALLED);
+                Log.e("installed bundle JAVA", fileName);
+            }
+        }
     }
 
 
@@ -288,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements  Runnable {
     public native int startCelix(String propertyString);
     public native int stopCelix();
     public native int initJni();
-
+    public native int installBundle(String path);
 
     @Override
     public void run() {

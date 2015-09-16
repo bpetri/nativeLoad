@@ -88,7 +88,7 @@ public class Config {
 
             String fullBundlePath = bundleLocation + "/" + bundle.getFilename();
 
-            if (bundle.isChecked() && bundle.getStatus() == BundleItem.BUNDLE_LOCALLY_AVAILABLE && !bundleCfg.contains(fullBundlePath)) {
+            if (bundle.isChecked() && bundle.getStatus() == BundleStatus.BUNDLE_LOCALLY_AVAILABLE && !bundleCfg.contains(fullBundlePath)) {
                 bundleCfg += " " + fullBundlePath;
             }
             else if (!bundle.isChecked() && bundleCfg.contains(fullBundlePath)){

@@ -32,10 +32,13 @@ typedef struct {
  */
 callback_t cb[] = {
   {
-  	"confirmCelixStart", "()V",
+          "confirmCelixStart", "()V",
   },
   {
-  	"confirmCelixStop", "()V", 
+          "confirmCelixStop", "()V",
+  },
+  {
+          "confirmBundleStart", "(Ljava/lang/String;)V"
   },
  };
 
@@ -84,6 +87,27 @@ void confirmCelixStart() {
         	(*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
+void confirmInstallBundle(char* location) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
+
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jstring jstr = (*je)->NewStringUTF(je,location);
+    (*je)->CallVoidMethod(je, gObject, cb[2].cbMethod, jstr);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
+
 
 
 
@@ -106,6 +130,40 @@ void confirmCelixStop() {
 
     	if(isAttached)
         	(*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
+
+void* installBundle(void* bundleLocation) {
+    // Install bundle
+    char* location = (char*) bundleLocation;
+    bundle_pt bundle = NULL;
+    bundle_context_pt context = NULL;
+    bundle_pt current = NULL;
+    // First install all bundles
+    framework_getFrameworkBundle(framework, &bundle);
+    bundle_getContext(bundle, &context);
+    if (bundleContext_installBundle(context, location, &current) == CELIX_SUCCESS)
+    {
+        LOGI("Succesfully intalled bundle %s",location);
+    }
+    else
+    {
+        LOGI("Failed to install bundle %s", location);
+    }
+
+    module_pt module = NULL;
+    char * name = NULL;
+
+    bundle_getCurrentModule(current, &module);
+    module_getSymbolicName(module, &name);
+    LOGI("Installed %s", name);
+
+    confirmInstallBundle(location);
+
+    //Run bundle
+    if (bundle_startWithOptions(current, 0) == CELIX_SUCCESS) {
+        LOGI("Running bundle %s", name);
+
+    }
 }
 
 
@@ -263,6 +321,14 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_startCelix(JN
     	const char *propertyString = (*je)->GetStringUTFChars(je, i, NULL);
 	pthread_t thread;
 	return pthread_create( &thread, NULL, startCelix, (void*) propertyString);
+}
+
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_installBundle(JNIEnv* je, jclass jc, jstring i)
+{
+    // convert Java string to UTF-8
+    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
+    pthread_t thread;
+    return pthread_create( &thread, NULL, installBundle, (void*) locationString);
 }
 
 

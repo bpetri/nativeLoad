@@ -44,6 +44,7 @@ import android.util.Log;
 
 import com.inaetics.demonstrator.MainActivity;
 import com.inaetics.demonstrator.model.BundleItem;
+import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.nativeload.R;
 
 /**
@@ -160,7 +161,7 @@ public class DownloaderThread extends Thread
                 String downloadUrl = baseUrl + "/" + downloadBundle.getFilename();
                 Log.v(TAG, "opening connection to " + downloadBundle.getFilename());
 
-                downloadBundle.setStatus(BundleItem.BUNDLE_CONNECTING_STARTED);
+                downloadBundle.setStatus(BundleStatus.BUNDLE_CONNECTING_STARTED);
                 refreshView(parentActivity);
 
                 try {
@@ -186,7 +187,7 @@ public class DownloaderThread extends Thread
                     // notify download start
                     Integer fileSizeInKB = fileSize / 1024;
 
-                    downloadBundle.setStatus(BundleItem.BUNDLE_DOWNLOAD_STARTED);
+                    downloadBundle.setStatus(BundleStatus.BUNDLE_DOWNLOAD_STARTED);
                     downloadBundle.setStatusInfo(fileSizeInKB);
                     refreshView(parentActivity);
 
@@ -206,7 +207,7 @@ public class DownloaderThread extends Thread
                         totalRead += bytesRead;
                         Integer totalReadInKB = totalRead / 1024;
 
-                        downloadBundle.setStatus(BundleItem.BUNDLE_UPDATE_PROGRESS_BAR);
+                        downloadBundle.setStatus(BundleStatus.BUNDLE_UPDATE_PROGRESS_BAR);
                         downloadBundle.setStatusInfo(totalReadInKB);
                         refreshView(parentActivity);
 
@@ -220,20 +221,20 @@ public class DownloaderThread extends Thread
                         // the download was canceled, so let's delete the partially downloaded file
                         outFile.delete();
                     } else {
-                        downloadBundle.setStatus(BundleItem.BUNDLE_DOWNLOAD_COMPLETE);
+                        downloadBundle.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
 
                     }
                 } catch (MalformedURLException e) {
                     String errMsg = parentActivity.getString(R.string.error_message_bad_url);
-                    downloadBundle.setStatus(BundleItem.BUNDLE_ENCOUNTERED_ERROR);
+                    downloadBundle.setStatus(BundleStatus.BUNDLE_ENCOUNTERED_ERROR);
                     downloadBundle.setStatusInfo(errMsg);
                 } catch (FileNotFoundException e) {
                     String errMsg = parentActivity.getString(R.string.error_message_file_not_found);
-                    downloadBundle.setStatus(BundleItem.BUNDLE_ENCOUNTERED_ERROR);
+                    downloadBundle.setStatus(BundleStatus.BUNDLE_ENCOUNTERED_ERROR);
                     downloadBundle.setStatusInfo(errMsg);
                 } catch (Exception e) {
                     String errMsg = parentActivity.getString(R.string.error_message_general) + " " + e.getMessage();
-                    downloadBundle.setStatus(BundleItem.BUNDLE_ENCOUNTERED_ERROR);
+                    downloadBundle.setStatus(BundleStatus.BUNDLE_ENCOUNTERED_ERROR);
                     downloadBundle.setStatusInfo(errMsg);
                 } finally {
                     refreshView(parentActivity);

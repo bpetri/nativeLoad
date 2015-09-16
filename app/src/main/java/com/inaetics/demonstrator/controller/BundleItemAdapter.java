@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.inaetics.demonstrator.model.BundleItem;
+import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.nativeload.R;
 
 import java.util.List;
@@ -45,7 +46,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
 
         final BundleItem item = getItem(position);
         String fileName = item.getFilename();
-        int status = item.getStatus();
+        BundleStatus status = item.getStatus();
         boolean isChecked = item.isChecked();
 
         TextView bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
@@ -57,14 +58,13 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
 
         switch (status) {
 
-            case BundleItem.BUNDLE_NOT_YET_INITIALIZED:
+            case BUNDLE_NOT_YET_INITIALIZED:
                 bundleProgressBar.setVisibility(View.GONE);
                 bundleCheckbox.setVisibility(View.VISIBLE);
                 bundleCheckbox.setEnabled(false);
                 bundleCheckbox.setChecked(false);
                 break;
-            case BundleItem.BUNDLE_DOWNLOAD_COMPLETE:
-            case BundleItem.BUNDLE_LOCALLY_AVAILABLE:
+            case BUNDLE_LOCALLY_AVAILABLE:
 
                 bundleProgressBar.setVisibility(View.GONE);
 
@@ -78,7 +78,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                 bundleCheckbox.setEnabled(true);
                 bundleCheckbox.setChecked(isChecked);
                 break;
-            case BundleItem.BUNDLE_CONNECTING_STARTED:
+            case BUNDLE_CONNECTING_STARTED:
                 bundleProgressBar.setVisibility(View.VISIBLE);
                 bundleCheckbox.setVisibility(View.VISIBLE);
                 bundleCheckbox.setEnabled(false);
@@ -86,7 +86,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
 
 
                 break;
-            case BundleItem.BUNDLE_DOWNLOAD_STARTED:
+            case BUNDLE_DOWNLOAD_STARTED:
                 Log.e("BundleItem", "DOWN_START:  " + fileName);
 
                 bundleCheckbox.setEnabled(false);
@@ -96,7 +96,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                 bundleProgressBar.setProgress(0);
                 bundleProgressBar.setMax(fileSizeInKB);
                 break;
-            case BundleItem.BUNDLE_UPDATE_PROGRESS_BAR:
+            case BUNDLE_UPDATE_PROGRESS_BAR:
                 Log.e("BundleItem", "UPD_PROGRESS:  " + fileName);
 
                 bundleCheckbox.setEnabled(false);
@@ -104,7 +104,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                 Integer totalReadInKB = (Integer) item.getStatusInfo();
                 bundleProgressBar.setProgress(totalReadInKB);
                 break;
-            case BundleItem.BUNDLE_ENCOUNTERED_ERROR:
+            case BUNDLE_ENCOUNTERED_ERROR:
                 Log.e("BundleItem", "ENC_ERR:  " + fileName);
 
                 bundleProgressBar.setVisibility(View.GONE);
