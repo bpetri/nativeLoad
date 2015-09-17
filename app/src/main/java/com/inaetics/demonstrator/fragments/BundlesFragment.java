@@ -40,5 +40,6 @@ public class BundlesFragment extends Fragment implements Observer {
     @Override
     public void update(Observable observable, Object o) {
         adapter.notifyDataSetChanged();
+        Log.d("BundlesFragment", "Updating adapter");
     }
 }

@@ -259,22 +259,11 @@ void* startCelix(void* param) {
                         // Only add bundle if it is installed correctly
                         LOGI("bundle from %s sucessfully installed\n", location);
                         confirmInstallBundle(location);
-                        //----------------------
-
-                        bundle_archive_pt archive = NULL;
-                        long id;
-                        char * stateString = NULL;
-                        module_pt module = NULL;
-                        char * name = NULL;
-
-                        bundle_getArchive(current, &archive);
-                        bundleArchive_getId(archive, &id);
-                        bundle_getCurrentModule(current, &module);
-                        module_getSymbolicName(module, &name);
-                        LOGI("  %-5ld %-12s %s\n", id, stateString, name);
-
-                        //----------------------
                         arrayList_add(installed, current);
+                        if (bundle_startWithOptions(current,0) == CELIX_SUCCESS) {
+                            confirmStartBundle(location);
+                        }
+
                     } else {
                         LOGI("Could not install bundle from %s\n", location);
                     }
@@ -283,13 +272,12 @@ void* startCelix(void* param) {
                 linkedListIterator_destroy(iter);
                 linkedList_destroy(bundles);
 
-                for (i = 0; i < arrayList_size(installed); i++) {
-                    bundle_pt bundle = (bundle_pt) arrayList_get(installed, i);
-                    bundle_startWithOptions(bundle,0);
+//                for (i = 0; i < arrayList_size(installed); i++) {
+//                    bundle_pt bundle = (bundle_pt) arrayList_get(installed, i);
 //                    if (bundle_startWithOptions(bundle,0) == CELIX_SUCCESS) {
 ////                        confirmStartBundle(location);
 //                    }
-                }
+//                }
 
                 arrayList_destroy(installed);
 

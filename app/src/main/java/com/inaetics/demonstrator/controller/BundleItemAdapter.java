@@ -5,6 +5,7 @@
 package com.inaetics.demonstrator.controller;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,7 +66,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             holder.stopButton.setText("Stop");
             holder.installButton.setEnabled(true);
             holder.runButton.setEnabled(true);
-            holder.stopButton.setEnabled(true);
+            holder.stopButton.setEnabled(false);
         }
 
 
@@ -78,6 +79,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         }
 
         final BundleItem item = getItem(position);
+
         String fileName = item.getFilename();
         BundleStatus status = item.getStatus();
         boolean isChecked = item.isChecked();
@@ -86,8 +88,22 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         holder.bundleCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CheckBox box = (CheckBox)view;
+                CheckBox box = (CheckBox) view;
                 item.setChecked(box.isChecked());
+            }
+        });
+
+        holder.installButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                model.getJniCommunicator().installBundle(model.getBundleLocation() + "/" + item.getFilename());
+            }
+        });
+
+        holder.runButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                model.getJniCommunicator().startBundle(model.getBundleLocation() + "/" + item.getFilename());
             }
         });
 
@@ -95,13 +111,16 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             case BUNDLE_RUNNING:
                 holder.runButton.setEnabled(false);
                 holder.runButton.setText("Running");
+                holder.stopButton.setEnabled(true);
             case BUNDLE_INSTALLED:
                 holder.installButton.setEnabled(false);
                 holder.installButton.setText("Installed");
                 break;
+            default:
+                holder.runButton.setEnabled(false);
+                holder.runButton.setText("Not installed");
         }
-
-
+        holder.bundleFileName.setText(fileName);
         return convertView;
     }
 

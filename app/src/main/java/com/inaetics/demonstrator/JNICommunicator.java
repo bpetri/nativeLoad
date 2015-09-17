@@ -62,7 +62,6 @@ public class JNICommunicator{
             @Override
             public void run() {
                 model.setBundleInstall(bundleLocation);
-                startBundle(bundleLocation);
             }
         });
     }
