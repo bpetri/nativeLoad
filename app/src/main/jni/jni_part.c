@@ -40,6 +40,9 @@ callback_t cb[] = {
   {
           "confirmBundleStart", "(Ljava/lang/String;)V"
   },
+  {
+          "confirmBundleInstalled", "(Ljava/lang/String;)V"
+  },
  };
 
 JNIEXPORT jboolean JNICALL Java_com_example_bjoern_nativeload_JNICommunicator_initJni(JNIEnv*, jobject);
@@ -107,12 +110,32 @@ void confirmInstallBundle(char* location) {
     }
 
     jstring jstr = (*je)->NewStringUTF(je,location);
-    (*je)->CallVoidMethod(je, gObject, cb[2].cbMethod, jstr);
+    (*je)->CallVoidMethod(je, gObject, cb[3].cbMethod, jstr);
 
     if(isAttached)
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
+void confirmStartBundle(char* location) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
+
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jstring jstr = (*je)->NewStringUTF(je,location);
+    (*je)->CallVoidMethod(je, gObject, cb[2].cbMethod, jstr);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
 
 
 
@@ -140,35 +163,36 @@ void confirmCelixStop() {
 void* installBundle(void* bundleLocation) {
     // Install bundle
     char* location = (char*) bundleLocation;
-    bundle_pt bundle = NULL;
+    bundle_pt fw_bundle = NULL;
     bundle_context_pt context = NULL;
     bundle_pt current = NULL;
-    // First install all bundles
-    framework_getFrameworkBundle(framework, &bundle);
-    bundle_getContext(bundle, &context);
+
+    framework_getFrameworkBundle(framework, &fw_bundle);
+    bundle_getContext(fw_bundle, &context);
     if (bundleContext_installBundle(context, location, &current) == CELIX_SUCCESS)
     {
         LOGI("Succesfully intalled bundle %s",location);
+        confirmInstallBundle(location);
     }
     else
     {
         LOGI("Failed to install bundle %s", location);
     }
+}
 
-    module_pt module = NULL;
-    char * name = NULL;
+void* startBundle(void* bundleLocation) {
+    char* location = (char*) bundleLocation;
 
-    bundle_getCurrentModule(current, &module);
-    module_getSymbolicName(module, &name);
-    LOGI("Installed %s", name);
+    bundle_pt fw_bundle = NULL;
+    bundle_pt current = NULL;
 
-    confirmInstallBundle(location);
+    current = framework_getBundle(framework, location);
 
-    //Run bundle
     if (bundle_startWithOptions(current, 0) == CELIX_SUCCESS) {
-        LOGI("Running bundle %s", name);
-
+        LOGI("Running bundle %s", location);
+        confirmStartBundle(location);
     }
+
 }
 
 
@@ -339,6 +363,14 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_installBun
     return pthread_create( &thread, NULL, installBundle, (void*) locationString);
 }
 
+//JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_installBundle(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_startBundle(JNIEnv* je, jclass jc, jstring i)
+{
+    // convert Java string to UTF-8
+    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
+    pthread_t thread;
+    return pthread_create( &thread, NULL, startBundle, (void*) locationString);
+}
 
 //JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_stopCelix(JNIEnv* je, jobject thiz)
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopCelix(JNIEnv* je, jobject thiz)
