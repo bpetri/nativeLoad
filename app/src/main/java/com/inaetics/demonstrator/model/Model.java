@@ -53,6 +53,11 @@ public class Model extends Observable{
         return item;
     }
 
+    public BundleStatus getCelixStatus() {
+        return celixStatus;
+    }
+
+
     public BundleItem addBundle(String fileName) {
         return addBundle(fileName,"",false);
     }

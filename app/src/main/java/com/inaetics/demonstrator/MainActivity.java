@@ -5,31 +5,25 @@
 package com.inaetics.demonstrator;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Toast;
 
+import com.astuetz.PagerSlidingTabStrip;
 import com.inaetics.demonstrator.controller.BundleItemAdapter;
-import com.inaetics.demonstrator.logging.LogCatOut;
-import com.inaetics.demonstrator.logging.LogCatReader;
-import com.inaetics.demonstrator.model.BundleItem;
+import com.inaetics.demonstrator.controller.MyPagerAdapter;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
 
-import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
@@ -39,11 +33,7 @@ public class MainActivity extends AppCompatActivity implements Observer{
 
 
     private final static String TAG = MainActivity.class.getName();
-    private LogCatReader lr;
-
-    public ListView bundleListView;
     public BundleItemAdapter bundleAdapter;
-    private Handler handler;
     private Model model;
     private Config config;
 
@@ -56,43 +46,24 @@ public class MainActivity extends AppCompatActivity implements Observer{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.setContentView(R.layout.activity_main);
+        super.setContentView(R.layout.pager_tab);
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(pagerAdapter);
+//        tabs.setShouldExpand(true);
+        tabs.setViewPager(pager);
+
 
         model = Model.getInstance();
         model.addObserver(this);
+        config = model.getConfig();
         model.setBundleLocation(getExternalFilesDir(null).toString());
         model.moveBundles(getResources().getAssets());
         for(String fileName : getExternalFilesDir(null).list()) {
             model.addBundle(fileName).setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
         }
         model.initJNI();
-
-        config = model.getConfig();
-
-        bundleListView = (ListView) findViewById(R.id.bundleListView);
-        bundleAdapter = new BundleItemAdapter(this, R.layout.bundle_item, model.getBundles());
-        bundleListView.setAdapter(bundleAdapter);
-
-
-
-        handler = new Handler();
-
-        lr = new LogCatReader(new LogCatOut()
-        {
-            @Override
-            public void writeLogData(final String line) throws IOException
-            {
-                final EditText editText_log = (EditText) findViewById(R.id.editText_log);
-                handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        editText_log.append(line + System.getProperty("line.separator"));
-                    }
-                });
-            }
-        });
-        setupInitScreen();
 
     }
 
@@ -145,112 +116,6 @@ public class MainActivity extends AppCompatActivity implements Observer{
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupInitScreen() {
-        final EditText editText_log = (EditText) findViewById(R.id.editText_log);
-        final Button btn_start = (Button) findViewById(R.id.button1);
-
-        bundleListView.setVisibility(View.VISIBLE);
-        editText_log.setVisibility(View.GONE);
-
-        btn_start.setEnabled(true);
-        btn_start.setText("START CELIX");
-
-
-        btn_start.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-
-                Log.d("Start button", "Started");
-                SharedPreferences prefs = getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
-                String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
-                String cfgStr = prefs.getString("celixConfig", null);
-                Properties cfgProps = null;
-                if (cfgStr != null)
-                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getBaseContext());
-                else
-                    cfgProps = config.generateConfiguration(null,model.getBundles(),model.getBundleLocation(),getBaseContext());
-
-                if (config.writeConfiguration(getApplicationContext(), config.propertiesToString(cfgProps))) {
-                    btn_start.setEnabled(false);
-                    bundleListView.setVisibility(View.GONE);
-                    editText_log.setText("");
-                    editText_log.setVisibility(View.VISIBLE);
-                    lr.start();
-                    model.getJniCommunicator().startCelix(cfgPath);
-                }
-            }
-        });
-
-    }
-
-
-
-
-
-//    public void confirmCelixStart() {
-//        final Button btn_start = (Button) findViewById(R.id.button1);
-//
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                btn_start.setText("STOP CELIX");
-//                btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-//                btn_start.setOnClickListener(new View.OnClickListener() {
-//                    public void onClick(View v) {
-//                        btn_start.setEnabled(false);
-////                        Log.d("Start button", "Stopped");
-//                        installBundle(model.getBundleLocation() + "/echo_client.zip");
-//                        installBundle(model.getBundleLocation() + "/echo_server.zip");
-////                                         stopCe1lix();
-//                    }
-//                });
-//
-//                btn_start.setEnabled(true);
-//            }
-//        });
-//    }
-//
-//
-//    public void confirmCelixStop() {
-//
-//        final Button btn_start = (Button) findViewById(R.id.button1);
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//
-//                Toast.makeText(getBaseContext(), "Celix has stopped", Toast.LENGTH_SHORT).show();
-//
-//                try {
-//                    Thread.sleep(5000);
-//                } catch (InterruptedException ignored) {
-//                    // I don't care
-//                } finally {
-//                    btn_start.setOnClickListener(new View.OnClickListener() {
-//                        public void onClick(View v) {
-//                            lr.kill();
-//                            setupInitScreen();
-//                        }
-//                    });
-//                }
-//
-//            }
-//        });
-//    }
-//    public void confirmBundleStart(String location) {
-//
-//        String[] words = location.split("/");
-//        String fileName = words[words.length - 1];
-//        for (BundleItem b : model.getBundles()) {
-//            if (fileName.equals(b.getFilename())) {
-//                b.setStatus(BundleStatus.BUNDLE_INSTALLED);
-//                Log.e("installed bundle JAVA", fileName);
-//            }
-//        }
-//    }
-
-
-
     protected void showInputDialog(final EditText edittext, String title, String msg, String text, DialogInterface.OnClickListener positiveListener) {
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -289,10 +154,4 @@ public class MainActivity extends AppCompatActivity implements Observer{
             }
         }
     }
-
-
-//    public native int startCelix(String propertyString);
-//    public native int stopCelix();
-//    public native int initJni();
-//    public native int installBundle(String path);
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="8.5"
+        android:minLines="20"
+        android:inputType="none"
+        android:scrollbars="vertical"
+        android:id="@+id/console_log"
+        android:textSize="10dp"
+        android:enabled="false"
+        android:nestedScrollingEnabled="true"
+        android:textColor="@android:color/white"
+        android:background="@android:color/black" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Start Celix"
+        android:id="@+id/start_stop_btn"
+        android:background="@android:color/holo_green_light"
+        android:textColor="@android:color/white" />
+</LinearLayout>

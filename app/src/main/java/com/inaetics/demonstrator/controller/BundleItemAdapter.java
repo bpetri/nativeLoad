@@ -12,12 +12,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
+import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
 
 import java.util.List;
@@ -29,11 +31,13 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
 
     private final String TAG = BundleItemAdapter.class.getName();
     private LayoutInflater inflater;
+    private Model model;
 
     int resource;
 
-    public BundleItemAdapter(Context _context, int _resource, List<BundleItem> _items) {
+    public BundleItemAdapter(Context _context, int _resource, List<BundleItem> _items, Model model) {
         super(_context, _resource, _items);
+        this.model = model;
         inflater = LayoutInflater.from(_context);
         resource = _resource;
     }
@@ -43,15 +47,24 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         if (convertView == null) {
             convertView = inflater.inflate(resource,parent,false);
         }
+        LinearLayout buttonsLayout = (LinearLayout) convertView.findViewById(R.id.buttons_layout);
+        TextView bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
+        CheckBox bundleCheckbox = (CheckBox) convertView.findViewById(R.id.bundleCheckbox);
+        ProgressBar bundleProgressBar = (ProgressBar) convertView.findViewById(R.id.bundleProgressBar);
+        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
+            bundleCheckbox.setVisibility(View.GONE);
+            buttonsLayout.setVisibility(View.VISIBLE);
+        } else {
+            bundleCheckbox.setVisibility(View.VISIBLE);
+            buttonsLayout.setVisibility(View.GONE);
+        }
 
         final BundleItem item = getItem(position);
         String fileName = item.getFilename();
         BundleStatus status = item.getStatus();
         boolean isChecked = item.isChecked();
 
-        TextView bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
-        CheckBox bundleCheckbox = (CheckBox) convertView.findViewById(R.id.bundleCheckbox);
-        ProgressBar bundleProgressBar = (ProgressBar) convertView.findViewById(R.id.bundleProgressBar);
+
 
         bundleFileName.setText(fileName);
 
@@ -74,7 +87,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                         item.setChecked(isChecked);
                     }
                 });
-                bundleCheckbox.setVisibility(View.VISIBLE);
+//                bundleCheckbox.setVisibility(View.VISIBLE);
                 bundleCheckbox.setEnabled(true);
                 bundleCheckbox.setChecked(isChecked);
                 break;
