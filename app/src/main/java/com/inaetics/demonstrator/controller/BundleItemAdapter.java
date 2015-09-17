@@ -96,6 +96,9 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         holder.installButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                Button b = (Button)v;
+                b.setEnabled(false);
+                b.setText("Installing");
                 model.getJniCommunicator().installBundle(model.getBundleLocation() + "/" + item.getFilename());
             }
         });
@@ -103,7 +106,20 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         holder.runButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Button b = (Button)v;
+                b.setEnabled(false);
+                b.setText("Starting");
                 model.getJniCommunicator().startBundle(model.getBundleLocation() + "/" + item.getFilename());
+            }
+        });
+
+        holder.stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button b = (Button)v;
+                b.setEnabled(false);
+                b.setText("Stopping");
+                model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
             }
         });
 

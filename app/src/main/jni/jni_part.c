@@ -38,10 +38,13 @@ callback_t cb[] = {
           "confirmCelixStop", "()V",
   },
   {
+          "confirmBundleInstalled", "(Ljava/lang/String;)V"
+  },
+  {
           "confirmBundleStart", "(Ljava/lang/String;)V"
   },
   {
-          "confirmBundleInstalled", "(Ljava/lang/String;)V"
+          "confirmBundleStop", "(Ljava/lang/String;)V"
   },
  };
 
@@ -95,7 +98,8 @@ void confirmCelixStart() {
         	(*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
-void confirmInstallBundle(char* location) {
+
+void confirmCelixStop() {
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
@@ -109,14 +113,14 @@ void confirmInstallBundle(char* location) {
         isAttached = 1;
     }
 
-    jstring jstr = (*je)->NewStringUTF(je,location);
-    (*je)->CallVoidMethod(je, gObject, cb[3].cbMethod, jstr);
+
+    (*je)->CallVoidMethod(je, gObject, cb[1].cbMethod);
 
     if(isAttached)
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
-void confirmStartBundle(char* location) {
+void confirmInstallBundle(char* location) {
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
@@ -137,27 +141,46 @@ void confirmStartBundle(char* location) {
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
+void confirmStartBundle(char* location) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
 
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
 
-void confirmCelixStop() {
-   	JNIEnv* je;
-	int isAttached = 0;
-	int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
 
-	if(status < 0) {
-		status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+    jstring jstr = (*je)->NewStringUTF(je,location);
+    (*je)->CallVoidMethod(je, gObject, cb[3].cbMethod, jstr);
 
-		if(status < 0) {
-            		LOGE("callback_handler: failed to attach current thread");
-        	}
-        	isAttached = 1;
-	}
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
 
+void confirmStopBundle(char* location) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
 
-    	(*je)->CallVoidMethod(je, gObject, cb[1].cbMethod);
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
 
-    	if(isAttached)
-        	(*gJavaVM)->DetachCurrentThread(gJavaVM);
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jstring jstr = (*je)->NewStringUTF(je,location);
+    (*je)->CallVoidMethod(je, gObject, cb[4].cbMethod, jstr);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
 void* installBundle(void* bundleLocation) {
@@ -191,6 +214,22 @@ void* startBundle(void* bundleLocation) {
     if (bundle_startWithOptions(current, 0) == CELIX_SUCCESS) {
         LOGI("Running bundle %s", location);
         confirmStartBundle(location);
+    }
+
+}
+
+void* stopBundle(void* bundleLocation) {
+    char* location = (char*) bundleLocation;
+
+    bundle_pt fw_bundle = NULL;
+    bundle_pt current = NULL;
+
+    current = framework_getBundle(framework, location);
+
+
+    if (bundle_stopWithOptions(current, 0) == CELIX_SUCCESS) {
+        LOGI("Stopped bundle %s", location);
+        confirmStopBundle(location);
     }
 
 }
@@ -364,6 +403,15 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_startBundl
     return pthread_create( &thread, NULL, startBundle, (void*) locationString);
 }
 
+//JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_installBundle(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopBundle(JNIEnv* je, jclass jc, jstring i)
+{
+    // convert Java string to UTF-8
+    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
+    pthread_t thread;
+    return pthread_create( &thread, NULL, stopBundle, (void*) locationString);
+}
+
 //JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_stopCelix(JNIEnv* je, jobject thiz)
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopCelix(JNIEnv* je, jobject thiz)
 {
@@ -390,18 +438,6 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopCelix(
         //framework_destroy(framework);
 	
 	return 0;
-}
-
-JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_printCMessage(JNIEnv *env, jobject obj) {
-    int pipes[2];
-    pipe(pipes);
-    dup2(pipes[1], STDOUT_FILENO);
-    FILE *inputFile = fdopen(pipes[0], "r");
-    char readBuffer[256];
-    while (1) {
-        fgets(readBuffer, sizeof(readBuffer), inputFile);
-        __android_log_write(2, "stdout", readBuffer);
-    }
 }
 
 

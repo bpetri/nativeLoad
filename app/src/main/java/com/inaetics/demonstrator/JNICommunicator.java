@@ -85,11 +85,11 @@ public class JNICommunicator{
      * Sets the status of the bundle to stopped
      * @param bundleLocation location of the stopped bundle
      */
-    public void confirmBundleStop(String bundleLocation) {
+    public void confirmBundleStop(final String bundleLocation) {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                //Set the status of the bundle to stopped
+                model.setBundleStop(bundleLocation);
             }
         });
     }

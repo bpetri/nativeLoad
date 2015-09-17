@@ -164,4 +164,14 @@ public class Model extends Observable{
         }
     }
 
+    public void setBundleStop(String location) {
+        BundleItem b = getBundleFromLocation(location);
+        if(b != null) {
+            b.setStatus(BundleStatus.BUNDLE_INSTALLED);
+            Log.d("Model", "Bundle " + b.getFilename() + " has been stopped");
+            setChanged();
+            notifyObservers();
+        }
+    }
+
 }
