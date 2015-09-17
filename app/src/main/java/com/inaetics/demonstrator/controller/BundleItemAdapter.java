@@ -44,41 +44,74 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
         if (convertView == null) {
+            //Use convertview for recycling views, smoother scrolling.
             convertView = inflater.inflate(resource,parent,false);
-        }
-        LinearLayout buttonsLayout = (LinearLayout) convertView.findViewById(R.id.buttons_layout);
-        TextView bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
-        CheckBox bundleCheckbox = (CheckBox) convertView.findViewById(R.id.bundleCheckbox);
-        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
-            bundleCheckbox.setVisibility(View.GONE);
-            buttonsLayout.setVisibility(View.VISIBLE);
+            // View holder pattern, find all views once, smoother scrolling
+            holder = new ViewHolder();
+            holder.buttonsLayout = (LinearLayout) convertView.findViewById(R.id.buttons_layout);
+            holder.bundleCheckbox = (CheckBox) convertView.findViewById(R.id.bundleCheckbox);
+            holder.bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
+            holder.installButton =  (Button) convertView.findViewById(R.id.install_btn);
+            holder.runButton = (Button) convertView.findViewById(R.id.run_btn);
+            holder.stopButton = (Button) convertView.findViewById(R.id.stop_btn);
+            convertView.setTag(holder);
         } else {
-            bundleCheckbox.setVisibility(View.VISIBLE);
-            buttonsLayout.setVisibility(View.GONE);
+            holder = (ViewHolder) convertView.getTag();
+            holder.installButton.setText("Install");
+            holder.runButton.setText("Run");
+            holder.stopButton.setText("Stop");
+            holder.installButton.setEnabled(true);
+            holder.runButton.setEnabled(true);
+            holder.stopButton.setEnabled(true);
+        }
+
+
+        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
+            holder.bundleCheckbox.setVisibility(View.GONE);
+            holder.buttonsLayout.setVisibility(View.VISIBLE);
+        } else {
+            holder.bundleCheckbox.setVisibility(View.VISIBLE);
+            holder.buttonsLayout.setVisibility(View.GONE);
         }
 
         final BundleItem item = getItem(position);
         String fileName = item.getFilename();
         BundleStatus status = item.getStatus();
         boolean isChecked = item.isChecked();
+        holder.bundleCheckbox.setChecked(isChecked);
+        holder.bundleFileName.setText(fileName);
+        holder.bundleCheckbox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CheckBox box = (CheckBox)view;
+                item.setChecked(box.isChecked());
+            }
+        });
 
         switch (status) {
+            case BUNDLE_RUNNING:
+                holder.runButton.setEnabled(false);
+                holder.runButton.setText("Running");
             case BUNDLE_INSTALLED:
-                Button inst = (Button) convertView.findViewById(R.id.button);
-                inst.setText("Installed");
-                inst.setEnabled(false);
+                holder.installButton.setEnabled(false);
+                holder.installButton.setText("Installed");
                 break;
-            default:
-                break;
-
         }
-        bundleFileName.setText(fileName);
-
 
 
         return convertView;
+    }
+
+    static class ViewHolder {
+        LinearLayout buttonsLayout;
+        TextView bundleFileName;
+        CheckBox bundleCheckbox;
+        Button installButton;
+        Button runButton;
+        Button stopButton;
     }
 
 }

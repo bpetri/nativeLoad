@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.inaetics.demonstrator.controller.BundleItemAdapter;
@@ -22,15 +23,17 @@ import java.util.Observer;
  */
 public class BundlesFragment extends Fragment implements Observer {
     private BundleItemAdapter adapter;
+    private Model model;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.bundles_fragment, null);
-        Model model = Model.getInstance();
+        model = Model.getInstance();
         model.addObserver(this);
         adapter = new BundleItemAdapter(getActivity().getBaseContext(),R.layout.bundle_item,model.getBundles(),model);
         ListView bundleList = (ListView) rootView.findViewById(R.id.bundles_listview);
         bundleList.setAdapter(adapter);
+        setRetainInstance(true);
         return rootView;
     }
 

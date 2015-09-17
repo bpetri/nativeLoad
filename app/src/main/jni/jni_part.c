@@ -285,9 +285,10 @@ void* startCelix(void* param) {
 
                 for (i = 0; i < arrayList_size(installed); i++) {
                     bundle_pt bundle = (bundle_pt) arrayList_get(installed, i);
-                    if (bundle_startWithOptions(bundle,0) == CELIX_SUCCESS) {
-//                        confirmStartBundle(location);
-                    }
+                    bundle_startWithOptions(bundle,0);
+//                    if (bundle_startWithOptions(bundle,0) == CELIX_SUCCESS) {
+////                        confirmStartBundle(location);
+//                    }
                 }
 
                 arrayList_destroy(installed);

@@ -22,6 +22,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.inaetics.demonstrator.controller.BundleItemAdapter;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
+import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
@@ -64,7 +65,10 @@ public class MainActivity extends AppCompatActivity implements Observer{
         model.setBundleLocation(getExternalFilesDir(null).toString());
         model.moveBundles(getResources().getAssets());
         for(String fileName : getExternalFilesDir(null).list()) {
-            model.addBundle(fileName).setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
+            BundleItem b = model.addBundle(fileName);
+            if (b!=null) {
+                b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
+            }
         }
         model.initJNI();
 

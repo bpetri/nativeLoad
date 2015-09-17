@@ -4,6 +4,8 @@
 
 package com.inaetics.demonstrator.model;
 
+import android.util.Log;
+
 public class BundleItem {
 
     private final String TAG = BundleItem.class.getName();
@@ -18,7 +20,7 @@ public class BundleItem {
         this.filename = filename;
         this.description = description;
         this.status = BundleStatus.BUNDLE_NOT_YET_INITIALIZED;
-        this.setChecked(checked);
+        this.checked = checked;
     }
 
     public String getFilename() {
