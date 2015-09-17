@@ -7,6 +7,7 @@ package com.inaetics.demonstrator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,6 +21,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.inaetics.demonstrator.controller.BundleItemAdapter;
 import com.inaetics.demonstrator.logging.LogCatOut;
 import com.inaetics.demonstrator.logging.LogCatReader;
@@ -28,6 +31,7 @@ import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
+import com.journeyapps.barcodescanner.CaptureActivity;
 
 import java.io.IOException;
 import java.util.Observable;
@@ -99,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements Observer{
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -139,10 +144,27 @@ public class MainActivity extends AppCompatActivity implements Observer{
                             }
                         }
                 );
-
                 return true;
+            case R.id.action_startQR:
+                new IntentIntegrator(this)
+                        .setCaptureActivity(ScanActivity.class)
+                        .setOrientationLocked(false)
+                        .initiateScan();
+
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            if(result.getContents() == null) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void setupInitScreen() {
@@ -183,10 +205,7 @@ public class MainActivity extends AppCompatActivity implements Observer{
     }
 
 
-
-
-
-//    public void confirmCelixStart() {
+    //    public void confirmCelixStart() {
 //        final Button btn_start = (Button) findViewById(R.id.button1);
 //
 //        handler.post(new Runnable() {

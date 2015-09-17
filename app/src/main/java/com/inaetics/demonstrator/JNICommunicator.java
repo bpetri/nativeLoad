@@ -64,6 +64,7 @@ public class JNICommunicator{
             @Override
             public void run() {
                 model.setBundleInstall(bundleLocation);
+                startBundle(bundleLocation);
             }
         });
     }
@@ -117,4 +118,7 @@ public class JNICommunicator{
     public native int stopCelix();
     public native int initJni();
     public native int installBundle(String path);
+    public native int startBundle(String path);
+    public native int stopBundle(String path);
+    public native int deleteBundle(String path);
 }
