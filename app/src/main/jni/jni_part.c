@@ -258,6 +258,7 @@ void* startCelix(void* param) {
                     if (bundleContext_installBundle(context, location, &current) == CELIX_SUCCESS) {
                         // Only add bundle if it is installed correctly
                         LOGI("bundle from %s sucessfully installed\n", location);
+                        confirmInstallBundle(location);
                         //----------------------
 
                         bundle_archive_pt archive = NULL;
@@ -284,7 +285,9 @@ void* startCelix(void* param) {
 
                 for (i = 0; i < arrayList_size(installed); i++) {
                     bundle_pt bundle = (bundle_pt) arrayList_get(installed, i);
-                    bundle_startWithOptions(bundle, 0);
+                    if (bundle_startWithOptions(bundle,0) == CELIX_SUCCESS) {
+//                        confirmStartBundle(location);
+                    }
                 }
 
                 arrayList_destroy(installed);

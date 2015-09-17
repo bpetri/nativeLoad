@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -50,7 +51,6 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         LinearLayout buttonsLayout = (LinearLayout) convertView.findViewById(R.id.buttons_layout);
         TextView bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
         CheckBox bundleCheckbox = (CheckBox) convertView.findViewById(R.id.bundleCheckbox);
-        ProgressBar bundleProgressBar = (ProgressBar) convertView.findViewById(R.id.bundleProgressBar);
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
             bundleCheckbox.setVisibility(View.GONE);
             buttonsLayout.setVisibility(View.VISIBLE);
@@ -64,73 +64,18 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         BundleStatus status = item.getStatus();
         boolean isChecked = item.isChecked();
 
-
-
-        bundleFileName.setText(fileName);
-
-
         switch (status) {
-
-            case BUNDLE_NOT_YET_INITIALIZED:
-                bundleProgressBar.setVisibility(View.GONE);
-                bundleCheckbox.setVisibility(View.VISIBLE);
-                bundleCheckbox.setEnabled(false);
-                bundleCheckbox.setChecked(false);
-                break;
-            case BUNDLE_LOCALLY_AVAILABLE:
-
-                bundleProgressBar.setVisibility(View.GONE);
-
-                bundleCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        item.setChecked(isChecked);
-                    }
-                });
-//                bundleCheckbox.setVisibility(View.VISIBLE);
-                bundleCheckbox.setEnabled(true);
-                bundleCheckbox.setChecked(isChecked);
-                break;
-            case BUNDLE_CONNECTING_STARTED:
-                bundleProgressBar.setVisibility(View.VISIBLE);
-                bundleCheckbox.setVisibility(View.VISIBLE);
-                bundleCheckbox.setEnabled(false);
-                bundleCheckbox.setChecked(false);
-
-
-                break;
-            case BUNDLE_DOWNLOAD_STARTED:
-                Log.e("BundleItem", "DOWN_START:  " + fileName);
-
-                bundleCheckbox.setEnabled(false);
-                bundleCheckbox.setVisibility(View.GONE);
-
-                Integer fileSizeInKB = (Integer) item.getStatusInfo();
-                bundleProgressBar.setProgress(0);
-                bundleProgressBar.setMax(fileSizeInKB);
-                break;
-            case BUNDLE_UPDATE_PROGRESS_BAR:
-                Log.e("BundleItem", "UPD_PROGRESS:  " + fileName);
-
-                bundleCheckbox.setEnabled(false);
-                bundleCheckbox.setVisibility(View.GONE);
-                Integer totalReadInKB = (Integer) item.getStatusInfo();
-                bundleProgressBar.setProgress(totalReadInKB);
-                break;
-            case BUNDLE_ENCOUNTERED_ERROR:
-                Log.e("BundleItem", "ENC_ERR:  " + fileName);
-
-                bundleProgressBar.setVisibility(View.GONE);
-                bundleCheckbox.setVisibility(View.VISIBLE);
-                bundleCheckbox.setEnabled(false);
-                bundleCheckbox.setChecked(false);
-
-                String message = (String) item.getStatusInfo();
-                Toast.makeText(getContext(), item.getFilename() + " " + message, Toast.LENGTH_SHORT).show();
+            case BUNDLE_INSTALLED:
+                Button inst = (Button) convertView.findViewById(R.id.button);
+                inst.setText("Installed");
+                inst.setEnabled(false);
                 break;
             default:
-                Log.e("Status", "UNKNOWN " + fileName + " " + status);
+                break;
+
         }
+        bundleFileName.setText(fileName);
+
 
 
         return convertView;

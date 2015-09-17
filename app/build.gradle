@@ -41,7 +41,6 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:support-v4:22.2.0'
-    compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
     compile 'com.journeyapps:zxing-android-embedded:3.0.2@aar'
     compile 'com.google.zxing:core:3.2.1'
     compile 'com.jpardogo.materialtabstrip:library:+'

@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements Observer{
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         pager.setAdapter(pagerAdapter);
-//        tabs.setShouldExpand(true);
         tabs.setViewPager(pager);
 
 
@@ -136,109 +135,6 @@ public class MainActivity extends AppCompatActivity implements Observer{
             }
         }
     }
-
-    private void setupInitScreen() {
-        final EditText editText_log = (EditText) findViewById(R.id.editText_log);
-        final Button btn_start = (Button) findViewById(R.id.button1);
-
-        bundleListView.setVisibility(View.VISIBLE);
-        editText_log.setVisibility(View.GONE);
-
-        btn_start.setEnabled(true);
-        btn_start.setText("START CELIX");
-
-
-        btn_start.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-
-                Log.d("Start button", "Started");
-                SharedPreferences prefs = getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
-                String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
-                String cfgStr = prefs.getString("celixConfig", null);
-                Properties cfgProps = null;
-                if (cfgStr != null)
-                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getBaseContext());
-                else
-                    cfgProps = config.generateConfiguration(null,model.getBundles(),model.getBundleLocation(),getBaseContext());
-
-                if (config.writeConfiguration(getApplicationContext(), config.propertiesToString(cfgProps))) {
-                    btn_start.setEnabled(false);
-                    bundleListView.setVisibility(View.GONE);
-                    editText_log.setText("");
-                    editText_log.setVisibility(View.VISIBLE);
-                    lr.start();
-                    model.getJniCommunicator().startCelix(cfgPath);
-                }
-            }
-        });
-
-    }
-
-
-    //    public void confirmCelixStart() {
-//        final Button btn_start = (Button) findViewById(R.id.button1);
-//
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                btn_start.setText("STOP CELIX");
-//                btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-//                btn_start.setOnClickListener(new View.OnClickListener() {
-//                    public void onClick(View v) {
-//                        btn_start.setEnabled(false);
-////                        Log.d("Start button", "Stopped");
-//                        installBundle(model.getBundleLocation() + "/echo_client.zip");
-//                        installBundle(model.getBundleLocation() + "/echo_server.zip");
-////                                         stopCe1lix();
-//                    }
-//                });
-//
-//                btn_start.setEnabled(true);
-//            }
-//        });
-//    }
-//
-//
-//    public void confirmCelixStop() {
-//
-//        final Button btn_start = (Button) findViewById(R.id.button1);
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//
-//                Toast.makeText(getBaseContext(), "Celix has stopped", Toast.LENGTH_SHORT).show();
-//
-//                try {
-//                    Thread.sleep(5000);
-//                } catch (InterruptedException ignored) {
-//                    // I don't care
-//                } finally {
-//                    btn_start.setOnClickListener(new View.OnClickListener() {
-//                        public void onClick(View v) {
-//                            lr.kill();
-//                            setupInitScreen();
-//                        }
-//                    });
-//                }
-//
-//            }
-//        });
-//    }
-//    public void confirmBundleStart(String location) {
-//
-//        String[] words = location.split("/");
-//        String fileName = words[words.length - 1];
-//        for (BundleItem b : model.getBundles()) {
-//            if (fileName.equals(b.getFilename())) {
-//                b.setStatus(BundleStatus.BUNDLE_INSTALLED);
-//                Log.e("installed bundle JAVA", fileName);
-//            }
-//        }
-//    }
-
-
 
     protected void showInputDialog(final EditText edittext, String title, String msg, String text, DialogInterface.OnClickListener positiveListener) {
 

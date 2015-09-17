@@ -35,8 +35,6 @@ public class JNICommunicator{
             public void run() {
                 Log.e("JNICommunicator", "Celix started correctly");
                 Model.getInstance().setCelixStatus(BundleStatus.CELIX_RUNNING);
-                installBundle(model.getBundleLocation() + "/echo_client.zip");
-                installBundle(model.getBundleLocation() + "/echo_server.zip");
             }
         });
     }
