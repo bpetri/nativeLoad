@@ -6,17 +6,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.inaetics.demonstrator.logging.LogCatOut;
 import com.inaetics.demonstrator.logging.LogCatReader;
+import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
@@ -39,6 +38,7 @@ public class ConsoleFragment extends Fragment {
         console = (EditText) rootView.findViewById(R.id.console_log);
         model = Model.getInstance();
         config = model.getConfig();
+
         final Handler handler = new Handler();
         final LogCatReader lr = new LogCatReader(new LogCatOut()
         {
@@ -56,9 +56,12 @@ public class ConsoleFragment extends Fragment {
             }
         });
         final Button btn_start = (Button) rootView.findViewById(R.id.start_stop_btn);
+        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
+            btn_start.setEnabled(false);
+            lr.start();
+        }
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
                 Log.d("Start button", "Started");
                 SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
                 String cfgPath = getActivity().getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;

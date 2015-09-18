@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,8 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.inaetics.demonstrator.controller.BundleItemAdapter;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
+import com.inaetics.demonstrator.fragments.BundlesFragment;
+import com.inaetics.demonstrator.fragments.ConsoleFragment;
 import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
@@ -34,7 +37,7 @@ import java.util.Observer;
 import java.util.Properties;
 
 
-public class MainActivity extends AppCompatActivity implements Observer{
+public class MainActivity extends AppCompatActivity{
 
 
     private final static String TAG = MainActivity.class.getName();
@@ -50,17 +53,25 @@ public class MainActivity extends AppCompatActivity implements Observer{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(null);
         super.setContentView(R.layout.pager_tab);
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-        MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
-        pager.setAdapter(pagerAdapter);
-        tabs.setViewPager(pager);
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            BundlesFragment left = new BundlesFragment();
+            ConsoleFragment right = new ConsoleFragment();
+            getSupportFragmentManager().beginTransaction().add(R.id.left_container,left).commit();
+            getSupportFragmentManager().beginTransaction().add(R.id.right_container,right).commit();
+        } else {
+            ViewPager pager = (ViewPager) findViewById(R.id.pager);
+            PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+            MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
+            pager.setAdapter(pagerAdapter);
+            tabs.setViewPager(pager);
+        }
+
 
 
         model = Model.getInstance();
-        model.addObserver(this);
         config = model.getConfig();
         model.setBundleLocation(getExternalFilesDir(null).toString());
         model.moveBundles(getResources().getAssets());
@@ -162,20 +173,5 @@ public class MainActivity extends AppCompatActivity implements Observer{
         });
 
         alert.show();
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        if(data != null && data instanceof BundleStatus) {
-            switch((BundleStatus)data) {
-                case CELIX_RUNNING:
-                    Log.d("MainActivity", "Celix running");
-                    break;
-                case CELIX_STOPPED:
-                    Log.d("MainActivity", "Celix stopped");
-                    break;
-                default: return;
-            }
-        }
     }
 }

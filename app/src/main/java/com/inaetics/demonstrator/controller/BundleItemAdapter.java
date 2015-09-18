@@ -58,6 +58,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             holder.installButton =  (Button) convertView.findViewById(R.id.install_btn);
             holder.runButton = (Button) convertView.findViewById(R.id.run_btn);
             holder.stopButton = (Button) convertView.findViewById(R.id.stop_btn);
+            holder.stopButton.setEnabled(false);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
