@@ -4,7 +4,9 @@
 
 package com.inaetics.demonstrator.model;
 
-import android.util.Log;
+
+
+import java.util.Comparator;
 
 public class BundleItem {
 
@@ -62,4 +64,5 @@ public class BundleItem {
     public void setStatusInfo(Object statusInfo) {
         this.statusInfo = statusInfo;
     }
+
 }
