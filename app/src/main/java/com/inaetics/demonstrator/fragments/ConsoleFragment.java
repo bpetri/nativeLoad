@@ -17,20 +17,24 @@ import android.widget.TextView;
 
 import com.inaetics.demonstrator.logging.LogCatOut;
 import com.inaetics.demonstrator.logging.LogCatReader;
+import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
 
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Properties;
 
 /**
  * Created by mjansen on 17-9-15.
  */
-public class ConsoleFragment extends Fragment {
+public class ConsoleFragment extends Fragment implements Observer {
     private EditText console;
     private Config config;
     private Model model;
+    private Button btn_start;
 
     @Nullable
     @Override
@@ -38,6 +42,7 @@ public class ConsoleFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.console_fragment,null);
         console = (EditText) rootView.findViewById(R.id.console_log);
         model = Model.getInstance();
+        model.addObserver(this);
         config = model.getConfig();
         final Handler handler = new Handler();
         final LogCatReader lr = new LogCatReader(new LogCatOut()
@@ -55,7 +60,7 @@ public class ConsoleFragment extends Fragment {
                 });
             }
         });
-        final Button btn_start = (Button) rootView.findViewById(R.id.start_stop_btn);
+        btn_start = (Button) rootView.findViewById(R.id.start_stop_btn);
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
@@ -80,4 +85,20 @@ public class ConsoleFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void update(Observable observable, Object data) {
+        if(data != null && data instanceof BundleStatus) {
+            if(data == BundleStatus.CELIX_RUNNING) {
+                btn_start.setEnabled(true);
+                btn_start.setText("Stop Celix");
+                btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+                btn_start.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        model.getJniCommunicator().stopCelix();
+                    }
+                });
+            }
+        }
+    }
 }

@@ -53,12 +53,6 @@ JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_JNICommunicator_startC
 JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_JNICommunicator_stopCelix(JNIEnv*, jobject);
 JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_JNICommunicator_printCMessage(JNIEnv*, jobject);
 
-//                   JNIEXPORT jboolean JNICALL Java_com_example_bjoern_nativeload_MainActivity_initJni(JNIEnv*, jobject);
-//                   JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_startCelix(JNIEnv*, jclass, jstring);
-//                   JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_stopCelix(JNIEnv*, jobject);
-//                   JNIEXPORT jint JNICALL Java_com_example_bjoern_nativeload_MainActivity_printCMessage(JNIEnv*, jobject);
-
-
 int running = 0;
 
 struct framework * framework;
@@ -339,7 +333,32 @@ void* startCelix(void* param) {
 
 }
 
+void* stopCelix(void* param) {
 
+    bundle_pt fwBundle = NULL;
+
+    framework_getFrameworkBundle(framework, &fwBundle);
+
+    //-----------------------
+    bundle_archive_pt archive = NULL;
+    long id;
+    char * stateString = NULL;
+    module_pt module = NULL;
+    char * name = NULL;
+
+    bundle_getArchive(fwBundle, &archive);
+    bundleArchive_getId(archive, &id);
+    bundle_getCurrentModule(fwBundle, &module);
+    module_getSymbolicName(module, &name);
+    LOGI("Stopping  %-5ld %s\n", id, name);
+    //-----------------------
+
+
+    bundle_stop(fwBundle);
+    //framework_destroy(framework);
+
+    return 0;
+}
 
 
 
@@ -415,29 +434,10 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopBundle
 //JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_stopCelix(JNIEnv* je, jobject thiz)
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopCelix(JNIEnv* je, jobject thiz)
 {
-	bundle_pt fwBundle = NULL;
-	
-	framework_getFrameworkBundle(framework, &fwBundle);
-
-    //-----------------------
-    bundle_archive_pt archive = NULL;
-    long id;
-    char * stateString = NULL;
-    module_pt module = NULL;
-    char * name = NULL;
-
-    bundle_getArchive(fwBundle, &archive);
-    bundleArchive_getId(archive, &id);
-    bundle_getCurrentModule(fwBundle, &module);
-    module_getSymbolicName(module, &name);
-    LOGI("Stopping  %-5ld %s\n", id, name);
-    //-----------------------
-
-
-	bundle_stop(fwBundle);
-        //framework_destroy(framework);
-	
-	return 0;
+    // convert Java string to UTF-8
+//    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
+    pthread_t thread;
+    return pthread_create( &thread, NULL, stopCelix, (void*) NULL);
 }
 
 
