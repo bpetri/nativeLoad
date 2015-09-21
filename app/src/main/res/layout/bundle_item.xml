@@ -48,6 +48,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Install"
+                    android:textSize="10dp"
                     android:layout_weight="1"
                     android:id="@+id/install_btn" />
 
@@ -55,6 +56,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Run"
+                    android:textSize="10dp"
                     android:layout_weight="1"
                     android:id="@+id/run_btn" />
 
@@ -62,6 +64,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Stop"
+                    android:textSize="10dp"
                     android:layout_weight="1"
                     android:id="@+id/stop_btn" />
             </LinearLayout>

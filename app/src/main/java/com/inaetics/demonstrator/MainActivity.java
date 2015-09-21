@@ -32,9 +32,12 @@ import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
 import com.journeyapps.barcodescanner.CaptureActivity;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Properties;
+import java.util.Scanner;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -146,6 +149,27 @@ public class MainActivity extends AppCompatActivity{
             if(result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
+                String content = result.getContents();
+                try {
+                    URL url = new URL(content);
+                    Toast.makeText(this,"Scanned a URL " + content, Toast.LENGTH_LONG).show();
+                } catch (MalformedURLException mue) {
+                    //Not a download URL
+                    final SharedPreferences pref = getApplicationContext().getSharedPreferences("celixAgent", MODE_PRIVATE);
+                    String cfgStr  = pref.getString("celixConfig", null);
+                    Properties cfgProps = null;
+                    if (cfgStr != null)
+                        cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getBaseContext());
+                    else
+                        cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getBaseContext());
+                    Scanner sc = new Scanner(content);
+                    while (sc.hasNext()) {
+                        String[] keyValue = sc.next().split("=");
+                        cfgProps.put(keyValue[0],keyValue[1]);
+                    }
+                    pref.edit().putString("celixConfig",config.propertiesToString(cfgProps)).apply();
+                }
+
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
             }
         }
