@@ -34,7 +34,7 @@ public class LogCatReader {
             {
 //                proc = Runtime.getRuntime().exec(new String[] {"logcat", " -d", " -v", " raw", " celix:V", " *:S" });
 
-                proc = Runtime.getRuntime().exec(new String[] {"logcat", " -d", " -v", " raw", " celix:V", " *:S" });
+                proc = Runtime.getRuntime().exec(new String[] {"logcat","CLOG:V", " -d", " -v", " raw", " celix:V", " *:S" });
 
                 OutputStream os = proc.getOutputStream();
 
