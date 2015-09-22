@@ -115,30 +115,23 @@ public class Config {
         // IPv4 only!
         String ipAdr = getLocalIpAddress();
 
-        if (!cfg.containsKey("RSA_IP")) {
-            cfg.put("RSA_IP", ipAdr);
-        }
+        cfg.put("RSA_IP", ipAdr);
 
         if (!cfg.containsKey("RSA_PORT")) {
             cfg.put("RSA_PORT", "20888");
         }
 
-        if (!cfg.containsKey("DISCOVERY_CFG_SERVER_IP")) {
-            cfg.put("DISCOVERY_CFG_SERVER_IP", ipAdr);
-        }
+        cfg.put("DISCOVERY_CFG_SERVER_IP", ipAdr);
 
         if (!cfg.containsKey("DISCOVERY_CFG_SERVER_PORT")) {
             cfg.put("DISCOVERY_CFG_SERVER_PORT", "20999");
         }
 
-        if (!cfg.containsKey("DISCOVERY_ETCD_SERVER_IP")) {
-            // just a guess that for the etcd server
-            String IpWithNoFinalPart  = ipAdr.replaceAll("(.*\\.)\\d+$", "$11");
-            cfg.put("DISCOVERY_ETCD_SERVER_IP", IpWithNoFinalPart);
-        }
-
         if (!cfg.containsKey("LOGHELPER_ENABLE_STDOUT_FALLBACK")) {
             cfg.put("LOGHELPER_ENABLE_STDOUT_FALLBACK", "true");
+        }
+        if (!cfg.containsKey("org.osgi.framework.storage.clean")) {
+            cfg.put("org.osgi.framework.storage.clean", "onFirstInit");
         }
 
         return cfg;
