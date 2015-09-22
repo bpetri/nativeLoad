@@ -58,14 +58,15 @@ public class Model extends Observable{
     }
 
 
-    public BundleItem addBundle(String fileName) {
+    public BundleItem addBundle(String fileName,boolean checked) {
         for (BundleItem b : bundles)  {
             if (fileName.equals(b.getFilename())) {
                 return null;
             }
         }
-        return addBundle(fileName,"",false);
+        return addBundle(fileName,"",checked);
     }
+
 
     public ArrayList<BundleItem> getBundles() {
         return bundles;

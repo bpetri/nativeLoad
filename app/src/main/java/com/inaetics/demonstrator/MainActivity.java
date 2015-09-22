@@ -79,7 +79,18 @@ public class MainActivity extends AppCompatActivity{
         model.setBundleLocation(getExternalFilesDir(null).toString());
         model.moveBundles(getResources().getAssets());
         for(String fileName : getExternalFilesDir(null).list()) {
-            BundleItem b = model.addBundle(fileName);
+            BundleItem b = null;
+            switch (fileName) {
+                case "discovery_etcd.zip":
+                case "remote_service_admin_http.zip":
+                case "topology_manager.zip":
+                    b = model.addBundle(fileName,true);
+                    break;
+                default:
+                    b = model.addBundle(fileName,false);
+                    break;
+            }
+
             if (b!=null) {
                 b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
             }
