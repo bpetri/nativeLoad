@@ -10,7 +10,7 @@ import android.widget.ListView;
 
 import com.inaetics.demonstrator.controller.BundleItemAdapter;
 import com.inaetics.demonstrator.model.Model;
-import com.inaetics.demonstrator.nativeload.R;
+import com.inaetics.demonstrator.R;
 
 import java.util.Observable;
 import java.util.Observer;

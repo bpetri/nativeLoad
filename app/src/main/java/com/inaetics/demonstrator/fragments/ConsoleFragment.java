@@ -18,7 +18,7 @@ import com.inaetics.demonstrator.logging.LogCatReader;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
-import com.inaetics.demonstrator.nativeload.R;
+import com.inaetics.demonstrator.R;
 
 import java.io.IOException;
 import java.util.Observable;

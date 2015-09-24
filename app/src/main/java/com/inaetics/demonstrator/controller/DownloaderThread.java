@@ -45,7 +45,7 @@ import android.util.Log;
 import com.inaetics.demonstrator.MainActivity;
 import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
-import com.inaetics.demonstrator.nativeload.R;
+import com.inaetics.demonstrator.R;
 
 /**
  * Downloads a file in a thread. Will send messages to the

@@ -35,6 +35,7 @@ LOCAL_MODULE := jni_part
 LOCAL_SRC_FILES := jni_part.c
 LOCAL_STATIC_LIBRARIES := curl
 LOCAL_SHARED_LIBRARIES := celix_fw celix_util
+LOCAL_CFLAGS := -O0 -g -ggdb
 LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_LIBRARY)
 
