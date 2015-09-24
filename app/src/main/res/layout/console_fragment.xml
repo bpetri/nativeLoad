@@ -7,16 +7,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="8.5"
-        android:minLines="20"
-        android:inputType="none"
-        android:scrollbars="vertical"
         android:id="@+id/console_log"
         android:textSize="10dp"
-        android:enabled="false"
-        android:nestedScrollingEnabled="true"
+        android:enabled="true"
+        android:focusable="false"
+        android:scrollbars="vertical"
         android:textColor="@android:color/white"
         android:background="@android:color/black" />
-
     <Button
         android:layout_width="match_parent"
         android:layout_height="0dp"
