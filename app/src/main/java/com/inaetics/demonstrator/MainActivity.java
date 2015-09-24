@@ -12,7 +12,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -30,12 +29,9 @@ import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
-import com.journeyapps.barcodescanner.CaptureActivity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -72,8 +68,6 @@ public class MainActivity extends AppCompatActivity{
             tabs.setViewPager(pager);
         }
 
-
-
         model = Model.getInstance();
         config = model.getConfig();
         model.setBundleLocation(getExternalFilesDir(null).toString());
@@ -90,7 +84,6 @@ public class MainActivity extends AppCompatActivity{
                     b = model.addBundle(fileName,false);
                     break;
             }
-
             if (b!=null) {
                 b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
             }
@@ -163,6 +156,8 @@ public class MainActivity extends AppCompatActivity{
                 String content = result.getContents();
                 try {
                     URL url = new URL(content);
+                    // IS A URL
+                    // TODO
                     Toast.makeText(this,"Scanned a URL " + content, Toast.LENGTH_LONG).show();
                 } catch (MalformedURLException mue) {
                     //Not a download URL
@@ -174,11 +169,31 @@ public class MainActivity extends AppCompatActivity{
                     else
                         cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getBaseContext());
                     Scanner sc = new Scanner(content);
-                    while (sc.hasNext()) {
-                        String[] keyValue = sc.next().split("=");
-                        cfgProps.put(keyValue[0],keyValue[1]);
+                    boolean autostart = false;
+                    while (sc.hasNextLine()) {
+                        String[] keyValue = sc.nextLine().split("=");
+                        if (keyValue[0].equals("cosgi.auto.start.1")) {
+                            autostart = true;
+                            String startBundles = "";
+                            Scanner bscan = new Scanner(keyValue[1]);
+                            while (bscan.hasNext()) {
+                                startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
+                            }
+                            bscan.close();
+                            cfgProps.put(keyValue[0], startBundles);
+                        } else {
+                            cfgProps.put(keyValue[0], keyValue[1]);
+                        }
+
                     }
-                    pref.edit().putString("celixConfig",config.propertiesToString(cfgProps)).apply();
+                    sc.close();
+                    pref.edit().putString("celixConfig", config.propertiesToString(cfgProps)).apply();
+                    if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
+                        config.writeConfiguration(this, config.propertiesToString(cfgProps));
+                        String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
+                        model.getJniCommunicator().startCelix(cfgPath);
+
+                    }
                 }
 
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();

@@ -21,15 +21,19 @@ import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.nativeload.R;
 
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Properties;
 
 /**
  * Created by mjansen on 17-9-15.
  */
-public class ConsoleFragment extends Fragment {
+public class ConsoleFragment extends Fragment implements Observer {
     private EditText console;
     private Config config;
     private Model model;
+    private LogCatReader lr;
+    private Button btn_start;
 
     @Nullable
     @Override
@@ -38,9 +42,10 @@ public class ConsoleFragment extends Fragment {
         console = (EditText) rootView.findViewById(R.id.console_log);
         model = Model.getInstance();
         config = model.getConfig();
+        model.addObserver(this);
 
         final Handler handler = new Handler();
-        final LogCatReader lr = new LogCatReader(new LogCatOut()
+        lr = new LogCatReader(new LogCatOut()
         {
             @Override
             public void writeLogData(final String line) throws IOException
@@ -49,17 +54,40 @@ public class ConsoleFragment extends Fragment {
                 {
                     public void run()
                     {
-                       console.append(line + System.getProperty("line.separator"));
+                        console.append(line + "\n");
+                        if (console.getText().length() > 10000) {
+                            console.setText(console.getText().toString().substring(5000));
+                            console.setSelection(console.getText().length());
+                        }
 
                     }
                 });
             }
         });
-        final Button btn_start = (Button) rootView.findViewById(R.id.start_stop_btn);
+        btn_start = (Button) rootView.findViewById(R.id.start_stop_btn);
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
-            btn_start.setEnabled(false);
-            lr.start();
+            setRunning();
+        } else {
+            setStopped();
         }
+
+        return rootView;
+    }
+
+    public void setRunning() {
+        lr.start();
+        btn_start.setText("STOP");
+        btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+        btn_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                model.getJniCommunicator().stopCelix();
+            }
+        });
+        btn_start.setEnabled(true);
+    }
+
+    public void setStopped() {
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("Start button", "Started");
@@ -68,9 +96,9 @@ public class ConsoleFragment extends Fragment {
                 String cfgStr = prefs.getString("celixConfig", null);
                 Properties cfgProps = null;
                 if (cfgStr != null)
-                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getActivity().getBaseContext());
+                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr), model.getBundles(), model.getBundleLocation(), getActivity().getBaseContext());
                 else
-                    cfgProps = config.generateConfiguration(null,model.getBundles(),model.getBundleLocation(),getActivity().getBaseContext());
+                    cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getActivity().getBaseContext());
 
                 if (config.writeConfiguration(getActivity().getApplicationContext(), config.propertiesToString(cfgProps))) {
                     btn_start.setEnabled(false);
@@ -80,7 +108,17 @@ public class ConsoleFragment extends Fragment {
                 }
             }
         });
-        return rootView;
+    }
+
+    @Override
+    public void update(Observable observable, Object o) {
+        if (o == BundleStatus.CELIX_RUNNING) {
+            setRunning();
+        } else if (o == BundleStatus.CELIX_STOPPED) {
+            setStopped();
+        }
     }
 
 }
+
+

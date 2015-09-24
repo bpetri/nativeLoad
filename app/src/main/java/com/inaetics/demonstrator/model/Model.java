@@ -1,9 +1,6 @@
 package com.inaetics.demonstrator.model;
 
-import android.content.Context;
 import android.content.res.AssetManager;
-import android.content.res.Resources;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
@@ -19,10 +16,10 @@ import java.util.Observable;
 /**
  * Created by mjansen on 16-9-15.
  */
-public class Model extends Observable{
+public class Model extends Observable {
 
-    private ArrayList<BundleItem> bundles;
     private static Model self;
+    private ArrayList<BundleItem> bundles;
     private Config config;
     private String bundleLocation;
 
@@ -44,11 +41,13 @@ public class Model extends Observable{
     }
 
     public void initJNI() {
-        jniCommunicator  = new JNICommunicator(handler);
+        if (jniCommunicator == null) {
+            jniCommunicator = new JNICommunicator(handler);
+        }
     }
 
     public BundleItem addBundle(String fileName, String description, boolean checked) {
-        BundleItem item = new BundleItem(fileName,description,checked);
+        BundleItem item = new BundleItem(fileName, description, checked);
         bundles.add(item);
         return item;
     }
@@ -57,16 +56,22 @@ public class Model extends Observable{
         return celixStatus;
     }
 
+    public void setCelixStatus(BundleStatus status) {
+        if (status != celixStatus) {
+            celixStatus = status;
+            setChanged();
+            notifyObservers(celixStatus);
+        }
+    }
 
-    public BundleItem addBundle(String fileName,boolean checked) {
-        for (BundleItem b : bundles)  {
+    public BundleItem addBundle(String fileName, boolean checked) {
+        for (BundleItem b : bundles) {
             if (fileName.equals(b.getFilename())) {
                 return null;
             }
         }
-        return addBundle(fileName,"",checked);
+        return addBundle(fileName, "", checked);
     }
-
 
     public ArrayList<BundleItem> getBundles() {
         return bundles;
@@ -137,17 +142,9 @@ public class Model extends Observable{
         return null;
     }
 
-    public void setCelixStatus(BundleStatus status) {
-        if(status != celixStatus) {
-            celixStatus = status;
-            setChanged();
-            notifyObservers(celixStatus);
-        }
-    }
-
     public void setBundleInstall(String location) {
         BundleItem b = getBundleFromLocation(location);
-        if(b != null) {
+        if (b != null) {
             b.setStatus(BundleStatus.BUNDLE_INSTALLED);
             Log.d("Model", "Bundle " + b.getFilename() + " has been installed");
             setChanged();
@@ -157,7 +154,7 @@ public class Model extends Observable{
 
     public void setBundleStart(String location) {
         BundleItem b = getBundleFromLocation(location);
-        if(b != null) {
+        if (b != null) {
             b.setStatus(BundleStatus.BUNDLE_RUNNING);
             Log.d("Model", "Bundle " + b.getFilename() + " has been started");
             setChanged();
@@ -167,7 +164,7 @@ public class Model extends Observable{
 
     public void setBundleStop(String location) {
         BundleItem b = getBundleFromLocation(location);
-        if(b != null) {
+        if (b != null) {
             b.setStatus(BundleStatus.BUNDLE_INSTALLED);
             Log.d("Model", "Bundle " + b.getFilename() + " has been stopped");
             setChanged();
