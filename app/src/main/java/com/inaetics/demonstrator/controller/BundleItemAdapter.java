@@ -5,24 +5,19 @@
 package com.inaetics.demonstrator.controller;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.inaetics.demonstrator.R;
 import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
-import com.inaetics.demonstrator.R;
 
 import java.util.List;
 
@@ -69,7 +64,6 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             holder.runButton.setEnabled(true);
             holder.stopButton.setEnabled(false);
         }
-
 
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
             holder.bundleCheckbox.setVisibility(View.GONE);
@@ -120,6 +114,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                 Button b = (Button)v;
                 b.setEnabled(false);
                 b.setText("Stopping");
+                item.setStatus(BundleStatus.BUNDLE_STOPPING);
                 model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
             }
         });
@@ -132,6 +127,14 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             case BUNDLE_INSTALLED:
                 holder.installButton.setEnabled(false);
                 holder.installButton.setText("Installed");
+                break;
+            case BUNDLE_STOPPING:
+                holder.stopButton.setEnabled(false);
+                holder.stopButton.setText("Stopping");
+                holder.installButton.setEnabled(false);
+                holder.installButton.setText("Installed");
+                holder.runButton.setEnabled(false);
+                holder.runButton.setText("Running");
                 break;
             default:
                 holder.runButton.setEnabled(false);

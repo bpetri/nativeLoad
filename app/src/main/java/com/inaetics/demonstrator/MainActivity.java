@@ -28,8 +28,6 @@ import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
-import com.inaetics.demonstrator.R;
-import com.journeyapps.barcodescanner.CaptureActivity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,22 +69,26 @@ public class MainActivity extends AppCompatActivity{
 
         model = Model.getInstance();
         config = model.getConfig();
-        model.setBundleLocation(getExternalFilesDir(null).toString());
-        model.moveBundles(getResources().getAssets());
-        for(String fileName : getExternalFilesDir(null).list()) {
-            BundleItem b = null;
-            switch (fileName) {
-                case "discovery_etcd.zip":
-                case "remote_service_admin_http.zip":
-                case "topology_manager.zip":
-                    b = model.addBundle(fileName,true);
-                    break;
-                default:
-                    b = model.addBundle(fileName,false);
-                    break;
-            }
-            if (b!=null) {
-                b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
+
+        // Only one time!! After configuration change don't do it again.
+        if (model.getBundles().isEmpty()) {
+            model.setBundleLocation(getExternalFilesDir(null).toString());
+            model.moveBundles(getResources().getAssets());
+            for (String fileName : getExternalFilesDir(null).list()) {
+                BundleItem b = null;
+                switch (fileName) {
+                    case "discovery_etcd.zip":
+                    case "remote_service_admin_http.zip":
+                    case "topology_manager.zip":
+                        b = model.addBundle(fileName, true);
+                        break;
+                    default:
+                        b = model.addBundle(fileName, false);
+                        break;
+                }
+                if (b != null) {
+                    b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
+                }
             }
         }
         model.initJNI();

@@ -13,12 +13,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.inaetics.demonstrator.R;
 import com.inaetics.demonstrator.logging.LogCatOut;
 import com.inaetics.demonstrator.logging.LogCatReader;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
-import com.inaetics.demonstrator.R;
 
 import java.io.IOException;
 import java.util.Observable;
@@ -77,7 +77,9 @@ public class ConsoleFragment extends Fragment implements Observer {
     public void setRunning() {
         lr.start();
         btn_start.setText("STOP");
-        btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+        if (isAdded()) {
+            btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+        }
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
