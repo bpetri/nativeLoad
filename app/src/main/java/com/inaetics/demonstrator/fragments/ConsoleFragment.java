@@ -46,24 +46,25 @@ public class ConsoleFragment extends Fragment implements Observer {
 
         final Handler handler = new Handler();
         lr = new LogCatReader(new LogCatOut()
-        {
+            {
             @Override
             public void writeLogData(final String line) throws IOException
-            {
-                handler.post(new Runnable()
                 {
-                    public void run()
+                    handler.post(new Runnable()
                     {
-                        console.append(line + "\n");
-                        if (console.getText().length() > 10000) {
-                            console.setText(console.getText().toString().substring(5000));
-                            console.setSelection(console.getText().length());
-                        }
+                        public void run() {
+                            console.append(line + "\n");
+                            if (console.getText().length() > 10000) {
+                                console.setText(console.getText().toString().substring(5000));
+                                console.setSelection(console.getText().length());
+                            }
 
-                    }
-                });
-            }
+                        }
+                    });
+                }
         });
+        lr.start();
+
         btn_start = (Button) rootView.findViewById(R.id.start_stop_btn);
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
             setRunning();
@@ -74,8 +75,15 @@ public class ConsoleFragment extends Fragment implements Observer {
         return rootView;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (lr != null) {
+            lr.kill();
+        }
+    }
+
     public void setRunning() {
-        lr.start();
         btn_start.setText("STOP");
         if (isAdded()) {
             btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
@@ -90,6 +98,11 @@ public class ConsoleFragment extends Fragment implements Observer {
     }
 
     public void setStopped() {
+        btn_start.setText("Start");
+        if (isAdded()) {
+            btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+        }
+
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("Start button", "Started");
@@ -105,7 +118,6 @@ public class ConsoleFragment extends Fragment implements Observer {
                 if (config.writeConfiguration(getActivity().getApplicationContext(), config.propertiesToString(cfgProps))) {
                     btn_start.setEnabled(false);
                     console.setText("");
-                    lr.start();
                     model.getJniCommunicator().startCelix(cfgPath);
                 }
             }

@@ -172,6 +172,7 @@ void confirmInstallBundle(char* location) {
 }
 
 void confirmStartBundle(char* location) {
+    LOGI("Running bundle %s", location);
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
@@ -187,12 +188,12 @@ void confirmStartBundle(char* location) {
 
     jstring jstr = (*je)->NewStringUTF(je,location);
     (*je)->CallVoidMethod(je, gObject, cb[3].cbMethod, jstr);
-
     if(isAttached)
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
 void confirmStopBundle(char* location) {
+    LOGI("Stopped bundle %s", location);
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
@@ -242,7 +243,6 @@ void* startBundle(void* bundleLocation) {
     current = framework_getBundle(framework, location);
 
     if (bundle_startWithOptions(current, 0) == CELIX_SUCCESS) {
-        LOGI("Running bundle %s", location);
         confirmStartBundle(location);
     }
 
@@ -258,7 +258,6 @@ void* stopBundle(void* bundleLocation) {
 
 
     if (bundle_stopWithOptions(current, 0) == CELIX_SUCCESS) {
-        LOGI("Stopped bundle %s", location);
         confirmStopBundle(location);
     }
 

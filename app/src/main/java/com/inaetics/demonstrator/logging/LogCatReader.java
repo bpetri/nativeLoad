@@ -39,7 +39,7 @@ public class LogCatReader {
                 OutputStream os = proc.getOutputStream();
 
                 this.inStd = proc.getInputStream();
-                this.inErr = proc.getErrorStream();
+//                this.inErr = proc.getErrorStream();
 
                 startReaders();
 
@@ -53,10 +53,10 @@ public class LogCatReader {
         private void startReaders() throws FileNotFoundException
         {
             this.streamReader = new LogcatProcessStreamReader(this.inStd, logcatOut);
-            this.errStreamReader = new LogcatProcessStreamReader(this.inErr, null);
+//            this.errStreamReader = new LogcatProcessStreamReader(this.inErr, null);
 
             streamReader.start();
-            errStreamReader.start();
+//            errStreamReader.start();
         }
 
         public void kill()
