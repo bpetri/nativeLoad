@@ -111,23 +111,27 @@ public class Model extends Observable {
         for (String fileName : files) {
 
             File newFile = new File(bundleLocation + "/" + fileName);
-            if (!newFile.isFile()) {
-                try {
-                    InputStream in = assetManager.open("celix_bundles/" + fileName);
-                    FileOutputStream out = new FileOutputStream(newFile);
-                    byte[] buffer = new byte[1024];
-                    int read;
-                    while ((read = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, read);
-                    }
-                    in.close();
-                    out.flush();
-                    out.close();
-                    Log.i("BundleMover", fileName + " copied to " + bundleLocation);
-                } catch (Exception e) {
-                    Log.e("BundleMover", "ERROR: " + e.toString());
-                }
+//            if (!newFile.isFile()) {
+            moveBundle(assetManager, newFile, fileName);
+//            }
+        }
+    }
+
+    private void moveBundle(AssetManager assetManager, File newFile, String fileName) {
+        try {
+            InputStream in = assetManager.open("celix_bundles/" + fileName);
+            FileOutputStream out = new FileOutputStream(newFile);
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
             }
+            in.close();
+            out.flush();
+            out.close();
+            Log.i("BundleMover", fileName + " copied to " + bundleLocation);
+        } catch (Exception e) {
+            Log.e("BundleMover", "ERROR: " + e.toString());
         }
     }
 
