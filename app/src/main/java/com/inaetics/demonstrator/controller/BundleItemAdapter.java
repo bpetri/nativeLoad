@@ -52,17 +52,17 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             holder.bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
             holder.installButton =  (Button) convertView.findViewById(R.id.install_btn);
             holder.runButton = (Button) convertView.findViewById(R.id.run_btn);
-            holder.stopButton = (Button) convertView.findViewById(R.id.stop_btn);
-            holder.stopButton.setEnabled(false);
+//            holder.stopButton = (Button) convertView.findViewById(R.id.stop_btn);
+//            holder.stopButton.setEnabled(false);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
             holder.installButton.setText("Install");
             holder.runButton.setText("Run");
-            holder.stopButton.setText("Stop");
+//            holder.stopButton.setText("Stop");
             holder.installButton.setEnabled(true);
             holder.runButton.setEnabled(true);
-            holder.stopButton.setEnabled(false);
+//            holder.stopButton.setEnabled(false);
         }
 
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
@@ -93,8 +93,15 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             public void onClick(View v) {
                 Button b = (Button)v;
                 b.setEnabled(false);
-                b.setText("Installing");
-                model.getJniCommunicator().installBundle(model.getBundleLocation() + "/" + item.getFilename());
+                if(item.getStatus() == BundleStatus.BUNDLE_LOCALLY_AVAILABLE) {
+                    b.setText("Installing");
+                    item.setStatus(BundleStatus.BUNDLE_INSTALLING);
+                    model.getJniCommunicator().installBundle(model.getBundleLocation() + "/" + item.getFilename());
+                } else if (item.getStatus() == BundleStatus.BUNDLE_INSTALLED) {
+                    b.setText("Deleting");
+                    item.setStatus(BundleStatus.BUNDLE_DELETING);
+                    model.getJniCommunicator().deleteBundle(model.getBundleLocation() + "/" + item.getFilename());
+                }
             }
         });
 
@@ -103,38 +110,79 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             public void onClick(View v) {
                 Button b = (Button)v;
                 b.setEnabled(false);
-                b.setText("Starting");
-                model.getJniCommunicator().startBundle(model.getBundleLocation() + "/" + item.getFilename());
+                if(item.getStatus() == BundleStatus.BUNDLE_INSTALLED) {
+                    b.setText("Starting");
+                    item.setStatus(BundleStatus.BUNDLE_STARTING);
+                    model.getJniCommunicator().startBundle(model.getBundleLocation() + "/" + item.getFilename());
+                } else if (item.getStatus() == BundleStatus.BUNDLE_RUNNING) {
+                    b.setText("Stopping");
+                    item.setStatus(BundleStatus.BUNDLE_STOPPING);
+                    model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
+                }
             }
         });
 
-        holder.stopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Button b = (Button)v;
-                b.setEnabled(false);
-                b.setText("Stopping");
-                item.setStatus(BundleStatus.BUNDLE_STOPPING);
-                model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
-            }
-        });
+//        holder.stopButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Button b = (Button)v;
+//                b.setEnabled(false);
+//                b.setText("Stopping");
+//                item.setStatus(BundleStatus.BUNDLE_STOPPING);
+//                model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
+//            }
+//        });
 
         switch (status) {
-            case BUNDLE_RUNNING:
+            case BUNDLE_LOCALLY_AVAILABLE:
+                holder.installButton.setEnabled(true);
+                holder.installButton.setText("Install");
+
                 holder.runButton.setEnabled(false);
-                holder.runButton.setText("Running");
-                holder.stopButton.setEnabled(true);
+                holder.runButton.setText("Not installed");
+                break;
+            case BUNDLE_INSTALLING:
+                holder.installButton.setEnabled(false);
+                holder.installButton.setText("Installing");
+
+                holder.runButton.setEnabled(false);
+                holder.runButton.setText("Not installed");
+                break;
             case BUNDLE_INSTALLED:
+                holder.installButton.setEnabled(true);
+                holder.installButton.setText("Delete");
+
+                holder.runButton.setEnabled(true);
+                holder.runButton.setText("Start");
+                break;
+            case BUNDLE_STARTING:
                 holder.installButton.setEnabled(false);
                 holder.installButton.setText("Installed");
+
+                holder.runButton.setEnabled(false);
+                holder.runButton.setText("Starting");
+            case BUNDLE_RUNNING:
+                holder.installButton.setEnabled(false);
+                holder.installButton.setText("Installed");
+
+                holder.runButton.setEnabled(true);
+                holder.runButton.setText("Stop");
+//                holder.stopButton.setEnabled(true);
                 break;
             case BUNDLE_STOPPING:
-                holder.stopButton.setEnabled(false);
-                holder.stopButton.setText("Stopping");
+//                holder.stopButton.setEnabled(false);
+//                holder.stopButton.setText("Stopping");
                 holder.installButton.setEnabled(false);
                 holder.installButton.setText("Installed");
                 holder.runButton.setEnabled(false);
-                holder.runButton.setText("Running");
+                holder.runButton.setText("Stopping");
+                break;
+            case BUNDLE_DELETING:
+                holder.installButton.setEnabled(false);
+                holder.installButton.setText("Deleting");
+
+                holder.runButton.setEnabled(false);
+                holder.runButton.setText("Start");
                 break;
             default:
                 holder.runButton.setEnabled(false);
@@ -150,7 +198,7 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         CheckBox bundleCheckbox;
         Button installButton;
         Button runButton;
-        Button stopButton;
+//        Button stopButton;
     }
 
 }

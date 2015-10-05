@@ -114,14 +114,17 @@ public class Config {
 
         // IPv4 only!
         String ipAdr = getLocalIpAddress();
-
-        cfg.put("RSA_IP", ipAdr);
+        if(!cfg.containsKey("RSA_IP")) {
+            cfg.put("RSA_IP", ipAdr);
+        }
 
         if (!cfg.containsKey("RSA_PORT")) {
             cfg.put("RSA_PORT", "20888");
         }
 
-        cfg.put("DISCOVERY_CFG_SERVER_IP", ipAdr);
+        if(!cfg.containsKey("DISCOVERY_CFG_SERVER_IP")) {
+            cfg.put("DISCOVERY_CFG_SERVER_IP", ipAdr);
+        }
 
         if (!cfg.containsKey("DISCOVERY_CFG_SERVER_PORT")) {
             cfg.put("DISCOVERY_CFG_SERVER_PORT", "20999");

@@ -46,6 +46,9 @@ callback_t cb[] = {
   {
           "confirmBundleStop", "(Ljava/lang/String;)V"
   },
+  {
+          "confirmBundleDeleted", "(Ljava/lang/String;)V"
+  },
  };
 
 JNIEXPORT jboolean JNICALL Java_com_example_bjoern_nativeload_JNICommunicator_initJni(JNIEnv*, jobject);
@@ -106,6 +109,19 @@ int start_logger(const char *app_name)
     return 0;
 }
 
+char *getBundleName(char* location) {
+    char *copy = strdup(location);
+    char result[256];
+    char * pch;
+    pch = strtok (copy,"/");
+    while (pch != NULL)
+    {
+        strcpy(result, pch);
+        pch = strtok (NULL, "/");
+    }
+    free(copy);
+    return strdup(result);
+}
 
 void confirmCelixStart() {
    	JNIEnv* je;
@@ -151,6 +167,7 @@ void confirmCelixStop() {
 }
 
 void confirmInstallBundle(char* location) {
+    LOGI("Bundle '%s' installed", getBundleName(location));
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
@@ -172,7 +189,7 @@ void confirmInstallBundle(char* location) {
 }
 
 void confirmStartBundle(char* location) {
-    LOGI("Running bundle %s", location);
+    LOGI("Bundle '%s' started", getBundleName(location));
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
@@ -193,7 +210,7 @@ void confirmStartBundle(char* location) {
 }
 
 void confirmStopBundle(char* location) {
-    LOGI("Stopped bundle %s", location);
+    LOGI("Bundle '%s' stopped", getBundleName(location));
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
@@ -214,9 +231,33 @@ void confirmStopBundle(char* location) {
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
+void confirmDeleteBundle(char* location) {
+    LOGI("Bundle '%s' deleted", getBundleName(location));
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
+
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jstring jstr = (*je)->NewStringUTF(je,location);
+    (*je)->CallVoidMethod(je, gObject, cb[5].cbMethod, jstr);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
+
+
 void* installBundle(void* bundleLocation) {
     // Install bundle
     char* location = (char*) bundleLocation;
+    LOGI("Installing bundle '%s'", getBundleName(location));
     bundle_pt fw_bundle = NULL;
     bundle_context_pt context = NULL;
     bundle_pt current = NULL;
@@ -225,17 +266,13 @@ void* installBundle(void* bundleLocation) {
     bundle_getContext(fw_bundle, &context);
     if (bundleContext_installBundle(context, location, &current) == CELIX_SUCCESS)
     {
-        LOGI("Succesfully intalled bundle %s",location);
         confirmInstallBundle(location);
-    }
-    else
-    {
-        LOGI("Failed to install bundle %s", location);
     }
 }
 
 void* startBundle(void* bundleLocation) {
     char* location = (char*) bundleLocation;
+    LOGI("Starting bundle '%s'", getBundleName(location));
 
     bundle_pt fw_bundle = NULL;
     bundle_pt current = NULL;
@@ -250,8 +287,8 @@ void* startBundle(void* bundleLocation) {
 
 void* stopBundle(void* bundleLocation) {
     char* location = (char*) bundleLocation;
+    LOGI("Stopping bundle '%s'", getBundleName(location));
 
-    bundle_pt fw_bundle = NULL;
     bundle_pt current = NULL;
 
     current = framework_getBundle(framework, location);
@@ -263,10 +300,27 @@ void* stopBundle(void* bundleLocation) {
 
 }
 
+void* deleteBundle(void* bundleLocation) {
+    // Install bundle
+    char* location = (char*) bundleLocation;
+    LOGI("Deleting bundle '%s'", getBundleName(location));
+
+    bundle_pt current = NULL;
+
+    current = framework_getBundle(framework, location);
+
+    if (bundle_uninstall(current) == CELIX_SUCCESS) {
+        confirmDeleteBundle(location);
+    } else {
+        LOGI("Failed to delete bundle %s", location);
+    }
+}
+
 
 void* startCelix(void* param) {
 	properties_pt config = NULL;
 	char *autoStart = NULL;
+    char *ownIP = NULL;
 	char* propertyString = (char*) param;
     bundle_pt fwBundle = NULL;
 
@@ -284,6 +338,8 @@ void* startCelix(void* param) {
 	}
     else {
         autoStart = properties_get(config, "cosgi.auto.start.1");
+        ownIP = properties_get(config, "RSA_IP");
+        LOGI("Device IP: '%s'", ownIP);
         framework = NULL;
         celix_status_t status = CELIX_SUCCESS;
         status = framework_create(&framework, config);
@@ -375,17 +431,12 @@ void* stopCelix(void* param) {
     framework_getFrameworkBundle(framework, &fwBundle);
 
     //-----------------------
-    bundle_archive_pt archive = NULL;
-    long id;
-    char * stateString = NULL;
     module_pt module = NULL;
     char * name = NULL;
 
-    bundle_getArchive(fwBundle, &archive);
-    bundleArchive_getId(archive, &id);
     bundle_getCurrentModule(fwBundle, &module);
     module_getSymbolicName(module, &name);
-    LOGI("Stopping  %-5ld %s\n", id, name);
+    LOGI("Stopping %s\n", name);
     //-----------------------
 
 
@@ -394,8 +445,6 @@ void* stopCelix(void* param) {
 
     return 0;
 }
-
-
 
 //JNIEXPORT jboolean JNICALL Java_com_inaetics_demonstrator_MainActivity_initJni(JNIEnv* je, jobject thiz)
 JNIEXPORT jboolean JNICALL Java_com_inaetics_demonstrator_JNICommunicator_initJni(JNIEnv* je, jobject thiz)
@@ -429,7 +478,6 @@ failure:
 }
 
 
-//JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_startCelix(JNIEnv* je, jclass jc, jstring i)
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_startCelix(JNIEnv* je, jclass jc, jstring i)
 {
     	// convert Java string to UTF-8
@@ -439,7 +487,6 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_startCelix
 	return pthread_create( &thread, NULL, startCelix, (void*) propertyString);
 }
 
-//JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_installBundle(JNIEnv* je, jclass jc, jstring i)
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_installBundle(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
@@ -448,7 +495,6 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_installBun
     return pthread_create( &thread, NULL, installBundle, (void*) locationString);
 }
 
-//JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_installBundle(JNIEnv* je, jclass jc, jstring i)
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_startBundle(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
@@ -457,7 +503,6 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_startBundl
     return pthread_create( &thread, NULL, startBundle, (void*) locationString);
 }
 
-//JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_installBundle(JNIEnv* je, jclass jc, jstring i)
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopBundle(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
@@ -466,7 +511,14 @@ JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopBundle
     return pthread_create( &thread, NULL, stopBundle, (void*) locationString);
 }
 
-//JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_MainActivity_stopCelix(JNIEnv* je, jobject thiz)
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_deleteBundle(JNIEnv* je, jclass jc, jstring i)
+{
+    // convert Java string to UTF-8
+    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
+    pthread_t thread;
+    return pthread_create( &thread, NULL, deleteBundle, (void*) locationString);
+}
+
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_stopCelix(JNIEnv* je, jobject thiz)
 {
     // convert Java string to UTF-8

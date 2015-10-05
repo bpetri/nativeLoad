@@ -152,6 +152,16 @@ public class Model extends Observable {
         }
     }
 
+    public void setBundleDelete(String location) {
+        BundleItem b = getBundleFromLocation(location);
+        if (b != null) {
+            b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
+            Log.d("Model", "Bundle " + b.getFilename() + " has been deleted");
+            setChanged();
+            notifyObservers();
+        }
+    }
+
     public void setBundleStart(String location) {
         BundleItem b = getBundleFromLocation(location);
         if (b != null) {
@@ -172,4 +182,11 @@ public class Model extends Observable {
         }
     }
 
+    public void resetBundles() {
+        for(BundleItem bundle : bundles) {
+            bundle.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
+        }
+        setChanged();
+        notifyObservers();
+    }
 }

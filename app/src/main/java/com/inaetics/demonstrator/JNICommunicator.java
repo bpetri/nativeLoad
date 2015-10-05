@@ -47,6 +47,7 @@ public class JNICommunicator{
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Model.getInstance().resetBundles();
                 Model.getInstance().setCelixStatus(BundleStatus.CELIX_STOPPED);
             }
         });
@@ -89,6 +90,8 @@ public class JNICommunicator{
         handler.post(new Runnable() {
             @Override
             public void run() {
+                String[] name = bundleLocation.split("/");
+                Log.i("Celix", "Stopped " + name[name.length -1]);
                 model.setBundleStop(bundleLocation);
             }
         });
@@ -99,11 +102,11 @@ public class JNICommunicator{
      * Sets the status of the bundle to deleted
      * @param bundleLocation location of the deleted bundle
      */
-    public void confirmBundleDeleted(String bundleLocation) {
+    public void confirmBundleDeleted(final String bundleLocation) {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                //Set the status of the bundle to deleted
+                model.setBundleDelete(bundleLocation);
             }
         });
     }
