@@ -8,6 +8,7 @@ import com.inaetics.demonstrator.JNICommunicator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Observable;
@@ -101,10 +102,22 @@ public class Model extends Observable {
 
         String[] files = null;
 
-        try {
-            files = assetManager.list("celix_bundles"); //assets/celix_bundles
-        } catch (Exception e) {
-            Log.e("BundleMover", "ERROR: " + e.toString());
+        Log.e("Arch", System.getProperty("os.arch"));
+        if (System.getProperty("os.arch").contains("v7") ||
+                System.getProperty("os.arch").contains("v8")) {
+            try {
+                files = assetManager.list("celix_bundles/armeabi-v7a");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            useBundlesv7 = true;
+        } else {
+            // Use armeabi bundles
+            try {
+                files = assetManager.list("celix_bundles/armeabi");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
@@ -117,9 +130,17 @@ public class Model extends Observable {
         }
     }
 
+    private boolean useBundlesv7;
+
     private void moveBundle(AssetManager assetManager, File newFile, String fileName) {
         try {
-            InputStream in = assetManager.open("celix_bundles/" + fileName);
+            InputStream in = null;
+            if (useBundlesv7) {
+                in = assetManager.open("celix_bundles/armeabi-v7a/" + fileName);
+            } else {
+                in = assetManager.open("celix_bundles/armeabi/" + fileName);
+            }
+
             FileOutputStream out = new FileOutputStream(newFile);
             byte[] buffer = new byte[1024];
             int read;

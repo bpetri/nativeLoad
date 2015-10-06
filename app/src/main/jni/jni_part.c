@@ -69,7 +69,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     JNIEnv *env;
     gJavaVM = vm;
     LOGI("JNI_OnLoad called");
-    start_logger("CLOG");
+    start_logger("printf");
     if ( (*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         LOGE("Failed to get the environment using GetEnv()");
         return -1;

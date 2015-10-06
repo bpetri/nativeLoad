@@ -12,51 +12,41 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 public class LogCatReader {
-
         private Process proc;
         private LogCatOut logcatOut;
+        private InputStream inStd;
+        private LogcatProcessStreamReader streamReader;
 
         public LogCatReader(LogCatOut logcatOut)
         {
             this.logcatOut = logcatOut;
         }
 
-        private InputStream inStd;
-
-        private InputStream inErr;
-
-        private LogcatProcessStreamReader streamReader;
-        private LogcatProcessStreamReader errStreamReader;
 
         public void start()
         {
             try
             {
-//                proc = Runtime.getRuntime().exec(new String[] {"logcat", " -d", " -v", " raw", " celix:V", " *:S" });
-
-                proc = Runtime.getRuntime().exec(new String[] {"logcat","CLOG:V", " -d", " -v", " raw", " celix:V", " *:S" });
-
+                //Flush (Clear) logcat before starting to prevent big load time.
+                Runtime.getRuntime().exec(new String[] {"logcat", "-c"});
+                // -v raw   --> No tags
+                // printf:V --> Printf's from jni_part.c C logger
+                // celix:V  --> __android_log_print
+                // *:S      --> Ignore everything else
+                proc = Runtime.getRuntime().exec(new String[] {"logcat", "-v", "raw", "printf:V", "celix:V", "*:S"});
                 OutputStream os = proc.getOutputStream();
-
                 this.inStd = proc.getInputStream();
-//                this.inErr = proc.getErrorStream();
-
                 startReaders();
-
                 os.flush();
-            } catch (Exception e1)
-            {
-//            App.logExecption("Can't logcata", e1);
+            } catch (Exception e1) {
+                e1.printStackTrace();
             }
         }
 
         private void startReaders() throws FileNotFoundException
         {
             this.streamReader = new LogcatProcessStreamReader(this.inStd, logcatOut);
-//            this.errStreamReader = new LogcatProcessStreamReader(this.inErr, null);
-
             streamReader.start();
-//            errStreamReader.start();
         }
 
         public void kill()
@@ -64,23 +54,18 @@ public class LogCatReader {
             proc.destroy();
             if (this.streamReader != null)
                 this.streamReader.finish();
-            if (this.errStreamReader != null)
-                this.errStreamReader.finish();
         }
 
 
         class LogcatProcessStreamReader extends Thread
         {
 
-
-            private InputStream in;
             BufferedReader reader;
             private boolean done = false;
             private LogCatOut logcatOut;
 
             public LogcatProcessStreamReader(InputStream in, LogCatOut logcatOut)
             {
-                this.in = in;
                 this.reader = new BufferedReader(new InputStreamReader(in));
                 this.logcatOut = logcatOut;
             }
@@ -88,8 +73,6 @@ public class LogCatReader {
             @Override
             public void run()
             {
-                int read;
-
                 try
                 {
                     String line = "";
@@ -99,35 +82,10 @@ public class LogCatReader {
                             if (logcatOut != null)
                                 logcatOut.writeLogData(line);
                     }
-                    /*
-                    while (!done && ((read = in. read(b)) != -1))
-                    {
-                        if(logcatOut != null)
-                            logcatOut.writeLogData(b, read);
-                    }
-*/
                     if(logcatOut != null)
                         logcatOut.cleanUp();
-                }
-                /*
-                byte[] b = new byte[8 * 1024];
-                int read;
-
-                try
-                {
-                    while (!done && ((read = in. read(b)) != -1))
-                    {
-                        if(logcatOut != null)
-                            logcatOut.writeLogData(b, read);
-                    }
-
-                    if(logcatOut != null)
-                        logcatOut.cleanUp();
-                }
-                */
-                catch (IOException e)
-                {
-//                App.logExecption("Can't stream", e);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 
