@@ -111,6 +111,7 @@ public class Model extends Observable {
                 e.printStackTrace();
             }
             useBundlesv7 = true;
+            Log.e("Bundles","Using v7a bundles");
         } else {
             // Use armeabi bundles
             try {
@@ -118,6 +119,7 @@ public class Model extends Observable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            Log.e("Bundles","Using armeabi bundles");
         }
 
         //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
