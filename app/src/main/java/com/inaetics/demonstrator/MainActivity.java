@@ -12,6 +12,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -111,17 +112,6 @@ public class MainActivity extends AppCompatActivity{
         final EditText edittext = new EditText(this.getApplicationContext());
         final SharedPreferences pref = getApplicationContext().getSharedPreferences("celixAgent", MODE_PRIVATE);
         switch (item.getItemId()) {
-            case R.id.action_settings_bundelUrl:
-                String baseUrl = pref.getString("bundleUrl", null);
-                showInputDialog(edittext, "Change Bundle URL", "", baseUrl,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                pref.edit().putString("bundleUrl", edittext.getText().toString()).apply();
-                                Toast.makeText(getBaseContext(), "url sucessfully changed", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                );
-                return true;
             case R.id.action_settings_editProperties:
                 String cfgStr  = pref.getString("celixConfig", null);
                 Properties cfgProps = null;
@@ -185,7 +175,12 @@ public class MainActivity extends AppCompatActivity{
                             bscan.close();
                             cfgProps.put(keyValue[0], startBundles);
                         } else {
-                            cfgProps.put(keyValue[0], keyValue[1]);
+                            try {
+                                cfgProps.put(keyValue[0], keyValue[1]);
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                //Ignore property
+                                Log.e("Scanner", "couldn't scan: " + keyValue.toString());
+                            }
                         }
 
                     }
@@ -198,8 +193,8 @@ public class MainActivity extends AppCompatActivity{
 
                     }
                 }
-
-                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
             }
         }
     }

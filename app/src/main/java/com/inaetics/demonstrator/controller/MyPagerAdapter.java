@@ -4,14 +4,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.inaetics.demonstrator.fragments.BundlesFragment;
 import com.inaetics.demonstrator.fragments.ConsoleFragment;
 
 /**
  * Created by mjansen on 17-9-15.
  */
 public class MyPagerAdapter extends FragmentPagerAdapter {
-    private final String[] TITLES = {"Bundles","Console"};
+    //    private final String[] TITLES = {"Bundles","Console"};
+    private final String[] TITLES = {"Console"};
 
     public MyPagerAdapter(FragmentManager fm) {
         super(fm);
@@ -25,9 +25,9 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         switch (position) {
+//            case 0:
+//                return new BundlesFragment();
             case 0:
-                return new BundlesFragment();
-            case 1:
                 return new ConsoleFragment();
 
         }

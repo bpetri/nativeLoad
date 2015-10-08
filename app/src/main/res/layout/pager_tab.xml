@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:keepScreenOn="true">
 
 
     <com.astuetz.PagerSlidingTabStrip
@@ -12,8 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:fillViewport="false"
+        app:pstsTabBackground="@android:color/white"
+        app:pstsTabTextColor="@color/inaetics_blue"
         app:pstsShouldExpand="true"
-        app:pstsIndicatorColor="@android:color/holo_blue_light"/>
+        app:pstsIndicatorColor="@color/inaetics_blue" />
 
 
     <android.support.v4.view.ViewPager

@@ -104,7 +104,7 @@ public class Model extends Observable {
 
         Log.e("Arch", System.getProperty("os.arch"));
         if (System.getProperty("os.arch").contains("v7") ||
-                System.getProperty("os.arch").contains("v8")) {
+                System.getProperty("os.arch").contains("aarch64")) {
             try {
                 files = assetManager.list("celix_bundles/armeabi-v7a");
             } catch (IOException e) {

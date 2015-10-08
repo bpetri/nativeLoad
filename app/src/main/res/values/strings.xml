@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Apache Celix</string>
+    <string name="app_name">Inaetics Android</string>
 
     <string name="btn_start">Start Celix</string>
 
@@ -13,7 +13,7 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="action_qr">Start QR</string>
+    <string name="action_qr">Start scanner</string>
     <string name="title_activity_scanner">ScannerActivity</string>
     <string name="title_activity_scan">ScanActivity</string>
 
