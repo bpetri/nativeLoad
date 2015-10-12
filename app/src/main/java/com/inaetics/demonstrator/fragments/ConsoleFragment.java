@@ -91,11 +91,9 @@ public class ConsoleFragment extends Fragment implements Observer {
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                model.getJniCommunicator().stopCelix();
-                System.exit(0);
+                model.getJniCommunicator().stopCelix();
             }
         });
-        btn_start.setVisibility(View.VISIBLE);
         btn_start.setEnabled(true);
     }
 
@@ -104,7 +102,6 @@ public class ConsoleFragment extends Fragment implements Observer {
         if (isAdded()) {
             btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
         }
-        btn_start.setVisibility(View.GONE);
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("Start button", "Started");

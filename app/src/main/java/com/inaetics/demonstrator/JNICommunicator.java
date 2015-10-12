@@ -19,8 +19,6 @@ public class JNICommunicator{
         this.model = Model.getInstance();
 
         initJni();
-//        installBundle(model.getBundleLocation() + "/echo_client.zip");
-//        installBundle(model.getBundleLocation() + "/echo_server.zip");
     }
 
     //-------------Callback methods--------------

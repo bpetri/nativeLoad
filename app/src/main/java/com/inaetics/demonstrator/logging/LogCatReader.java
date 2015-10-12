@@ -28,12 +28,13 @@ public class LogCatReader {
             try
             {
                 //Flush (Clear) logcat before starting to prevent big load time.
-                Runtime.getRuntime().exec(new String[] {"logcat", "-c"});
+                Runtime.getRuntime().exec("logcat -c");
                 // -v raw   --> No tags
                 // printf:V --> Printf's from jni_part.c C logger
                 // celix:V  --> __android_log_print
                 // *:S      --> Ignore everything else
                 proc = Runtime.getRuntime().exec(new String[] {"logcat", "-v", "raw", "printf:V", "celix:V", "*:S"});
+
                 OutputStream os = proc.getOutputStream();
                 this.inStd = proc.getInputStream();
                 startReaders();

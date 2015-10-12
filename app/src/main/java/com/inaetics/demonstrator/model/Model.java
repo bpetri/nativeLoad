@@ -1,6 +1,7 @@
 package com.inaetics.demonstrator.model;
 
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -101,48 +102,45 @@ public class Model extends Observable {
     public void moveBundles(AssetManager assetManager) {
 
         String[] files = null;
-
-        Log.e("Arch", System.getProperty("os.arch"));
-        if (System.getProperty("os.arch").contains("v7") ||
-                System.getProperty("os.arch").contains("aarch64")) {
-            try {
-                files = assetManager.list("celix_bundles/armeabi-v7a");
-            } catch (IOException e) {
-                e.printStackTrace();
+        String abi = Build.CPU_ABI;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            String[] abis = Build.SUPPORTED_ABIS;
+            for (String ab : abis) {
+                try {
+                    files = assetManager.list("celix_bundles/" + ab);
+                    if (files != null && files.length > 0) {
+                        abi = ab;
+                        break;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            useBundlesv7 = true;
-            Log.e("Bundles","Using v7a bundles");
         } else {
-            // Use armeabi bundles
             try {
-                files = assetManager.list("celix_bundles/armeabi");
+                files = assetManager.list("celix_bundles/" + Build.CPU_ABI);
+                if (files == null || files.length == 0) {
+                    files = assetManager.list("celix_bundles/" + Build.CPU_ABI2);
+                    abi = Build.CPU_ABI2;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.e("Bundles","Using armeabi bundles");
         }
+        Log.e("Bundles", "Using " + abi + " bundles");
+
 
         //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
         for (String fileName : files) {
-
             File newFile = new File(bundleLocation + "/" + fileName);
-//            if (!newFile.isFile()) {
-            moveBundle(assetManager, newFile, fileName);
-//            }
+            moveBundle(assetManager, newFile, fileName, abi);
         }
     }
 
-    private boolean useBundlesv7;
-
-    private void moveBundle(AssetManager assetManager, File newFile, String fileName) {
+    private void moveBundle(AssetManager assetManager, File newFile, String fileName, String abi) {
         try {
             InputStream in = null;
-            if (useBundlesv7) {
-                in = assetManager.open("celix_bundles/armeabi-v7a/" + fileName);
-            } else {
-                in = assetManager.open("celix_bundles/armeabi/" + fileName);
-            }
-
+            in = assetManager.open("celix_bundles/" + abi + "/" + fileName);
             FileOutputStream out = new FileOutputStream(newFile);
             byte[] buffer = new byte[1024];
             int read;
