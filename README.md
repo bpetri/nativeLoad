@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/bpetri/nativeLoad.png?label=ready&title=Ready)](https://waffle.io/bpetri/nativeLoad)
 #nativeLoad [![Build Status](https://travis-ci.org/bpetri/nativeLoad.svg?branch=master)](https://travis-ci.org/bpetri/nativeLoad)
 This project implements a launcher for Apache Celix Bundles embedded in an Android Application. Apache Celix is an implementation of the OSGi specification adapted to C. 
 
