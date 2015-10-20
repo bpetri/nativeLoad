@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity{
                         .setCaptureActivity(ScanActivity.class)
                         .setOrientationLocked(false)
                         .initiateScan();
+                return true;
 
         }
         return super.onOptionsItemSelected(item);

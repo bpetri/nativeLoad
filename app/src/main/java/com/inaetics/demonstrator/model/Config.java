@@ -1,7 +1,6 @@
 package com.inaetics.demonstrator.model;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
 
 import org.apache.http.conn.util.InetAddressUtils;
@@ -11,7 +10,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -136,6 +134,10 @@ public class Config {
         if (!cfg.containsKey("org.osgi.framework.storage.clean")) {
             cfg.put("org.osgi.framework.storage.clean", "onFirstInit");
         }
+        cfg.put("deployment_cache_dir", context.getCacheDir().getAbsolutePath());
+        Log.e("ipadres", ipAdr);
+        String[] ip = ipAdr.split("\\.");
+        cfg.put("deployment_admin_identification", "Android" + ip[ip.length - 1]);
 
         return cfg;
     }
