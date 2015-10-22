@@ -5,14 +5,19 @@
 package com.inaetics.demonstrator;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -32,7 +37,6 @@ import com.inaetics.demonstrator.model.Model;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
 import java.util.Scanner;
 
 
@@ -54,7 +58,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         super.setContentView(R.layout.pager_tab);
-
+        registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             BundlesFragment left = new BundlesFragment();
             ConsoleFragment right = new ConsoleFragment();
@@ -69,8 +73,8 @@ public class MainActivity extends AppCompatActivity{
         }
 
         model = Model.getInstance();
+        model.setContext(this);
         config = model.getConfig();
-
         // Only one time!! After configuration change don't do it again.
         if (model.getBundles().isEmpty()) {
             model.setBundleLocation(getExternalFilesDir(null).toString());
@@ -113,21 +117,15 @@ public class MainActivity extends AppCompatActivity{
         final SharedPreferences pref = getApplicationContext().getSharedPreferences("celixAgent", MODE_PRIVATE);
         switch (item.getItemId()) {
             case R.id.action_settings_editProperties:
-                String cfgStr  = pref.getString("celixConfig", null);
-                Properties cfgProps = null;
-                if (cfgStr != null)
-                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getBaseContext());
-                else
-                    cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getBaseContext());
+                String props = config.propertiesToString();
+                showInputDialog(edittext, "Edit Properties", "", props, new DialogInterface.OnClickListener() {
 
-                showInputDialog(edittext, "Edit Properties", "", config.propertiesToString(cfgProps),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                pref.edit().putString("celixConfig", edittext.getText().toString()).apply();
-                                Toast.makeText(getBaseContext(), "properties sucessfully changed", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                );
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        config.setProperties(edittext.getText().toString());
+                        Toast.makeText(getBaseContext(), "properties changed", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 return true;
             case R.id.action_startQR:
                 new IntentIntegrator(this)
@@ -155,13 +153,6 @@ public class MainActivity extends AppCompatActivity{
                     Toast.makeText(this,"Scanned a URL " + content, Toast.LENGTH_LONG).show();
                 } catch (MalformedURLException mue) {
                     //Not a download URL
-                    final SharedPreferences pref = getApplicationContext().getSharedPreferences("celixAgent", MODE_PRIVATE);
-                    String cfgStr  = pref.getString("celixConfig", null);
-                    Properties cfgProps = null;
-                    if (cfgStr != null)
-                        cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr),model.getBundles(),model.getBundleLocation(),getBaseContext());
-                    else
-                        cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getBaseContext());
                     Scanner sc = new Scanner(content);
                     boolean autostart = false;
                     while (sc.hasNextLine()) {
@@ -174,10 +165,10 @@ public class MainActivity extends AppCompatActivity{
                                 startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
                             }
                             bscan.close();
-                            cfgProps.put(keyValue[0], startBundles);
+                            config.putProperty(keyValue[0], startBundles);
                         } else {
                             try {
-                                cfgProps.put(keyValue[0], keyValue[1]);
+                                config.putProperty(keyValue[0], keyValue[1]);
                             } catch (ArrayIndexOutOfBoundsException e) {
                                 //Ignore property
                                 Log.e("Scanner", "couldn't scan: " + keyValue.toString());
@@ -186,9 +177,7 @@ public class MainActivity extends AppCompatActivity{
 
                     }
                     sc.close();
-                    pref.edit().putString("celixConfig", config.propertiesToString(cfgProps)).apply();
                     if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
-                        config.writeConfiguration(this, config.propertiesToString(cfgProps));
                         String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
                         model.getJniCommunicator().startCelix(cfgPath);
 
@@ -207,6 +196,7 @@ public class MainActivity extends AppCompatActivity{
         if (text != null) {
             edittext.setText(text);
             edittext.setTextColor(getResources().getColor(android.R.color.black));
+            edittext.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         }
 
         alert.setTitle(title);
@@ -223,4 +213,24 @@ public class MainActivity extends AppCompatActivity{
 
         alert.show();
     }
+
+
+    // Used to determine if the ip has changed.
+    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e("Network", "network changes detected");
+            String ip = config.getLocalIpAddress();
+            if (ip != null) {
+                if (!config.getProperty("RSA_IP").equals(ip)) {
+                    Log.e("RSA_IP", "Putting new IP" + ip);
+                    config.putProperty("RSA_IP", ip);
+                }
+                if (!config.getProperty("DISCOVERY_CFG_SERVER_IP").equals(ip)) {
+                    Log.e("DISCOVERY_CFG_SERVER_IP", "Putting new IP" + ip);
+                    config.putProperty("DISCOVERY_CFG_SERVER_IP", ip);
+                }
+            }
+        }
+    };
 }

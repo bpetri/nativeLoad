@@ -1,12 +1,12 @@
 package com.inaetics.demonstrator.model;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,8 +21,75 @@ import java.util.Properties;
  */
 public class Config {
     public static final String CONFIG_PROPERTIES = "config.properties";
+    private Properties properties;
+    private Context context;
 
-    protected Config() {
+    protected Config(Context context) {
+        this.context = context;
+        setup();
+    }
+
+    public void setup() {
+        SharedPreferences prefs = context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE);
+        String props = prefs.getString("celixConfig", null);
+        if (props != null) {
+            properties = stringToProperties(props);
+        } else {
+            properties = new Properties();
+            properties.put("RSA_PORT", "20888");
+            properties.put("DISCOVERY_CFG_SERVER_PORT", "20999");
+            properties.put("org.osgi.framework.storage.clean", "onFirstInit");
+            properties.put("LOGHELPER_ENABLE_STDOUT_FALLBACK", "true");
+        }
+
+        //Following variables will be set every startup
+        String ipAdr = getLocalIpAddress();
+        if (ipAdr != null) {
+            String[] ip = ipAdr.split("\\.");
+            properties.put("RSA_IP", ipAdr);
+            properties.put("DISCOVERY_CFG_SERVER_IP", ipAdr);
+            properties.put("deployment_admin_identification", "Android" + ip[ip.length - 1]);
+        } else {
+            Toast.makeText(context, "No ip address found! Are you connected?", Toast.LENGTH_LONG).show();
+            properties.put("deployment_admin_identification", "Android" + (int) (Math.random() * 745 + 255));
+        }
+        properties.put("deployment_cache_dir", context.getCacheDir().getAbsolutePath());
+        properties.put("org.osgi.framework.storage", context.getDir("cache", Context.MODE_PRIVATE).getAbsolutePath());
+
+        writeProperties();
+        prefs.edit().putString("celixConfig", propertiesToString()).apply();
+    }
+
+    public void putProperty(String key, String value) {
+        properties.put(key, value);
+        writeProperties();
+        context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE).edit().putString("celixConfig", propertiesToString()).apply();
+    }
+
+    public void setProperties(String propertyString) {
+        properties = stringToProperties(propertyString);
+        writeProperties();
+        context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE).edit().putString("celixConfig", propertiesToString()).apply();
+    }
+
+    public String getProperty(String key) {
+        return properties.getProperty(key, "none");
+    }
+
+    public void removeProperty(String key) {
+        properties.remove(key);
+        writeProperties();
+        context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE).edit().putString("celixConfig", propertiesToString()).apply();
+    }
+
+    private void writeProperties() {
+        // Write properties
+        try {
+            FileOutputStream openFileOutput = context.openFileOutput(CONFIG_PROPERTIES, Context.MODE_PRIVATE);
+            openFileOutput.write(propertiesToString().getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getLocalIpAddress()
@@ -39,13 +106,13 @@ public class Config {
                 }
             }
         } catch (Exception e) {
-            Log.e("Config", "Error while retrieving IP Address: " +  e.toString(), e);
+            Log.e("Config", "Error while retrieving IP Address: " + e.toString(), e);
         }
 
         return null;
     }
 
-    public Properties stringToProperties(String s) {
+    private Properties stringToProperties(String s) {
         final Properties p = new Properties();
         try {
             p.load(new StringReader(s));
@@ -56,112 +123,26 @@ public class Config {
         return p;
     }
 
-    public String propertiesToString(Properties props) {
-
+    public String propertiesToString() {
         String propStr = "";
-
-        Enumeration<?> keys = props.propertyNames();
+        Enumeration<?> keys = properties.propertyNames();
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
-            String val = props.getProperty(key);
+            String val = properties.getProperty(key);
 
-            propStr += key + "=" + val + System.getProperty("line.separator");
+            propStr += key + "=" + val + "\n";
         }
-
         return propStr;
     }
 
-
-    public Properties generateConfiguration(Properties cfg, ArrayList<BundleItem> bundles, String bundleLocation, Context context) {
-
-
-        if (cfg == null) {
-            cfg = new Properties();
-        }
-
-        /* bundle configuration */
-        String bundleCfg = cfg.getProperty("cosgi.auto.start.1","");
-
-        for(BundleItem bundle : bundles) {
-
-            String fullBundlePath = bundleLocation + "/" + bundle.getFilename();
-
-            if (bundle.isChecked() && bundle.getStatus() == BundleStatus.BUNDLE_LOCALLY_AVAILABLE && !bundleCfg.contains(fullBundlePath)) {
-                bundleCfg += " " + fullBundlePath;
-            }
-            else if (!bundle.isChecked() && bundleCfg.contains(fullBundlePath)){
-                bundleCfg = bundleCfg.replace(fullBundlePath, "");
-            }
-
-        }
-
-        cfg.put("cosgi.auto.start.1", bundleCfg);
-
-        /* cache directory */
-        if (!cfg.containsKey("org.osgi.framework.storage")) {
-            File cacheDir = context.getDir("cache", Context.MODE_PRIVATE);
-            cfg.put("org.osgi.framework.storage", cacheDir.getAbsolutePath());
-
-            if(cacheDir.isDirectory()) {
-                Log.d("Config", "Cache dir " + cacheDir.toString() + " found.");
-            }
-            else if (!cacheDir.mkdir() ) {
-                Log.e("Config", "Creation of cache dir " + cacheDir.toString() + " failes.");
+    public void setAutostart(ArrayList<BundleItem> autostart, String bundleLocation) {
+        String bundles = "";
+        for (BundleItem bundle : autostart) {
+            if (bundle.isChecked()) {
+                bundles += bundleLocation + "/" + bundle.getFilename() + " ";
             }
         }
-
-        // IPv4 only!
-        String ipAdr = getLocalIpAddress();
-        if(!cfg.containsKey("RSA_IP")) {
-            cfg.put("RSA_IP", ipAdr);
-        }
-
-        if (!cfg.containsKey("RSA_PORT")) {
-            cfg.put("RSA_PORT", "20888");
-        }
-
-        if(!cfg.containsKey("DISCOVERY_CFG_SERVER_IP")) {
-            cfg.put("DISCOVERY_CFG_SERVER_IP", ipAdr);
-        }
-
-        if (!cfg.containsKey("DISCOVERY_CFG_SERVER_PORT")) {
-            cfg.put("DISCOVERY_CFG_SERVER_PORT", "20999");
-        }
-
-        if (!cfg.containsKey("LOGHELPER_ENABLE_STDOUT_FALLBACK")) {
-            cfg.put("LOGHELPER_ENABLE_STDOUT_FALLBACK", "true");
-        }
-        if (!cfg.containsKey("org.osgi.framework.storage.clean")) {
-            cfg.put("org.osgi.framework.storage.clean", "onFirstInit");
-        }
-        cfg.put("deployment_cache_dir", context.getCacheDir().getAbsolutePath());
-        Log.e("ipadres", ipAdr);
-        String[] ip = ipAdr.split("\\.");
-        cfg.put("deployment_admin_identification", "Android" + ip[ip.length - 1]);
-
-        return cfg;
-    }
-
-
-    public boolean writeConfiguration(Context ctx, String cfgStr) {
-        BufferedWriter writer = null;
-        boolean retVal = true;
-        try {
-            FileOutputStream openFileOutput = ctx.openFileOutput(CONFIG_PROPERTIES, Context.MODE_PRIVATE);
-            openFileOutput.write(cfgStr.getBytes());
-        } catch (Exception e) {
-            retVal = false;
-            throw new RuntimeException(e);
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    Log.e("Config", "Error while writing configuration: " +  e.toString(), e);
-                }
-            }
-        }
-
-        return retVal;
+        bundles = bundles.trim();
+        putProperty("cosgi.auto.start.1", bundles);
     }
 }

@@ -13,7 +13,8 @@
         android:focusable="false"
         android:scrollbars="vertical"
         android:textColor="@android:color/white"
-        android:background="@android:color/black" />
+        android:background="@android:color/black"
+        android:inputType="textFilter|textNoSuggestions|textMultiLine"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="0dp"

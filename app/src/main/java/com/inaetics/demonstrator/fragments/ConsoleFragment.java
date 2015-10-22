@@ -1,12 +1,9 @@
 package com.inaetics.demonstrator.fragments;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +20,6 @@ import com.inaetics.demonstrator.model.Model;
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Properties;
 
 /**
  * Created by mjansen on 17-9-15.
@@ -104,25 +100,15 @@ public class ConsoleFragment extends Fragment implements Observer {
         }
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("Start button", "Started");
-                SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("celixAgent", Context.MODE_PRIVATE);
                 String cfgPath = getActivity().getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
-                String cfgStr = prefs.getString("celixConfig", null);
-                Properties cfgProps = null;
-                if (cfgStr != null)
-                    cfgProps = config.generateConfiguration(config.stringToProperties(cfgStr), model.getBundles(), model.getBundleLocation(), getActivity().getBaseContext());
-                else
-                    cfgProps = config.generateConfiguration(null, model.getBundles(), model.getBundleLocation(), getActivity().getBaseContext());
-
-                if (config.writeConfiguration(getActivity().getApplicationContext(), config.propertiesToString(cfgProps))) {
-                    btn_start.setEnabled(false);
-                    console.setText("");
-                    model.getJniCommunicator().startCelix(cfgPath);
-                }
+                config.setAutostart(model.getBundles(), model.getBundleLocation());
+                btn_start.setEnabled(false);
+                console.setText("");
+                model.getJniCommunicator().startCelix(cfgPath);
             }
+
         });
     }
-
 
     @Override
     public void update(Observable observable, Object o) {

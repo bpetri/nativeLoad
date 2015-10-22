@@ -1,5 +1,6 @@
 package com.inaetics.demonstrator.model;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Handler;
@@ -29,11 +30,19 @@ public class Model extends Observable {
     private JNICommunicator jniCommunicator;
     private BundleStatus celixStatus;
 
+    private Context context;
+
     private Model() {
-        config = new Config();
         bundles = new ArrayList<>();
         handler = new Handler();
     }
+
+    public void setContext(Context context) {
+        config = new Config(context);
+
+    }
+
+
 
     public static Model getInstance() {
         if (self == null) {

@@ -409,7 +409,7 @@ void* startCelix(void* param) {
 
                 framework_waitForStop(framework);
                 framework_destroy(framework);
-                properties_destroy(config);
+//                properties_destroy(config);
             }
         }
 

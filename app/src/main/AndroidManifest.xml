@@ -17,8 +17,7 @@
         android:debuggable="true">
         <activity
             android:name="com.inaetics.demonstrator.MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,7 +27,7 @@
         <activity
             android:name="com.inaetics.demonstrator.ScanActivity"
             android:label="@string/title_activity_scan"
-            android:screenOrientation="fullSensor"
+            android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme"
             android:windowSoftInputMode="stateAlwaysHidden">
