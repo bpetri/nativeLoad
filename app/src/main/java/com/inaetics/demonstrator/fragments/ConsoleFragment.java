@@ -7,44 +7,30 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.inaetics.demonstrator.R;
 import com.inaetics.demonstrator.logging.LogCatOut;
 import com.inaetics.demonstrator.logging.LogCatReader;
-import com.inaetics.demonstrator.model.BundleStatus;
-import com.inaetics.demonstrator.model.Config;
-import com.inaetics.demonstrator.model.Model;
-
-import java.io.IOException;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Created by mjansen on 17-9-15.
  */
-public class ConsoleFragment extends Fragment implements Observer {
+public class ConsoleFragment extends Fragment {
     private EditText console;
-    private Config config;
-    private Model model;
     private LogCatReader lr;
-    private Button btn_start;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.console_fragment,null);
+        //Inflate fragment layout
+        final View rootView = inflater.inflate(R.layout.console_fragment, container, false);
         console = (EditText) rootView.findViewById(R.id.console_log);
-        model = Model.getInstance();
-        config = model.getConfig();
-        model.addObserver(this);
-
         final Handler handler = new Handler();
         lr = new LogCatReader(new LogCatOut()
             {
             @Override
-            public void writeLogData(final String line) throws IOException
+            public void writeLogData(final String line)
                 {
                     handler.post(new Runnable()
                     {
@@ -61,64 +47,17 @@ public class ConsoleFragment extends Fragment implements Observer {
         });
         lr.start();
 
-        btn_start = (Button) rootView.findViewById(R.id.start_stop_btn);
-        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
-            setRunning();
-        } else {
-            setStopped();
-        }
-
         return rootView;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        // the logreader should be killed when destroyed
         if (lr != null) {
             lr.kill();
         }
     }
-
-    public void setRunning() {
-        btn_start.setText("STOP");
-        if (isAdded()) {
-            btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-        }
-        btn_start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                model.getJniCommunicator().stopCelix();
-            }
-        });
-        btn_start.setEnabled(true);
-    }
-
-    public void setStopped() {
-        btn_start.setText("Start");
-        if (isAdded()) {
-            btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
-        }
-        btn_start.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String cfgPath = getActivity().getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
-                config.setAutostart(model.getBundles(), model.getBundleLocation());
-                btn_start.setEnabled(false);
-                console.setText("");
-                model.getJniCommunicator().startCelix(cfgPath);
-            }
-
-        });
-    }
-
-    @Override
-    public void update(Observable observable, Object o) {
-        if (o == BundleStatus.CELIX_RUNNING) {
-            setRunning();
-        } else if (o == BundleStatus.CELIX_STOPPED) {
-            setStopped();
-        }
-    }
-
 }
 
 

@@ -30,8 +30,6 @@ public class Model extends Observable {
     private JNICommunicator jniCommunicator;
     private BundleStatus celixStatus;
 
-    private Context context;
-
     private Model() {
         bundles = new ArrayList<>();
         handler = new Handler();
@@ -41,8 +39,6 @@ public class Model extends Observable {
         config = new Config(context);
 
     }
-
-
 
     public static Model getInstance() {
         if (self == null) {
@@ -57,8 +53,13 @@ public class Model extends Observable {
         }
     }
 
-    public BundleItem addBundle(String fileName, String description, boolean checked) {
-        BundleItem item = new BundleItem(fileName, description, checked);
+    public BundleItem addBundle(String fileName, boolean checked) {
+        BundleItem item = new BundleItem(fileName, checked);
+        for (BundleItem bundle : bundles) {
+            if (bundle.getFilename().equals(fileName)) {
+                return null;
+            }
+        }
         bundles.add(item);
         return item;
     }
@@ -73,15 +74,6 @@ public class Model extends Observable {
             setChanged();
             notifyObservers(celixStatus);
         }
-    }
-
-    public BundleItem addBundle(String fileName, boolean checked) {
-        for (BundleItem b : bundles) {
-            if (fileName.equals(b.getFilename())) {
-                return null;
-            }
-        }
-        return addBundle(fileName, "", checked);
     }
 
     public ArrayList<BundleItem> getBundles() {
@@ -148,7 +140,7 @@ public class Model extends Observable {
 
     private void moveBundle(AssetManager assetManager, File newFile, String fileName, String abi) {
         try {
-            InputStream in = null;
+            InputStream in;
             in = assetManager.open("celix_bundles/" + abi + "/" + fileName);
             FileOutputStream out = new FileOutputStream(newFile);
             byte[] buffer = new byte[1024];
@@ -165,7 +157,7 @@ public class Model extends Observable {
         }
     }
 
-    public BundleItem getBundleFromLocation(String location) {
+    private BundleItem getBundleFromLocation(String location) {
         String[] words = location.split("/");
         String fileName = words[words.length - 1];
         for (BundleItem b : bundles) {

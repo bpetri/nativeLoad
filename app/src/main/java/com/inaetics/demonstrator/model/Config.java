@@ -18,18 +18,24 @@ import java.util.Properties;
 
 /**
  * Created by mjansen on 16-9-15.
+ * Class used for keeping all information related to the config.properties.
+ * Contains a properties object with the same information as the config.properties file
  */
 public class Config {
     public static final String CONFIG_PROPERTIES = "config.properties";
     private Properties properties;
     private Context context;
 
-    protected Config(Context context) {
+    Config(Context context) {
         this.context = context;
         setup();
     }
 
-    public void setup() {
+    /**
+     * Sets up when config gets created.
+     * Retrieves old config.properties and always sets a few properties which change often. (ip etc)
+     */
+    private void setup() {
         SharedPreferences prefs = context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE);
         String props = prefs.getString("celixConfig", null);
         if (props != null) {
@@ -60,18 +66,36 @@ public class Config {
         prefs.edit().putString("celixConfig", propertiesToString()).apply();
     }
 
+    /**
+     * Put a property, overwrites the current property if it exists
+     * Creates a new one if it doesn't exist yet.
+     *
+     * @param key   Key of the property you want to put
+     * @param value Value of the property you want to put
+     */
     public void putProperty(String key, String value) {
         properties.put(key, value);
         writeProperties();
         context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE).edit().putString("celixConfig", propertiesToString()).apply();
     }
 
+    /**
+     * Set properties from string.
+     * Converts a string to a properties object and uses this one.
+     *
+     * @param propertyString Property string you want to use
+     */
     public void setProperties(String propertyString) {
         properties = stringToProperties(propertyString);
         writeProperties();
         context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE).edit().putString("celixConfig", propertiesToString()).apply();
     }
 
+    /**
+     * Returns the property corresponding to the key
+     * @param key       Key of the property you want to retrieve
+     * @return Value of the property with the given key
+     */
     public String getProperty(String key) {
         return properties.getProperty(key, "none");
     }
@@ -82,6 +106,9 @@ public class Config {
         context.getSharedPreferences("CelixAgent", Context.MODE_PRIVATE).edit().putString("celixConfig", propertiesToString()).apply();
     }
 
+    /**
+     * Writes properties to properties.config file.
+     */
     private void writeProperties() {
         // Write properties
         try {
@@ -92,6 +119,10 @@ public class Config {
         }
     }
 
+    /**
+     * Retrieves the ip address of this phone
+     * @return Ip address ( like 192.168.0.50 )
+     */
     public String getLocalIpAddress()
     {
 
@@ -112,6 +143,11 @@ public class Config {
         return null;
     }
 
+    /**
+     * Makes a properties object from the given string
+     * @param s     String you want to parse into a properties object
+     * @return Properties object
+     */
     private Properties stringToProperties(String s) {
         final Properties p = new Properties();
         try {
@@ -123,18 +159,25 @@ public class Config {
         return p;
     }
 
+    /**
+     * Translates the properties object to a String in format : key=value
+     * @return
+     */
     public String propertiesToString() {
         String propStr = "";
-        Enumeration<?> keys = properties.propertyNames();
-        while (keys.hasMoreElements()) {
-            String key = (String) keys.nextElement();
-            String val = properties.getProperty(key);
-
-            propStr += key + "=" + val + "\n";
+        for (String key : properties.stringPropertyNames()) {
+            propStr += key + "=" + properties.get(key) + "\n";
         }
         return propStr;
     }
 
+    /**
+     * Checks what bundles are checked and should be autostarted.
+     * Autostart is a configuration property : cosgi.auto.start.1=....
+     * Adds checked bundles to the autostart property
+     * @param autostart         All bundles
+     * @param bundleLocation    Where are the bundles located
+     */
     public void setAutostart(ArrayList<BundleItem> autostart, String bundleLocation) {
         String bundles = "";
         for (BundleItem bundle : autostart) {

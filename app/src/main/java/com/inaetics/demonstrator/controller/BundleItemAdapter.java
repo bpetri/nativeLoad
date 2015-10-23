@@ -26,11 +26,9 @@ import java.util.List;
  */
 public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
 
-    private final String TAG = BundleItemAdapter.class.getName();
     private LayoutInflater inflater;
     private Model model;
-
-    int resource;
+    private int resource;
 
     public BundleItemAdapter(Context _context, int _resource, List<BundleItem> _items, Model model) {
         super(_context, _resource, _items);
@@ -52,17 +50,13 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             holder.bundleFileName = (TextView) convertView.findViewById(R.id.bundleFileName);
             holder.installButton =  (Button) convertView.findViewById(R.id.install_btn);
             holder.runButton = (Button) convertView.findViewById(R.id.run_btn);
-//            holder.stopButton = (Button) convertView.findViewById(R.id.stop_btn);
-//            holder.stopButton.setEnabled(false);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
             holder.installButton.setText("Install");
             holder.runButton.setText("Run");
-//            holder.stopButton.setText("Stop");
             holder.installButton.setEnabled(true);
             holder.runButton.setEnabled(true);
-//            holder.stopButton.setEnabled(false);
         }
 
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
@@ -122,29 +116,16 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             }
         });
 
-//        holder.stopButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Button b = (Button)v;
-//                b.setEnabled(false);
-//                b.setText("Stopping");
-//                item.setStatus(BundleStatus.BUNDLE_STOPPING);
-//                model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
-//            }
-//        });
-
         switch (status) {
             case BUNDLE_LOCALLY_AVAILABLE:
                 holder.installButton.setEnabled(true);
                 holder.installButton.setText("Install");
-
                 holder.runButton.setEnabled(false);
                 holder.runButton.setText("Not installed");
                 break;
             case BUNDLE_INSTALLING:
                 holder.installButton.setEnabled(false);
                 holder.installButton.setText("Installing");
-
                 holder.runButton.setEnabled(false);
                 holder.runButton.setText("Not installed");
                 break;
@@ -167,11 +148,8 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
 
                 holder.runButton.setEnabled(true);
                 holder.runButton.setText("Stop");
-//                holder.stopButton.setEnabled(true);
                 break;
             case BUNDLE_STOPPING:
-//                holder.stopButton.setEnabled(false);
-//                holder.stopButton.setText("Stopping");
                 holder.installButton.setEnabled(false);
                 holder.installButton.setText("Installed");
                 holder.runButton.setEnabled(false);
@@ -180,7 +158,6 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
             case BUNDLE_DELETING:
                 holder.installButton.setEnabled(false);
                 holder.installButton.setText("Deleting");
-
                 holder.runButton.setEnabled(false);
                 holder.runButton.setText("Start");
                 break;
@@ -198,7 +175,6 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
         CheckBox bundleCheckbox;
         Button installButton;
         Button runButton;
-//        Button stopButton;
     }
 
 }

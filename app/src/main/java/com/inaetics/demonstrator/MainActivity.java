@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -20,13 +19,14 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.inaetics.demonstrator.controller.BundleItemAdapter;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
 import com.inaetics.demonstrator.fragments.BundlesFragment;
 import com.inaetics.demonstrator.fragments.ConsoleFragment;
@@ -35,18 +35,18 @@ import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Arrays;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Scanner;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements Observer {
 
-
-    private final static String TAG = MainActivity.class.getName();
-    public BundleItemAdapter bundleAdapter;
     private Model model;
     private Config config;
+    private Button btn_start;
+    private ViewPager pager;
 
     static {
         System.loadLibrary("celix_utils");
@@ -58,14 +58,17 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         super.setContentView(R.layout.pager_tab);
+        // Receiver used to check network status ( On network status change the ip should be refreshed)
         registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        //Check if in landscape or portrait
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             BundlesFragment left = new BundlesFragment();
             ConsoleFragment right = new ConsoleFragment();
             getSupportFragmentManager().beginTransaction().add(R.id.left_container,left).commit();
             getSupportFragmentManager().beginTransaction().add(R.id.right_container,right).commit();
         } else {
-            ViewPager pager = (ViewPager) findViewById(R.id.pager);
+            pager = (ViewPager) findViewById(R.id.pager);
             PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
             MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
             pager.setAdapter(pagerAdapter);
@@ -74,13 +77,14 @@ public class MainActivity extends AppCompatActivity{
 
         model = Model.getInstance();
         model.setContext(this);
+        model.addObserver(this);
         config = model.getConfig();
         // Only one time!! After configuration change don't do it again.
         if (model.getBundles().isEmpty()) {
             model.setBundleLocation(getExternalFilesDir(null).toString());
             model.moveBundles(getResources().getAssets());
             for (String fileName : getExternalFilesDir(null).list()) {
-                BundleItem b = null;
+                BundleItem b;
                 switch (fileName) {
                     case "discovery_etcd.zip":
                     case "remote_service_admin_http.zip":
@@ -96,6 +100,12 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
         }
+        btn_start = (Button) findViewById(R.id.start_btn);
+        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
+            setRunning();
+        } else {
+            setStopped();
+        }
         model.initJNI();
 
     }
@@ -109,14 +119,9 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
-        final EditText edittext = new EditText(this.getApplicationContext());
-        final SharedPreferences pref = getApplicationContext().getSharedPreferences("celixAgent", MODE_PRIVATE);
         switch (item.getItemId()) {
             case R.id.action_settings_editProperties:
+                final EditText edittext = new EditText(this.getApplicationContext());
                 String props = config.propertiesToString();
                 showInputDialog(edittext, "Edit Properties", "", props, new DialogInterface.OnClickListener() {
 
@@ -141,55 +146,55 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if(result != null) {
-            if(result.getContents() == null) {
+        if (result != null) {
+            if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 String content = result.getContents();
-                try {
-                    URL url = new URL(content);
-                    // IS A URL
-                    // TODO
-                    Toast.makeText(this,"Scanned a URL " + content, Toast.LENGTH_LONG).show();
-                } catch (MalformedURLException mue) {
-                    //Not a download URL
-                    Scanner sc = new Scanner(content);
-                    boolean autostart = false;
-                    while (sc.hasNextLine()) {
-                        String[] keyValue = sc.nextLine().split("=");
-                        if (keyValue[0].equals("cosgi.auto.start.1")) {
-                            autostart = true;
-                            String startBundles = "";
-                            Scanner bscan = new Scanner(keyValue[1]);
-                            while (bscan.hasNext()) {
-                                startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
-                            }
-                            bscan.close();
-                            config.putProperty(keyValue[0], startBundles);
-                        } else {
-                            try {
-                                config.putProperty(keyValue[0], keyValue[1]);
-                            } catch (ArrayIndexOutOfBoundsException e) {
-                                //Ignore property
-                                Log.e("Scanner", "couldn't scan: " + keyValue.toString());
-                            }
+                Scanner sc = new Scanner(content);
+                boolean autostart = false;
+                Log.e("Content", content);
+                while (sc.hasNextLine()) {
+                    String[] keyValue = sc.nextLine().split("=");
+                    Log.e("content", Arrays.toString(keyValue));
+                    if (keyValue[0].equals("cosgi.auto.start.1")) {
+                        autostart = true;
+                        String startBundles = "";
+                        Scanner bscan = new Scanner(keyValue[1]);
+                        while (bscan.hasNext()) {
+                            startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
                         }
-
-                    }
-                    sc.close();
-                    if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
-                        String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
-                        model.getJniCommunicator().startCelix(cfgPath);
-
+                        bscan.close();
+                        config.putProperty(keyValue[0], startBundles);
+                    } else {
+                        try {
+                            config.putProperty(keyValue[0], keyValue[1]);
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            //Ignore property there is no key/value combination
+                            Log.e("Scanner", "couldn't scan: " + Arrays.toString(keyValue));
+                        }
                     }
                 }
+                sc.close();
+                if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
+                    String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
+                    model.getJniCommunicator().startCelix(cfgPath);
+                }
                 Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();
-//                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    protected void showInputDialog(final EditText edittext, String title, String msg, String text, DialogInterface.OnClickListener positiveListener) {
+    /**
+     * Dialog used to show the settings
+     *
+     * @param edittext         Edittext which contains all the settings
+     * @param title            Title of the dialog
+     * @param msg              Message of the dialog
+     * @param text             Text inside the edittext
+     * @param positiveListener Onclicklistener for the change button
+     */
+    private void showInputDialog(final EditText edittext, String title, String msg, String text, DialogInterface.OnClickListener positiveListener) {
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -214,6 +219,44 @@ public class MainActivity extends AppCompatActivity{
         alert.show();
     }
 
+    /**
+     * Method triggered when celix is running.
+     * Changes button, onclicklistener to a stop button.
+     */
+    private void setRunning() {
+        btn_start.setText("STOP");
+        btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+        btn_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                model.getJniCommunicator().stopCelix();
+                btn_start.setEnabled(false);
+            }
+        });
+        btn_start.setEnabled(true);
+    }
+
+    /**
+     * Method triggered when celix is stopped (Not running)
+     * Changes button to a start button and the onclicklistener.
+     */
+    private void setStopped() {
+        btn_start.setText("Start");
+        btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+        btn_start.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
+                config.setAutostart(model.getBundles(), model.getBundleLocation());
+                btn_start.setEnabled(false);
+                model.getJniCommunicator().startCelix(cfgPath);
+                if (pager != null) {
+                    pager.setCurrentItem(1);
+                }
+            }
+
+        });
+        btn_start.setEnabled(true);
+    }
 
     // Used to determine if the ip has changed.
     private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
@@ -233,4 +276,17 @@ public class MainActivity extends AppCompatActivity{
             }
         }
     };
+
+
+    /**
+     * Observes the model and checks if there's a update from celix (that it is running or stopped)
+     */
+    @Override
+    public void update(Observable observable, Object o) {
+        if (o == BundleStatus.CELIX_RUNNING) {
+            setRunning();
+        } else if (o == BundleStatus.CELIX_STOPPED) {
+            setStopped();
+        }
+    }
 }

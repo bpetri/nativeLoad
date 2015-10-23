@@ -5,7 +5,6 @@
 package com.inaetics.demonstrator.logging;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,7 +43,7 @@ public class LogCatReader {
             }
         }
 
-        private void startReaders() throws FileNotFoundException
+    private void startReaders()
         {
             this.streamReader = new LogcatProcessStreamReader(this.inStd, logcatOut);
             streamReader.start();
@@ -76,7 +75,7 @@ public class LogCatReader {
             {
                 try
                 {
-                    String line = "";
+                    String line;
 
                     while (!done && (line = reader.readLine()) != null)
                     {

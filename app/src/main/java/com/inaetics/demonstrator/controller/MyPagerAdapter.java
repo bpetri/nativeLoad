@@ -12,7 +12,6 @@ import com.inaetics.demonstrator.fragments.ConsoleFragment;
  */
 public class MyPagerAdapter extends FragmentPagerAdapter {
     private final String[] TITLES = {"Bundles", "Console"};
-//    private final String[] TITLES = {"Console"};
 
     public MyPagerAdapter(FragmentManager fm) {
         super(fm);

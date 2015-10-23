@@ -3,14 +3,12 @@
  */
 package com.inaetics.demonstrator.logging;
 
-import java.io.IOException;
-
 public abstract class LogCatOut
 {
     //public abstract void writeLogData(byte[] data, int read) throws IOException;
-    public abstract void writeLogData(String line) throws IOException;
+    public abstract void writeLogData(String line);
 
-    protected void cleanUp()
+    void cleanUp()
     {
 
     }
