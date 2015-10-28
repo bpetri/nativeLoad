@@ -1,11 +1,4 @@
-#include <jni.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <libgen.h>
 #include <curl/curl.h>
-#include <android/log.h>
-#include <unistd.h>
 
 #include "framework.h"
 #include "linked_list_iterator.h"
@@ -48,6 +41,9 @@ callback_t cb[] = {
   },
   {
           "confirmBundleDeleted", "(Ljava/lang/String;)V"
+  },
+  {
+          "confirmGetBundles", "([Ljava/lang/String;)V"
   },
  };
 
@@ -396,20 +392,13 @@ void* startCelix(void* param) {
                 linkedListIterator_destroy(iter);
                 linkedList_destroy(bundles);
 
-//                for (i = 0; i < arrayList_size(installed); i++) {
-//                    bundle_pt bundle = (bundle_pt) arrayList_get(installed, i);
-//                    if (bundle_startWithOptions(bundle,0) == CELIX_SUCCESS) {
-////                        confirmStartBundle(location);
-//                    }
-//                }
-
                 arrayList_destroy(installed);
 
 		confirmCelixStart();
 
                 framework_waitForStop(framework);
                 framework_destroy(framework);
-//                properties_destroy(config);
+                framework = NULL;
             }
         }
 
@@ -422,6 +411,90 @@ void* startCelix(void* param) {
 
 	confirmCelixStop();
 
+}
+
+void * confirmGetBundles(array_list_pt values) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void **) &je, JNI_VERSION_1_4);
+
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jclass stringClass = (*je)->FindClass(je,"java/lang/String");
+
+    jobjectArray ret;
+    if (values) {
+        int i;
+        ret = (*je)->NewObjectArray(je,arrayList_size(values),stringClass,0);
+        for (i = 0; i < arrayList_size(values); i++) {
+            (*je)->SetObjectArrayElement(je, ret, i, (*je)->NewStringUTF(je,arrayList_get(values,i)));
+            free(arrayList_get(values,i));
+            // Dont do anything with freed values.
+        }
+        arrayList_destroy(values);
+        (*je)->CallVoidMethod(je, gObject, cb[6].cbMethod, ret);
+    }
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+
+}
+char * psCommand_stateString(bundle_state_e state);
+
+void * printBundles(void* param) {
+    if (framework != NULL) {
+        array_list_pt bundles = framework_getBundles(framework);
+        array_list_pt retvals;
+        arrayList_create(&retvals);
+        int i;
+        for (i = 0; i < arrayList_size(bundles); i++) {
+            bundle_pt bundle = (bundle_pt) arrayList_get(bundles, i);
+
+            bundle_archive_pt archive = NULL;
+            long id;
+            bundle_state_e state;
+            char * stateString = NULL;
+            module_pt module = NULL;
+            char * name = NULL;
+
+            bundle_getArchive(bundle, &archive);
+            bundleArchive_getId(archive, &id);
+            bundle_getState(bundle, &state);
+            bundle_getCurrentModule(bundle, &module);
+            module_getSymbolicName(module, &name);
+            stateString = psCommand_stateString(state);
+            char str[100];
+            snprintf(str, 100, "%ld %s %s", id, stateString, name);
+            arrayList_add(retvals, strdup(str));
+        }
+        confirmGetBundles(retvals);
+
+    }
+    return NULL;
+}
+
+char * psCommand_stateString(bundle_state_e state) {
+    switch (state) {
+        case OSGI_FRAMEWORK_BUNDLE_ACTIVE:
+            return "Active";
+        case OSGI_FRAMEWORK_BUNDLE_INSTALLED:
+            return "Installed";
+        case OSGI_FRAMEWORK_BUNDLE_RESOLVED:
+            return "Resolved";
+        case OSGI_FRAMEWORK_BUNDLE_STARTING:
+            return "Starting";
+        case OSGI_FRAMEWORK_BUNDLE_STOPPING:
+            return "Stopping";
+        default:
+            return "Unknown";
+    }
 }
 
 void* stopCelix(void* param) {
@@ -441,12 +514,10 @@ void* stopCelix(void* param) {
 
 
     bundle_stop(fwBundle);
-    //framework_destroy(framework);
 
     return 0;
 }
 
-//JNIEXPORT jboolean JNICALL Java_com_inaetics_demonstrator_MainActivity_initJni(JNIEnv* je, jobject thiz)
 JNIEXPORT jboolean JNICALL Java_com_inaetics_demonstrator_JNICommunicator_initJni(JNIEnv* je, jobject thiz)
 {
 	jboolean retVal = true;
@@ -477,12 +548,15 @@ failure:
 	return retVal;
 }
 
-
+JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_printBundles(JNIEnv *env, jobject thiz)
+{
+    pthread_t thread;
+    return pthread_create( &thread, NULL, printBundles, (void*) NULL);
+}
 JNIEXPORT jint JNICALL Java_com_inaetics_demonstrator_JNICommunicator_startCelix(JNIEnv* je, jclass jc, jstring i)
 {
-    	// convert Java string to UTF-8
-    printf("Dit is een message van C");
-    	const char *propertyString = (*je)->GetStringUTFChars(je, i, NULL);
+    // convert Java string to UTF-8
+    const char *propertyString = (*je)->GetStringUTFChars(je, i, NULL);
 	pthread_t thread;
 	return pthread_create( &thread, NULL, startCelix, (void*) propertyString);
 }

@@ -35,10 +35,13 @@ import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
+
+import celix.com.example.mylibrary.Celix;
 
 
 public class MainActivity extends AppCompatActivity implements Observer {
@@ -58,9 +61,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         super.setContentView(R.layout.pager_tab);
-        // Receiver used to check network status ( On network status change the ip should be refreshed)
-        registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-
+        new Celix();
         //Check if in landscape or portrait
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             BundlesFragment left = new BundlesFragment();
@@ -81,20 +82,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
         config = model.getConfig();
         // Only one time!! After configuration change don't do it again.
         if (model.getBundles().isEmpty()) {
-            model.setBundleLocation(getExternalFilesDir(null).toString());
+            File dirLocation = getExternalFilesDir(null);
+            if (dirLocation == null) {
+                dirLocation = getCacheDir();
+            }
+            model.setBundleLocation(dirLocation.getAbsolutePath());
             model.moveBundles(getResources().getAssets());
-            for (String fileName : getExternalFilesDir(null).list()) {
+            for (String fileName : dirLocation.list()) {
                 BundleItem b;
-                switch (fileName) {
-                    case "discovery_etcd.zip":
-                    case "remote_service_admin_http.zip":
-                    case "topology_manager.zip":
-                        b = model.addBundle(fileName, true);
-                        break;
-                    default:
-                        b = model.addBundle(fileName, false);
-                        break;
-                }
+                b = model.addBundle(fileName, false);
                 if (b != null) {
                     b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
                 }
@@ -108,6 +104,37 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         model.initJNI();
 
+
+        t.start();
+
+
+    }
+
+    private Thread t = new Thread() {
+        @Override
+        public void run() {
+            super.run();
+            while (true) {
+                Model.getInstance().getJniCommunicator().printBundles();
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(mConnReceiver);
     }
 
     @Override
@@ -241,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
      * Changes button to a start button and the onclicklistener.
      */
     private void setStopped() {
+
         btn_start.setText("Start");
         btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
         btn_start.setOnClickListener(new View.OnClickListener() {
@@ -262,15 +290,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("Network", "network changes detected");
+            Log.v("Network", "network changes detected");
             String ip = config.getLocalIpAddress();
             if (ip != null) {
                 if (!config.getProperty("RSA_IP").equals(ip)) {
-                    Log.e("RSA_IP", "Putting new IP" + ip);
+                    Log.v("RSA_IP", "Putting new IP" + ip);
                     config.putProperty("RSA_IP", ip);
                 }
                 if (!config.getProperty("DISCOVERY_CFG_SERVER_IP").equals(ip)) {
-                    Log.e("DISCOVERY_CFG_SERVER_IP", "Putting new IP" + ip);
+                    Log.v("DISCOVERY_CFG_SERVER_IP", "Putting new IP" + ip);
                     config.putProperty("DISCOVERY_CFG_SERVER_IP", ip);
                 }
             }

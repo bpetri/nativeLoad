@@ -109,6 +109,15 @@ public class JNICommunicator{
         });
     }
 
+    public void confirmGetBundles(final String[] strings) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Model.getInstance().readOsgiBundles(strings);
+            }
+        });
+    }
+
 
     //--------------Native methods-----------------
 
@@ -119,4 +128,6 @@ public class JNICommunicator{
     public native int startBundle(String path);
     public native int stopBundle(String path);
     public native int deleteBundle(String path);
+
+    public native String[] printBundles();
 }
