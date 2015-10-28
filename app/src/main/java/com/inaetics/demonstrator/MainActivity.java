@@ -13,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -32,16 +33,18 @@ import com.inaetics.demonstrator.fragments.BundlesFragment;
 import com.inaetics.demonstrator.fragments.ConsoleFragment;
 import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
-import com.inaetics.demonstrator.model.Config;
 import com.inaetics.demonstrator.model.Model;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
 
-import celix.com.example.mylibrary.Celix;
+import apache.celix.Celix;
+import apache.celix.model.Config;
+import apache.celix.model.OsgiBundle;
 
 
 public class MainActivity extends AppCompatActivity implements Observer {
@@ -50,18 +53,18 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Config config;
     private Button btn_start;
     private ViewPager pager;
+    private Handler handler;
 
-    static {
-        System.loadLibrary("celix_utils");
-        System.loadLibrary("celix_framework");
-        System.loadLibrary("jni_part");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         super.setContentView(R.layout.pager_tab);
-        new Celix();
+        //Initiate celix
+        Celix celix = Celix.getInstance();
+        celix.setContext(this);
+        handler = new Handler();
+
         //Check if in landscape or portrait
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             BundlesFragment left = new BundlesFragment();
@@ -75,10 +78,11 @@ public class MainActivity extends AppCompatActivity implements Observer {
             pager.setAdapter(pagerAdapter);
             tabs.setViewPager(pager);
         }
-
+//
         model = Model.getInstance();
         model.setContext(this);
         model.addObserver(this);
+
         config = model.getConfig();
         // Only one time!! After configuration change don't do it again.
         if (model.getBundles().isEmpty()) {
@@ -102,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         } else {
             setStopped();
         }
-        model.initJNI();
-
 
         t.start();
 
@@ -115,9 +117,24 @@ public class MainActivity extends AppCompatActivity implements Observer {
         public void run() {
             super.run();
             while (true) {
-                Model.getInstance().getJniCommunicator().printBundles();
+                List<OsgiBundle> bundles = Celix.getInstance().getBundlesInList();
+                if (bundles.isEmpty()) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            model.setCelixStatus(BundleStatus.CELIX_STOPPED);
+                        }
+                    });
+                } else {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            model.setCelixStatus(BundleStatus.CELIX_RUNNING);
+                        }
+                    });
+                }
                 try {
-                    sleep(5000);
+                    sleep(2500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -128,7 +145,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onStart() {
         super.onStart();
-        new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+
+        registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
@@ -204,8 +222,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 }
                 sc.close();
                 if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
-                    String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
-                    model.getJniCommunicator().startCelix(cfgPath);
+                    Celix.getInstance().startFramework();
                 }
                 Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();
             }
@@ -256,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                model.getJniCommunicator().stopCelix();
+                Celix.getInstance().stopFramework();
                 btn_start.setEnabled(false);
             }
         });
@@ -273,10 +290,16 @@ public class MainActivity extends AppCompatActivity implements Observer {
         btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String cfgPath = getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES;
-                config.setAutostart(model.getBundles(), model.getBundleLocation());
+                String str = "";
+                for (BundleItem b : model.getBundles()) {
+                    if (b.isChecked()) {
+                        str += model.getBundleLocation() + "/" + b.getFilename() + " ";
+                    }
+                }
+                str.trim();
+                config.putProperty("cosgi.auto.start.1", str);
                 btn_start.setEnabled(false);
-                model.getJniCommunicator().startCelix(cfgPath);
+                Celix.getInstance().startFramework();
                 if (pager != null) {
                     pager.setCurrentItem(1);
                 }

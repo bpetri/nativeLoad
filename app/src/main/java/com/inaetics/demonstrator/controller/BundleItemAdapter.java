@@ -21,6 +21,8 @@ import com.inaetics.demonstrator.model.Model;
 
 import java.util.List;
 
+import apache.celix.Celix;
+
 /**
  * Created by bjoern on 29.05.15.
  */
@@ -90,11 +92,13 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                 if(item.getStatus() == BundleStatus.BUNDLE_LOCALLY_AVAILABLE) {
                     b.setText("Installing");
                     item.setStatus(BundleStatus.BUNDLE_INSTALLING);
-                    model.getJniCommunicator().installBundle(model.getBundleLocation() + "/" + item.getFilename());
+                    Celix.getInstance().installBundle(model.getBundleLocation() + "/" + item.getFilename());
+//                    model.getJniCommunicator().installBundle(model.getBundleLocation() + "/" + item.getFilename());
                 } else if (item.getStatus() == BundleStatus.BUNDLE_INSTALLED) {
                     b.setText("Deleting");
                     item.setStatus(BundleStatus.BUNDLE_DELETING);
-                    model.getJniCommunicator().deleteBundle(model.getBundleLocation() + "/" + item.getFilename());
+                    Celix.getInstance().deleteBundle(model.getBundleLocation() + "/" + item.getFilename());
+//                    model.getJniCommunicator().deleteBundle(model.getBundleLocation() + "/" + item.getFilename());
                 }
             }
         });
@@ -107,11 +111,13 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                 if(item.getStatus() == BundleStatus.BUNDLE_INSTALLED) {
                     b.setText("Starting");
                     item.setStatus(BundleStatus.BUNDLE_STARTING);
-                    model.getJniCommunicator().startBundle(model.getBundleLocation() + "/" + item.getFilename());
+                    Celix.getInstance().startBundle(model.getBundleLocation() + "/" + item.getFilename());
+//                    model.getJniCommunicator().startBundle(model.getBundleLocation() + "/" + item.getFilename());
                 } else if (item.getStatus() == BundleStatus.BUNDLE_RUNNING) {
                     b.setText("Stopping");
                     item.setStatus(BundleStatus.BUNDLE_STOPPING);
-                    model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
+                    Celix.getInstance().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
+//                    model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
                 }
             }
         });

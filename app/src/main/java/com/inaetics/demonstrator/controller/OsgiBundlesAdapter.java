@@ -8,9 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.inaetics.demonstrator.R;
-import com.inaetics.demonstrator.model.OsgiBundle;
 
 import java.util.List;
+
+import apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 27-10-15.

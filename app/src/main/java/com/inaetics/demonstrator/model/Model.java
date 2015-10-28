@@ -3,20 +3,16 @@ package com.inaetics.demonstrator.model;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Build;
-import android.os.Handler;
 import android.util.Log;
-
-import com.inaetics.demonstrator.JNICommunicator;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Observable;
-import java.util.Scanner;
+
+import apache.celix.model.Config;
 
 
 /**
@@ -26,18 +22,12 @@ public class Model extends Observable {
 
     private static Model self;
     private ArrayList<BundleItem> bundles;
-    private ArrayList<OsgiBundle> osgiBundles;
     private Config config;
     private String bundleLocation;
-
-    private Handler handler;
-    private JNICommunicator jniCommunicator;
     private BundleStatus celixStatus;
 
     private Model() {
         bundles = new ArrayList<>();
-        handler = new Handler();
-        osgiBundles = new ArrayList<>();
     }
 
     public void setContext(Context context) {
@@ -50,12 +40,6 @@ public class Model extends Observable {
             self = new Model();
         }
         return self;
-    }
-
-    public void initJNI() {
-        if (jniCommunicator == null) {
-            jniCommunicator = new JNICommunicator(handler);
-        }
     }
 
     public BundleItem addBundle(String fileName, boolean checked) {
@@ -96,11 +80,6 @@ public class Model extends Observable {
     public Config getConfig() {
         return config;
     }
-
-    public JNICommunicator getJniCommunicator() {
-        return jniCommunicator;
-    }
-
     /**
      * Method for moving the files from the assets to the internal storage
      * so the C code can reach it
@@ -226,31 +205,5 @@ public class Model extends Observable {
         notifyObservers();
     }
 
-    public ArrayList<OsgiBundle> getOsgiBundles() {
-        return osgiBundles;
-    }
 
-    public void readOsgiBundles(String[] bundleStrings) {
-        osgiBundles.clear();
-        for (String str : bundleStrings) {
-            Scanner sc = new Scanner(str);
-            long id = sc.nextLong();
-            String status = sc.next();
-            String symbolicName = sc.next();
-            osgiBundles.add(new OsgiBundle(symbolicName, status, id));
-            sc.close();
-        }
-        Collections.sort(osgiBundles, new Comparator<OsgiBundle>() {
-            @Override
-            public int compare(OsgiBundle osgiBundle, OsgiBundle t1) {
-                if (osgiBundle.getId() > t1.getId()) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            }
-        });
-        setChanged();
-        notifyObservers();
-    }
 }

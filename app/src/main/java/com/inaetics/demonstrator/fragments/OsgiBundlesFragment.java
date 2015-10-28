@@ -15,6 +15,8 @@ import com.inaetics.demonstrator.model.Model;
 import java.util.Observable;
 import java.util.Observer;
 
+import apache.celix.Celix;
+
 /**
  * Created by mjansen on 27-10-15.
  */
@@ -28,7 +30,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
         ListView list = (ListView) rootview.findViewById(R.id.bundles_listview);
         Model model = Model.getInstance();
         model.addObserver(this);
-        adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundle_item, model.getOsgiBundles());
+        adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundle_item, Celix.getInstance().getBundlesInList());
         list.setAdapter(adapter);
 
         return rootview;
