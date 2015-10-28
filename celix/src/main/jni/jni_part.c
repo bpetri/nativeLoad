@@ -15,44 +15,47 @@ static jobject gObject;
 static jclass gClass;
 
 typedef struct {
-    const char *cbName;
-    const char *cbSignature;
+    const char* cbName;
+    const char* cbSignature;
     jmethodID cbMethod;
 } callback_t;
 
 
 int running = 0;
 
-struct framework *framework;
+struct framework * framework;
 
 static int pfd[2];
 static pthread_t thr;
 static const char *tag = "myapp";
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+jint JNI_OnLoad(JavaVM* vm, void* reserved)
+{
     JNIEnv *env;
     gJavaVM = vm;
     LOGI("JNI_OnLoad called");
     start_logger("printf");
-    if ((*vm)->GetEnv(vm, (void **) &env, JNI_VERSION_1_4) != JNI_OK) {
+    if ( (*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         LOGE("Failed to get the environment using GetEnv()");
         return -1;
     }
     return JNI_VERSION_1_4;
 }
 
-static int thread_func(void) {
+static int thread_func(void)
+{
     ssize_t rdsz;
     char buf[512];
-    while ((rdsz = read(pfd[0], buf, sizeof buf - 1)) > 0) {
-        if (buf[rdsz - 1] == '\n') --rdsz;
+    while((rdsz = read(pfd[0], buf, sizeof buf - 1)) > 0) {
+        if(buf[rdsz - 1] == '\n') --rdsz;
         buf[rdsz] = 0;  /* add null-terminator */
         __android_log_write(ANDROID_LOG_DEBUG, tag, buf);
     }
     return 0;
 }
 
-int start_logger(const char *app_name) {
+int start_logger(const char *app_name)
+{
     tag = app_name;
 
     /* make stdout line-buffered and stderr unbuffered */
@@ -65,28 +68,29 @@ int start_logger(const char *app_name) {
     dup2(pfd[1], 2);
 
     /* spawn the logging thread */
-    if (pthread_create(&thr, 0, thread_func, 0) == -1)
+    if(pthread_create(&thr, 0, thread_func, 0) == -1)
         return -1;
     pthread_detach(thr);
     return 0;
 }
 
-char *getBundleName(char *location) {
+char *getBundleName(char* location) {
     char *copy = strdup(location);
     char result[256];
-    char *pch;
-    pch = strtok(copy, "/");
-    while (pch != NULL) {
+    char * pch;
+    pch = strtok (copy,"/");
+    while (pch != NULL)
+    {
         strcpy(result, pch);
-        pch = strtok(NULL, "/");
+        pch = strtok (NULL, "/");
     }
     free(copy);
     return strdup(result);
 }
 
-void *installBundle(void *bundleLocation) {
+void* installBundle(void* bundleLocation) {
     // Install bundle
-    char *location = (char *) bundleLocation;
+    char* location = (char*) bundleLocation;
     LOGI("Installing bundle '%s'", getBundleName(location));
     bundle_pt fw_bundle = NULL;
     bundle_context_pt context = NULL;
@@ -94,13 +98,14 @@ void *installBundle(void *bundleLocation) {
 
     framework_getFrameworkBundle(framework, &fw_bundle);
     bundle_getContext(fw_bundle, &context);
-    if (bundleContext_installBundle(context, location, &current) != CELIX_SUCCESS) {
+    if (bundleContext_installBundle(context, location, &current) != CELIX_SUCCESS)
+    {
         LOGI("Failed to install bundle %s", location);
     }
 }
 
-void *startBundle(void *bundleLocation) {
-    char *location = (char *) bundleLocation;
+void* startBundle(void* bundleLocation) {
+    char* location = (char*) bundleLocation;
     LOGI("Starting bundle '%s'", getBundleName(location));
 
     bundle_pt fw_bundle = NULL;
@@ -114,8 +119,8 @@ void *startBundle(void *bundleLocation) {
 
 }
 
-void *stopBundle(void *bundleLocation) {
-    char *location = (char *) bundleLocation;
+void* stopBundle(void* bundleLocation) {
+    char* location = (char*) bundleLocation;
     LOGI("Stopping bundle '%s'", getBundleName(location));
 
     bundle_pt current = NULL;
@@ -129,9 +134,9 @@ void *stopBundle(void *bundleLocation) {
 
 }
 
-void *deleteBundle(void *bundleLocation) {
+void* deleteBundle(void* bundleLocation) {
     // Install bundle
-    char *location = (char *) bundleLocation;
+    char* location = (char*) bundleLocation;
     LOGI("Deleting bundle '%s'", getBundleName(location));
 
     bundle_pt current = NULL;
@@ -144,25 +149,25 @@ void *deleteBundle(void *bundleLocation) {
 }
 
 
-void *startCelix(void *param) {
-    properties_pt config = NULL;
-    char *autoStart = NULL;
+void* startCelix(void* param) {
+	properties_pt config = NULL;
+	char *autoStart = NULL;
     char *ownIP = NULL;
-    char *propertyString = (char *) param;
+	char* propertyString = (char*) param;
     bundle_pt fwBundle = NULL;
 
-    // Before doing anything else, let's setup Curl
-    curl_global_init(CURL_GLOBAL_NOTHING);
+	// Before doing anything else, let's setup Curl
+	curl_global_init(CURL_GLOBAL_NOTHING);
 
     LOGI("received propertyString is %s", propertyString);
 
     config = properties_load(propertyString);
 
-    // Make sure we've read it and that nothing went wrong with the file access...
-    if (config == NULL) {
+	// Make sure we've read it and that nothing went wrong with the file access...
+	if (config == NULL) {
 
-        LOGI("Error: invalid or non-existing configuration file: \"%s\"!\n", DEFAULT_CONFIG_FILE);
-    }
+		LOGI("Error: invalid or non-existing configuration file: \"%s\"!\n", DEFAULT_CONFIG_FILE);
+	}
     else {
         autoStart = properties_get(config, "cosgi.auto.start.1");
         ownIP = properties_get(config, "RSA_IP");
@@ -193,7 +198,7 @@ void *startCelix(void *param) {
                 linkedList_create(&bundles);
                 result = strtok_r(autoStart, delims, &save_ptr);
                 while (result != NULL) {
-                    char *location = strdup(result);
+                    char * location = strdup(result);
                     linkedList_addElement(bundles, location);
                     result = strtok_r(NULL, delims, &save_ptr);
                 }
@@ -205,12 +210,12 @@ void *startCelix(void *param) {
                 iter = linkedListIterator_create(bundles, 0);
                 while (linkedListIterator_hasNext(iter)) {
                     bundle_pt current = NULL;
-                    char *location = (char *) linkedListIterator_next(iter);
+                    char * location = (char *) linkedListIterator_next(iter);
                     if (bundleContext_installBundle(context, location, &current) == CELIX_SUCCESS) {
                         // Only add bundle if it is installed correctly
                         LOGI("bundle from %s sucessfully installed\n", location);
                         arrayList_add(installed, current);
-                        if (bundle_startWithOptions(current, 0) == CELIX_SUCCESS) {
+                        if (bundle_startWithOptions(current,0) == CELIX_SUCCESS) {
                             LOGI("bundle from %s succesfully started\n", location);
                         } else {
                             LOGI("failed to start bundle from %s", location);
@@ -235,12 +240,11 @@ void *startCelix(void *param) {
             LOGI("Problem creating framework\n");
         }
     }
-    // Cleanup Curl
-    curl_global_cleanup();
+	// Cleanup Curl
+	curl_global_cleanup();
 
 }
-
-char *psCommand_stateString(bundle_state_e state);
+char * psCommand_stateString(bundle_state_e state);
 
 array_list_pt printBundles() {
     if (framework != NULL) {
@@ -254,9 +258,9 @@ array_list_pt printBundles() {
             bundle_archive_pt archive = NULL;
             long id;
             bundle_state_e state;
-            char *stateString = NULL;
+            char * stateString = NULL;
             module_pt module = NULL;
-            char *name = NULL;
+            char * name = NULL;
 
             bundle_getArchive(bundle, &archive);
             bundleArchive_getId(archive, &id);
@@ -274,7 +278,7 @@ array_list_pt printBundles() {
     return NULL;
 }
 
-char *psCommand_stateString(bundle_state_e state) {
+char * psCommand_stateString(bundle_state_e state) {
     switch (state) {
         case OSGI_FRAMEWORK_BUNDLE_ACTIVE:
             return "Active";
@@ -291,7 +295,7 @@ char *psCommand_stateString(bundle_state_e state) {
     }
 }
 
-void *stopCelix(void *param) {
+void* stopCelix(void* param) {
 
     bundle_pt fwBundle = NULL;
 
@@ -299,7 +303,7 @@ void *stopCelix(void *param) {
 
     //-----------------------
     module_pt module = NULL;
-    char *name = NULL;
+    char * name = NULL;
 
     bundle_getCurrentModule(fwBundle, &module);
     module_getSymbolicName(module, &name);
@@ -312,15 +316,15 @@ void *stopCelix(void *param) {
     return 0;
 }
 
-JNIEXPORT jintJNICALL Java_apache_celix_Celix_printcmsg(JNIEnv *je, jobject thiz)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_printcmsg(JNIEnv* je, jobject thiz)
 {
     LOGI("Message van C!");
 }
-JNIEXPORT jobjectArrayJNICALL Java_apache_celix_Celix_printBundles(JNIEnv *je, jobject thiz)
+JNIEXPORT jobjectArray JNICALL Java_apache_celix_Celix_printBundles(JNIEnv *je, jobject thiz)
 {
     pthread_t thread;
     array_list_pt values = printBundles();
-    jclass stringClass = (*je)->FindClass(je, "java/lang/String");
+    jclass stringClass = (*je)->FindClass(je,"java/lang/String");
 
     jobjectArray ret;
     if (values) {
@@ -338,52 +342,52 @@ JNIEXPORT jobjectArrayJNICALL Java_apache_celix_Celix_printBundles(JNIEnv *je, j
     }
     return ret;
 }
-JNIEXPORT jintJNICALL Java_apache_celix_Celix_startCelix(JNIEnv *je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_startCelix(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *propertyString = (*je)->GetStringUTFChars(je, i, NULL);
-    pthread_t thread;
-    return pthread_create(&thread, NULL, startCelix, (void *) propertyString);
+	pthread_t thread;
+	return pthread_create( &thread, NULL, startCelix, (void*) propertyString);
 }
 
-JNIEXPORT jintJNICALL Java_apache_celix_Celix_bundleInstall(JNIEnv *je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleInstall(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
     pthread_t thread;
-    return pthread_create(&thread, NULL, installBundle, (void *) locationString);
+    return pthread_create( &thread, NULL, installBundle, (void*) locationString);
 }
 
-JNIEXPORT jintJNICALL Java_apache_celix_Celix_bundleStart(JNIEnv *je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStart(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
     pthread_t thread;
-    return pthread_create(&thread, NULL, startBundle, (void *) locationString);
+    return pthread_create( &thread, NULL, startBundle, (void*) locationString);
 }
 
-JNIEXPORT jintJNICALL Java_apache_celix_Celix_bundleStop(JNIEnv *je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStop(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
     pthread_t thread;
-    return pthread_create(&thread, NULL, stopBundle, (void *) locationString);
+    return pthread_create( &thread, NULL, stopBundle, (void*) locationString);
 }
 
-JNIEXPORT jintJNICALL Java_apache_celix_Celix_bundleDelete(JNIEnv *je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleDelete(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
     pthread_t thread;
-    return pthread_create(&thread, NULL, deleteBundle, (void *) locationString);
+    return pthread_create( &thread, NULL, deleteBundle, (void*) locationString);
 }
 
-JNIEXPORT jintJNICALL Java_apache_celix_Celix_stopCelix(JNIEnv *je, jobject thiz)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_stopCelix(JNIEnv* je, jobject thiz)
 {
     // convert Java string to UTF-8
 //    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
     pthread_t thread;
-    return pthread_create(&thread, NULL, stopCelix, (void *) NULL);
+    return pthread_create( &thread, NULL, stopCelix, (void*) NULL);
 }
 
 
