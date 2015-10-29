@@ -61,6 +61,10 @@ public class Celix {
         bundleStart(absolutePath);
     }
 
+    public void startBundleById(long id) {
+        bundleStartById(id);
+    }
+
     /**
      * Installs the bundle from specified path
      *
@@ -109,15 +113,19 @@ public class Celix {
      */
     public List<OsgiBundle> getBundlesInList() {
         ArrayList<OsgiBundle> bundles = new ArrayList<>();
+        bundles.clear();
         String[] bundleStrings = printBundles();
         for (String str : bundleStrings) {
             Scanner sc = new Scanner(str);
             long id = sc.nextLong();
             String status = sc.next();
             String symbolicName = sc.next();
-            bundles.add(new OsgiBundle(symbolicName, status, id));
+            String location = sc.next();
+            bundles.add(new OsgiBundle(symbolicName, status, id, location));
             sc.close();
         }
+
+
         Collections.sort(bundles, new Comparator<OsgiBundle>() {
             @Override
             public int compare(OsgiBundle osgiBundle, OsgiBundle t1) {
@@ -147,6 +155,7 @@ public class Celix {
     private native int bundleInstall(String path);
 
     private native int bundleStart(String path);
+    private native int bundleStartById(long id);
 
     private native int bundleStop(String path);
 

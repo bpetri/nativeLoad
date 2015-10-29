@@ -93,12 +93,10 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                     b.setText("Installing");
                     item.setStatus(BundleStatus.BUNDLE_INSTALLING);
                     Celix.getInstance().installBundle(model.getBundleLocation() + "/" + item.getFilename());
-//                    model.getJniCommunicator().installBundle(model.getBundleLocation() + "/" + item.getFilename());
                 } else if (item.getStatus() == BundleStatus.BUNDLE_INSTALLED) {
                     b.setText("Deleting");
                     item.setStatus(BundleStatus.BUNDLE_DELETING);
                     Celix.getInstance().deleteBundle(model.getBundleLocation() + "/" + item.getFilename());
-//                    model.getJniCommunicator().deleteBundle(model.getBundleLocation() + "/" + item.getFilename());
                 }
             }
         });
@@ -112,12 +110,10 @@ public class BundleItemAdapter extends ArrayAdapter<BundleItem> {
                     b.setText("Starting");
                     item.setStatus(BundleStatus.BUNDLE_STARTING);
                     Celix.getInstance().startBundle(model.getBundleLocation() + "/" + item.getFilename());
-//                    model.getJniCommunicator().startBundle(model.getBundleLocation() + "/" + item.getFilename());
                 } else if (item.getStatus() == BundleStatus.BUNDLE_RUNNING) {
                     b.setText("Stopping");
                     item.setStatus(BundleStatus.BUNDLE_STOPPING);
                     Celix.getInstance().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
-//                    model.getJniCommunicator().stopBundle(model.getBundleLocation() + "/" + item.getFilename());
                 }
             }
         });

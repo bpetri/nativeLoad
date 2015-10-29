@@ -78,12 +78,13 @@ public class MainActivity extends AppCompatActivity implements Observer {
             pager.setAdapter(pagerAdapter);
             tabs.setViewPager(pager);
         }
-//
+
         model = Model.getInstance();
         model.setContext(this);
         model.addObserver(this);
 
         config = model.getConfig();
+
         // Only one time!! After configuration change don't do it again.
         if (model.getBundles().isEmpty()) {
             File dirLocation = getExternalFilesDir(null);
@@ -117,24 +118,32 @@ public class MainActivity extends AppCompatActivity implements Observer {
         public void run() {
             super.run();
             while (true) {
-                List<OsgiBundle> bundles = Celix.getInstance().getBundlesInList();
+                final List<OsgiBundle> bundles = Celix.getInstance().getBundlesInList();
                 if (bundles.isEmpty()) {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
+                            model.clearOsgi();
                             model.setCelixStatus(BundleStatus.CELIX_STOPPED);
                         }
                     });
                 } else {
+                    // Retrieve new list
+                    final List<BundleItem> items = model.readBundles(bundles);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
                             model.setCelixStatus(BundleStatus.CELIX_RUNNING);
+                            // Change OsgiBundles list
+                            model.addAllOsgiBundles(bundles);
+                            // Change BundleItem list
+                            // Notify observers
+                            model.addAllBundleItems(items);
                         }
                     });
                 }
                 try {
-                    sleep(2500);
+                    sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -145,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onStart() {
         super.onStart();
-
         registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
@@ -299,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 str.trim();
                 config.putProperty("cosgi.auto.start.1", str);
                 btn_start.setEnabled(false);
+                model.resetBundles();
                 Celix.getInstance().startFramework();
                 if (pager != null) {
                     pager.setCurrentItem(1);

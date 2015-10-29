@@ -7,28 +7,26 @@ public class OsgiBundle {
     private String status;
     private String symbolicName;
     private long id;
+    private String location;
 
-    public OsgiBundle(String symbolicName, String status, long id) {
+    public OsgiBundle(String symbolicName, String status, long id, String location) {
         this.symbolicName = symbolicName;
         this.status = status;
         this.id = id;
+        this.location = location;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setSymbolicName(String symbolicName) {
-        this.symbolicName = symbolicName;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+    public String getLocation() {
+        return location;
     }
 
     public long getId() {
-
         return id;
+    }
+
+    public String getFilename() {
+        String[] split = location.split("/");
+        return split[split.length -1];
     }
 
     public String getSymbolicName() {
@@ -41,6 +39,6 @@ public class OsgiBundle {
 
     @Override
     public String toString() {
-        return id + " " + status + " " + symbolicName;
+        return id + " " + status + " " + symbolicName + " " + getFilename();
     }
 }

@@ -21,13 +21,6 @@ static JavaVM *gJavaVM;
 static jobject gObject;
 static jclass gClass;
 
-typedef struct {
-    const char* cbName;
-    const char* cbSignature;
-    jmethodID cbMethod;
-} callback_t;
-
-
 int running = 0;
 
 struct framework * framework;
@@ -111,6 +104,7 @@ void* installBundle(void* bundleLocation) {
     }
 }
 
+
 void* startBundle(void* bundleLocation) {
     char* location = (char*) bundleLocation;
     LOGI("Starting bundle '%s'", getBundleName(location));
@@ -123,6 +117,25 @@ void* startBundle(void* bundleLocation) {
     if (bundle_startWithOptions(current, 0) != CELIX_SUCCESS) {
         LOGI("Failed to start bundle %s", location);
     }
+
+}
+
+void* startBundleById(long id) {
+    LOGI("Starting bundle with id %ld", id);
+    bundle_pt fw_bundle = NULL;
+    bundle_context_pt context = NULL;
+    bundle_pt bundle = NULL;
+
+    framework_getFrameworkBundle(framework, &fw_bundle);
+    bundle_getContext(fw_bundle, &context);
+
+    bundleContext_getBundleById(context, id, &bundle);
+    if (bundle_startWithOptions(bundle,0) != CELIX_SUCCESS) {
+        LOGI("Starting bundle with id %ld failed", id);
+    }
+
+
+
 
 }
 
@@ -268,15 +281,18 @@ array_list_pt printBundles() {
             char * stateString = NULL;
             module_pt module = NULL;
             char * name = NULL;
+            char * location = NULL;
 
             bundle_getArchive(bundle, &archive);
             bundleArchive_getId(archive, &id);
+            bundleArchive_getLocation(archive, &location);
             bundle_getState(bundle, &state);
             bundle_getCurrentModule(bundle, &module);
             module_getSymbolicName(module, &name);
             stateString = psCommand_stateString(state);
-            char str[100];
-            snprintf(str, 100, "%ld %s %s", id, stateString, name);
+
+            char str[512];
+            snprintf(str, 512, "%ld %s %s %s", id,  stateString, name, location);
             arrayList_add(retvals, strdup(str));
         }
         return retvals;
@@ -326,6 +342,14 @@ void* stopCelix(void* param) {
 JNIEXPORT jint JNICALL Java_apache_celix_Celix_printcmsg(JNIEnv* je, jobject thiz)
 {
     LOGI("Message van C!");
+}
+
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStartById(JNIEnv* je, jclass jc, jlong javaId)
+{
+    long id = (long) javaId;
+    pthread_t thread;
+    return pthread_create( &thread, NULL, startBundleById, (void*) id);
+
 }
 JNIEXPORT jobjectArray JNICALL Java_apache_celix_Celix_printBundles(JNIEnv *je, jobject thiz)
 {

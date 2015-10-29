@@ -10,9 +10,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 import apache.celix.model.Config;
+import apache.celix.model.OsgiBundle;
 
 
 /**
@@ -22,17 +24,28 @@ public class Model extends Observable {
 
     private static Model self;
     private ArrayList<BundleItem> bundles;
+    private ArrayList<OsgiBundle> osgiBundles;
     private Config config;
     private String bundleLocation;
     private BundleStatus celixStatus;
 
     private Model() {
         bundles = new ArrayList<>();
+        osgiBundles = new ArrayList<>();
     }
 
     public void setContext(Context context) {
         config = new Config(context);
 
+    }
+
+    public ArrayList<OsgiBundle> getOsgiBundles() {
+        return osgiBundles;
+    }
+
+    public void addAllOsgiBundles(List<OsgiBundle> osgibundles) {
+        this.osgiBundles.clear();
+        this.osgiBundles.addAll(osgibundles);
     }
 
     public static Model getInstance() {
@@ -206,4 +219,55 @@ public class Model extends Observable {
     }
 
 
+    public ArrayList<BundleItem> readBundles(List<OsgiBundle> bundles) {
+        ArrayList<BundleItem> retlist = new ArrayList<>();
+        for (BundleItem i : this.bundles) {
+            BundleItem bitem = new BundleItem(i.getFilename(),i.isChecked());
+            bitem.setStatus(i.getStatus());
+            retlist.add(bitem);
+        }
+
+        for (BundleItem b : retlist) {
+            boolean present = false;
+            for (OsgiBundle ob : bundles) {
+                if (b.getFilename().equals(ob.getFilename())) {
+                    present = true;
+                    switch (ob.getStatus()) {
+                        case "Active":
+                            b.setStatus(BundleStatus.BUNDLE_RUNNING);
+                            break;
+                        case "Installed":
+                            b.setStatus(BundleStatus.BUNDLE_INSTALLED);
+                            break;
+                        case "Resolved":
+                            b.setStatus(BundleStatus.BUNDLE_INSTALLED);
+                            break;
+                        case "Starting":
+                            b.setStatus(BundleStatus.BUNDLE_STARTING);
+                            break;
+                        case "Stopping":
+                            b.setStatus(BundleStatus.BUNDLE_STOPPING);
+                            break;
+                    }
+                    break;
+                }
+            }
+            if (!present) {
+                b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
+            }
+
+        }
+        return retlist;
+    }
+
+    public void clearOsgi() {
+        osgiBundles.clear();
+    }
+
+    public void addAllBundleItems(List<BundleItem> items) {
+        bundles.clear();
+        bundles.addAll(items);
+        setChanged();
+        notifyObservers();
+    }
 }
