@@ -13,7 +13,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Observable;
+import java.util.Scanner;
 
 
 /**
@@ -23,6 +26,7 @@ public class Model extends Observable {
 
     private static Model self;
     private ArrayList<BundleItem> bundles;
+    private ArrayList<OsgiBundle> osgiBundles;
     private Config config;
     private String bundleLocation;
     private String cpu_abi;
@@ -34,6 +38,7 @@ public class Model extends Observable {
     private Model() {
         bundles = new ArrayList<>();
         handler = new Handler();
+        osgiBundles = new ArrayList<>();
     }
 
     public void setContext(Context context) {
@@ -132,10 +137,14 @@ public class Model extends Observable {
         Log.e("Bundles", "Using " + cpu_abi + " bundles");
 
 
-        //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
-        for (String fileName : files) {
-            File newFile = new File(bundleLocation + "/" + fileName);
-            moveBundle(assetManager, newFile, fileName, cpu_abi);
+        if (files != null) {
+            //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
+            for (String fileName : files) {
+                File newFile = new File(bundleLocation + "/" + fileName);
+                moveBundle(assetManager, newFile, fileName, abi);
+            }
+        } else {
+            Log.e("Zips", "No zips for supported abis found!");
         }
     }
 
@@ -213,6 +222,34 @@ public class Model extends Observable {
         for(BundleItem bundle : bundles) {
             bundle.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
         }
+        setChanged();
+        notifyObservers();
+    }
+
+    public ArrayList<OsgiBundle> getOsgiBundles() {
+        return osgiBundles;
+    }
+
+    public void readOsgiBundles(String[] bundleStrings) {
+        osgiBundles.clear();
+        for (String str : bundleStrings) {
+            Scanner sc = new Scanner(str);
+            long id = sc.nextLong();
+            String status = sc.next();
+            String symbolicName = sc.next();
+            osgiBundles.add(new OsgiBundle(symbolicName, status, id));
+            sc.close();
+        }
+        Collections.sort(osgiBundles, new Comparator<OsgiBundle>() {
+            @Override
+            public int compare(OsgiBundle osgiBundle, OsgiBundle t1) {
+                if (osgiBundle.getId() > t1.getId()) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        });
         setChanged();
         notifyObservers();
     }

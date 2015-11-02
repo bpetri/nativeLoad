@@ -6,12 +6,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import com.inaetics.demonstrator.fragments.BundlesFragment;
 import com.inaetics.demonstrator.fragments.ConsoleFragment;
+import com.inaetics.demonstrator.fragments.OsgiBundlesFragment;
 
 /**
  * Created by mjansen on 17-9-15.
  */
 public class MyPagerAdapter extends FragmentPagerAdapter {
-    private final String[] TITLES = {"Bundles", "Console"};
+    private final String[] TITLES = {"Bundles", "Console", "Osgi Bundles"};
 
     public MyPagerAdapter(FragmentManager fm) {
         super(fm);
@@ -29,6 +30,8 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
                 return new BundlesFragment();
             case 1:
                 return new ConsoleFragment();
+            case 2:
+                return new OsgiBundlesFragment();
 
         }
         return null;
