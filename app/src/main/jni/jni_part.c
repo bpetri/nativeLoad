@@ -1,4 +1,11 @@
+#include <jni.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <libgen.h>
 #include <curl/curl.h>
+#include <android/log.h>
+#include <unistd.h>
 
 #include "framework.h"
 #include "linked_list_iterator.h"
