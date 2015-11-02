@@ -41,8 +41,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
 
-import celix.com.example.mylibrary.Celix;
-
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
@@ -61,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         super.setContentView(R.layout.pager_tab);
-        new Celix();
+        
         //Check if in landscape or portrait
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             BundlesFragment left = new BundlesFragment();
@@ -128,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onStart() {
         super.onStart();
-        new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
@@ -268,7 +266,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
      * Changes button to a start button and the onclicklistener.
      */
     private void setStopped() {
-
         btn_start.setText("Start");
         btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
         btn_start.setOnClickListener(new View.OnClickListener() {
