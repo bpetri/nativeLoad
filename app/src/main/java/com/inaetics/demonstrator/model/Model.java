@@ -141,7 +141,7 @@ public class Model extends Observable {
             //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
             for (String fileName : files) {
                 File newFile = new File(bundleLocation + "/" + fileName);
-                moveBundle(assetManager, newFile, fileName, abi);
+                moveBundle(assetManager, newFile, fileName, cpu_abi);
             }
         } else {
             Log.e("Zips", "No zips for supported abis found!");
