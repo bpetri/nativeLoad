@@ -57,7 +57,7 @@ public class LogCatReader {
         }
 
 
-        class LogcatProcessStreamReader extends Thread
+        private static class LogcatProcessStreamReader extends Thread
         {
 
             BufferedReader reader;
