@@ -25,6 +25,7 @@ public class Model extends Observable {
     private ArrayList<BundleItem> bundles;
     private Config config;
     private String bundleLocation;
+    private String cpu_abi;
 
     private Handler handler;
     private JNICommunicator jniCommunicator;
@@ -103,14 +104,14 @@ public class Model extends Observable {
     public void moveBundles(AssetManager assetManager) {
 
         String[] files = null;
-        String abi = Build.CPU_ABI;
+        cpu_abi = Build.CPU_ABI;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String[] abis = Build.SUPPORTED_ABIS;
             for (String ab : abis) {
                 try {
                     files = assetManager.list("celix_bundles/" + ab);
                     if (files != null && files.length > 0) {
-                        abi = ab;
+                        cpu_abi = ab;
                         break;
                     }
                 } catch (IOException e) {
@@ -122,19 +123,19 @@ public class Model extends Observable {
                 files = assetManager.list("celix_bundles/" + Build.CPU_ABI);
                 if (files == null || files.length == 0) {
                     files = assetManager.list("celix_bundles/" + Build.CPU_ABI2);
-                    abi = Build.CPU_ABI2;
+                    cpu_abi = Build.CPU_ABI2;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        Log.e("Bundles", "Using " + abi + " bundles");
+        Log.e("Bundles", "Using " + cpu_abi + " bundles");
 
 
         //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
         for (String fileName : files) {
             File newFile = new File(bundleLocation + "/" + fileName);
-            moveBundle(assetManager, newFile, fileName, abi);
+            moveBundle(assetManager, newFile, fileName, cpu_abi);
         }
     }
 
@@ -214,5 +215,9 @@ public class Model extends Observable {
         }
         setChanged();
         notifyObservers();
+    }
+
+    public String getCpuAbi() {
+        return cpu_abi;
     }
 }
