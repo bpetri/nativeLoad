@@ -10,10 +10,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,8 +29,6 @@ import com.astuetz.PagerSlidingTabStrip;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
-import com.inaetics.demonstrator.fragments.BundlesFragment;
-import com.inaetics.demonstrator.fragments.ConsoleFragment;
 import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
@@ -127,10 +125,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                         @Override
                         public void run() {
                             model.setCelixStatus(BundleStatus.CELIX_RUNNING);
-                            // Change OsgiBundles list
-//                            model.addAllOsgiBundles(bundles);
-                            // Change BundleItem list
-                            // Notify observers
                             model.addAllBundleItems(items);
                         }
                     });
@@ -243,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         if (text != null) {
             edittext.setText(text);
-            edittext.setTextColor(getResources().getColor(android.R.color.black));
+            edittext.setTextColor(ContextCompat.getColor(this,android.R.color.black));
             edittext.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         }
 
@@ -268,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
      */
     private void setRunning() {
         btn_start.setText("STOP");
-        btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+        btn_start.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -286,7 +280,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private void setStopped() {
 
         btn_start.setText("Start");
-        btn_start.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+        btn_start.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
+
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String str = "";

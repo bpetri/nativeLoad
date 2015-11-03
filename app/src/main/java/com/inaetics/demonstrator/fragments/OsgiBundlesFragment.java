@@ -1,7 +1,6 @@
 package com.inaetics.demonstrator.fragments;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -25,7 +24,6 @@ import apache.celix.model.OsgiBundle;
  */
 public class OsgiBundlesFragment extends Fragment implements Observer {
     private OsgiBundlesAdapter adapter;
-    private ListView list;
     private Model model;
 
     @Nullable
@@ -35,7 +33,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
 
         model = Model.getInstance();
         Celix.getInstance().addObserver(this);
-        list = (ListView) rootview.findViewById(R.id.bundles_listview);
+        ListView list = (ListView) rootview.findViewById(R.id.bundles_listview);
         adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundle_item, model.getOsgiBundles());
         list.setAdapter(adapter);
 

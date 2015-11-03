@@ -1,7 +1,6 @@
 package com.inaetics.demonstrator.fragments;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,14 +10,10 @@ import android.widget.ListView;
 
 import com.inaetics.demonstrator.R;
 import com.inaetics.demonstrator.controller.BundleItemAdapter;
-import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
 
 import java.util.Observable;
 import java.util.Observer;
-
-import apache.celix.Celix;
-import apache.celix.model.CelixUpdate;
 
 /**
  * Created by mjansen on 17-9-15.
