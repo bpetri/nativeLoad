@@ -1,22 +1,27 @@
 package apache.celix;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Observable;
 import java.util.Scanner;
 
+import apache.celix.model.CelixUpdate;
 import apache.celix.model.Config;
 import apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 28-10-15.
  */
-public class Celix {
+public class Celix extends Observable {
     private Context context;
     private static Celix self;
+    private String stdio;
+    private ArrayList<OsgiBundle> bundles;
 
     static {
         System.loadLibrary("celix_utils");
@@ -26,6 +31,9 @@ public class Celix {
 
     // INIT METHODS/CONSTRUCTORS
     private Celix() {
+        bundles = new ArrayList<>();
+        initCallback();
+        stdio = "";
     }
 
     /**
@@ -34,8 +42,9 @@ public class Celix {
      * @return Celix instance
      */
     public static Celix getInstance() {
-        if (self == null)
+        if (self == null) {
             self = new Celix();
+        }
         return self;
     }
 
@@ -139,17 +148,61 @@ public class Celix {
         return bundles;
     }
 
-    public void printcmessage() {
-        printcmsg();
+    /**
+     * Returns latest C logs, clears after.
+     * Only returns newest log items since last call.
+     * @return      String with logs.
+     */
+    public String getStdio() {
+        String result = new String(stdio);
+        stdio = "";
+        return result;
     }
 
-    //--------------Native methods-----------------
-    private native int printcmsg();
+    private OsgiBundle getBundleById(long id) {
+        for (OsgiBundle b : bundles) {
+            if (b.getId() == id) {
+                return b;
+            }
+        }
+        return null;
+    }
 
-    private native int initJni();
+    // CALLBACK
+    private void confirmLogChanged(String newLine) {
+        if (stdio.length() > 25000) {
+            stdio = stdio.substring(10000);
+        }
+        stdio += newLine + "\n";
+        setChanged();
+        notifyObservers(CelixUpdate.LOG_CHANGED);
+    }
+
+    private void bundleChanged(String bundle) {
+        Scanner sc = new Scanner(bundle);
+        long id = sc.nextLong();
+        String status = sc.next();
+        String symbolicName = sc.next();
+        String location = "";
+        if (sc.hasNext()) {
+            location = sc.next();
+        }
+        sc.close();
+
+        OsgiBundle osgiBundle = getBundleById(id);
+        if (osgiBundle != null) {
+            osgiBundle.setStatus(status);
+        } else {
+            osgiBundle = new OsgiBundle(symbolicName, status, id, location);
+        }
+        setChanged();
+        notifyObservers(osgiBundle);
+    }
+
+
+    //--------------Native methods-----------------
 
     private native int startCelix(String propertyString);
-
     private native int stopCelix();
 
     private native int bundleInstall(String path);
@@ -158,10 +211,13 @@ public class Celix {
     private native int bundleStartById(long id);
 
     private native int bundleStop(String path);
+    private native int bundleStopById(long id);
 
     private native int bundleDelete(String path);
+    private native int bundleDeleteById(long id);
 
     private native String[] printBundles();
+    private native int initCallback();
 
 
 }

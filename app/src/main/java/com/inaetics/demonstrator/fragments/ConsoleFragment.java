@@ -10,52 +10,50 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.inaetics.demonstrator.R;
-import com.inaetics.demonstrator.logging.LogCatOut;
-import com.inaetics.demonstrator.logging.LogCatReader;
+
+import java.util.Observable;
+import java.util.Observer;
+
+import apache.celix.Celix;
+import apache.celix.model.CelixUpdate;
 
 /**
  * Created by mjansen on 17-9-15.
  */
-public class ConsoleFragment extends Fragment {
+public class ConsoleFragment extends Fragment implements Observer {
     private EditText console;
-    private LogCatReader lr;
+    private Handler handler;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //Inflate fragment layout
         final View rootView = inflater.inflate(R.layout.console_fragment, container, false);
-        console = (EditText) rootView.findViewById(R.id.console_log);
-        final Handler handler = new Handler();
-        lr = new LogCatReader(new LogCatOut()
-            {
-            @Override
-            public void writeLogData(final String line)
-                {
-                    handler.post(new Runnable()
-                    {
-                        public void run() {
-                            console.append(line + "\n");
-                            if (console.getText().length() > 10000) {
-                                console.setText(console.getText().toString().substring(5000));
-                                console.setSelection(console.getText().length());
-                            }
 
-                        }
-                    });
-                }
-        });
-        lr.start();
+        console = (EditText) rootView.findViewById(R.id.console_log);
+        handler = new Handler();
+        console.setText(Celix.getInstance().getStdio());
+
+        Celix.getInstance().addObserver(this);
 
         return rootView;
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        // the logreader should be killed when destroyed
-        if (lr != null) {
-            lr.kill();
+    public void update(Observable observable, Object data) {
+        if (data == CelixUpdate.LOG_CHANGED) {
+            final String newLines = Celix.getInstance().getStdio();
+            handler.post(new Runnable()
+            {
+                public void run() {
+                    console.append(newLines);
+                    if (console.getText().length() > 3000) {
+                        console.setText(console.getText().toString().substring(500));
+                    }
+                    console.setSelection(console.getText().length());
+
+                }
+            });
         }
     }
 }

@@ -17,19 +17,27 @@ import com.inaetics.demonstrator.model.Model;
 import java.util.Observable;
 import java.util.Observer;
 
+import apache.celix.Celix;
+import apache.celix.model.CelixUpdate;
+
 /**
  * Created by mjansen on 17-9-15.
  */
 public class BundlesFragment extends Fragment implements Observer {
+
     private BundleItemAdapter adapter;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.bundles_fragment, container, false);
+
         Model model = Model.getInstance();
         model.addObserver(this);
+
         adapter = new BundleItemAdapter(getActivity().getBaseContext(),R.layout.bundle_item,model.getBundles(),model);
         ListView bundleList = (ListView) rootView.findViewById(R.id.bundles_listview);
+
         bundleList.setAdapter(adapter);
         return rootView;
     }
@@ -42,6 +50,8 @@ public class BundlesFragment extends Fragment implements Observer {
      */
     @Override
     public void update(Observable observable, Object o) {
-        adapter.notifyDataSetChanged();
+        if (o == null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 }

@@ -29,6 +29,10 @@ public class OsgiBundle {
         return split[split.length -1];
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public String getSymbolicName() {
         return symbolicName;
     }

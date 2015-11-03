@@ -65,19 +65,11 @@ public class MainActivity extends AppCompatActivity implements Observer {
         celix.setContext(this);
         handler = new Handler();
 
-        //Check if in landscape or portrait
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            BundlesFragment left = new BundlesFragment();
-            ConsoleFragment right = new ConsoleFragment();
-            getSupportFragmentManager().beginTransaction().add(R.id.left_container,left).commit();
-            getSupportFragmentManager().beginTransaction().add(R.id.right_container,right).commit();
-        } else {
-            pager = (ViewPager) findViewById(R.id.pager);
-            PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-            MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
-            pager.setAdapter(pagerAdapter);
-            tabs.setViewPager(pager);
-        }
+        pager = (ViewPager) findViewById(R.id.pager);
+        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(pagerAdapter);
+        tabs.setViewPager(pager);
 
         model = Model.getInstance();
         model.setContext(this);
@@ -143,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     });
                 }
                 try {
-                    sleep(1000);
+                    sleep(1500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -206,10 +198,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 String content = result.getContents();
                 Scanner sc = new Scanner(content);
                 boolean autostart = false;
-                Log.e("Content", content);
                 while (sc.hasNextLine()) {
                     String[] keyValue = sc.nextLine().split("=");
-                    Log.e("content", Arrays.toString(keyValue));
                     if (keyValue[0].equals("cosgi.auto.start.1")) {
                         autostart = true;
                         String startBundles = "";

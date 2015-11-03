@@ -19,9 +19,23 @@
 
 static JavaVM *gJavaVM;
 static jobject gObject;
-static jclass gClass;
 
 int running = 0;
+
+typedef struct {
+    const char* cbName;
+    const char* cbSignature;
+    jmethodID cbMethod;
+} callback_t;
+
+callback_t cb[] = {
+        {
+                "confirmLogChanged", "(Ljava/lang/String;)V",
+        },
+        {
+                "bundleChanged", "(Ljava/lang/String;)V",
+        }
+};
 
 struct framework * framework;
 
@@ -34,7 +48,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     JNIEnv *env;
     gJavaVM = vm;
     LOGI("JNI_OnLoad called");
-    start_logger("printf");
     if ( (*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         LOGE("Failed to get the environment using GetEnv()");
         return -1;
@@ -50,6 +63,7 @@ static int thread_func(void)
         if(buf[rdsz - 1] == '\n') --rdsz;
         buf[rdsz] = 0;  /* add null-terminator */
         __android_log_write(ANDROID_LOG_DEBUG, tag, buf);
+        confirmLogChanged(buf);
     }
     return 0;
 }
@@ -74,6 +88,26 @@ int start_logger(const char *app_name)
     return 0;
 }
 
+void confirmLogChanged(char* buf) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jstring jstr = (*je)->NewStringUTF(je, buf);
+    (*je)->CallVoidMethod(je, gObject, cb[0].cbMethod, jstr);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
+
 char *getBundleName(char* location) {
     char *copy = strdup(location);
     char result[256];
@@ -91,7 +125,7 @@ char *getBundleName(char* location) {
 void* installBundle(void* bundleLocation) {
     // Install bundle
     char* location = (char*) bundleLocation;
-    LOGI("Installing bundle '%s'", getBundleName(location));
+    printf("Installing bundle '%s' \n", getBundleName(location));
     bundle_pt fw_bundle = NULL;
     bundle_context_pt context = NULL;
     bundle_pt current = NULL;
@@ -100,14 +134,14 @@ void* installBundle(void* bundleLocation) {
     bundle_getContext(fw_bundle, &context);
     if (bundleContext_installBundle(context, location, &current) != CELIX_SUCCESS)
     {
-        LOGI("Failed to install bundle %s", location);
+        printf("Failed to install bundle %s \n", location);
     }
 }
 
 
 void* startBundle(void* bundleLocation) {
     char* location = (char*) bundleLocation;
-    LOGI("Starting bundle '%s'", getBundleName(location));
+    printf("Starting bundle '%s' \n", getBundleName(location));
 
     bundle_pt fw_bundle = NULL;
     bundle_pt current = NULL;
@@ -115,13 +149,13 @@ void* startBundle(void* bundleLocation) {
     current = framework_getBundle(framework, location);
 
     if (bundle_startWithOptions(current, 0) != CELIX_SUCCESS) {
-        LOGI("Failed to start bundle %s", location);
+        printf("Failed to start bundle %s \n", location);
     }
 
 }
 
 void* startBundleById(long id) {
-    LOGI("Starting bundle with id %ld", id);
+    printf("Starting bundle with id %ld \n", id);
     bundle_pt fw_bundle = NULL;
     bundle_context_pt context = NULL;
     bundle_pt bundle = NULL;
@@ -131,17 +165,13 @@ void* startBundleById(long id) {
 
     bundleContext_getBundleById(context, id, &bundle);
     if (bundle_startWithOptions(bundle,0) != CELIX_SUCCESS) {
-        LOGI("Starting bundle with id %ld failed", id);
+        printf("Starting bundle with id %ld failed \n", id);
     }
-
-
-
-
 }
 
 void* stopBundle(void* bundleLocation) {
     char* location = (char*) bundleLocation;
-    LOGI("Stopping bundle '%s'", getBundleName(location));
+    printf("Stopping bundle '%s' \n", getBundleName(location));
 
     bundle_pt current = NULL;
 
@@ -149,25 +179,107 @@ void* stopBundle(void* bundleLocation) {
 
 
     if (bundle_stopWithOptions(current, 0) != CELIX_SUCCESS) {
-        LOGI("Failed to stop bundle %s", location);
+        printf("Failed to stop bundle %s \n", location);
     }
+
+}
+
+void* stopBundleById(long id) {
+    printf("Stopping bundle with id %ld \n", id);
+
+    bundle_pt bundle = framework_getBundleById(framework, id);
+
+    if (bundle_stopWithOptions(bundle, 0) != CELIX_SUCCESS) {
+        printf("Stopping bundle with id %ld failed \n", id);
+    }
+
 
 }
 
 void* deleteBundle(void* bundleLocation) {
     // Install bundle
     char* location = (char*) bundleLocation;
-    LOGI("Deleting bundle '%s'", getBundleName(location));
+    printf("Deleting bundle '%s' \n", getBundleName(location));
 
     bundle_pt current = NULL;
 
     current = framework_getBundle(framework, location);
 
     if (bundle_uninstall(current) != CELIX_SUCCESS) {
-        LOGI("Failed to delete bundle %s", location);
+        printf("Failed to delete bundle %s \n", location);
     }
 }
 
+void* deleteBundleById(long id) {
+    printf("Deleting bundle with id %ld \n", id);
+
+    bundle_pt bundle = framework_getBundleById(framework, id);
+
+    if (bundle_uninstall(bundle) != CELIX_SUCCESS) {
+        printf("Delete bundle with id %ld failed \n", id);
+    }
+
+}
+
+bundle_listener_pt bundleListener;
+char * psCommand_stateString(bundle_state_e state);
+
+void* callback_to_bundleChanged(char * str) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jstring jstr = (*je)->NewStringUTF(je, str);
+    (*je)->CallVoidMethod(je, gObject, cb[1].cbMethod, jstr);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
+
+void* log_changedBundle(void *listener, bundle_event_pt event)
+{
+    bundle_pt bundle = event->bundle;
+    bundle_event_type_e type = event->type;
+
+    bundle_archive_pt archive = NULL;
+    long id;
+    bundle_state_e state;
+    char * stateString = NULL;
+    module_pt module = NULL;
+    char * name = NULL;
+    char * location = NULL;
+
+    if (bundle) {
+        bundle_getState(bundle, &state);
+        stateString = psCommand_stateString(state);
+
+        bundle_getArchive(bundle, &archive);
+        if (archive) {
+            bundleArchive_getId(archive, &id);
+            bundleArchive_getLocation(archive, &location);
+        }
+
+        bundle_getCurrentModule(bundle, &module);
+        if (module) {
+            module_getSymbolicName(module, &name);
+        }
+    }
+
+    char str[512];
+    snprintf(str, 512, "%ld %s %s %s", id,  stateString, name, location);
+    puts(str);
+    pthread_t thread;
+    return pthread_create( &thread, NULL, callback_to_bundleChanged, (void*) str);
+
+}
 
 void* startCelix(void* param) {
 	properties_pt config = NULL;
@@ -179,31 +291,41 @@ void* startCelix(void* param) {
 	// Before doing anything else, let's setup Curl
 	curl_global_init(CURL_GLOBAL_NOTHING);
 
-    LOGI("received propertyString is %s", propertyString);
+    printf("received propertyString is %s \n", propertyString);
 
     config = properties_load(propertyString);
 
 	// Make sure we've read it and that nothing went wrong with the file access...
 	if (config == NULL) {
 
-		LOGI("Error: invalid or non-existing configuration file: \"%s\"!\n", DEFAULT_CONFIG_FILE);
+		printf("Error: invalid or non-existing configuration file: \"%s\"!\n", DEFAULT_CONFIG_FILE);
 	}
     else {
         autoStart = properties_get(config, "cosgi.auto.start.1");
         ownIP = properties_get(config, "RSA_IP");
-        LOGI("Device IP: '%s'", ownIP);
+        printf("Device IP: '%s' \n", ownIP);
         framework = NULL;
         celix_status_t status = CELIX_SUCCESS;
         status = framework_create(&framework, config);
         if (status == CELIX_SUCCESS) {
-            LOGI("framework sucessfully created");
+            printf("framework succesfully created \n");
             status = fw_init(framework);
             if (status == CELIX_SUCCESS) {
 
-                LOGI("framework sucessfully initiated");
+                printf("framework succesfully initiated \n");
                 // Start the system bundle
                 framework_getFrameworkBundle(framework, &fwBundle);
+
+                bundle_context_pt fwbundlecontext = NULL;
+                bundle_getContext(fwBundle, &fwbundlecontext);
+                //Add listeners to bundle- and framework events
+                bundleListener = calloc(1,sizeof(bundleListener));
+                bundleListener->bundleChanged = log_changedBundle;
+                bundleContext_addBundleListener(fwbundlecontext, bundleListener);
+
                 bundle_start(fwBundle);
+
+
 
                 char delims[] = " ";
                 char *result = NULL;
@@ -233,15 +355,15 @@ void* startCelix(void* param) {
                     char * location = (char *) linkedListIterator_next(iter);
                     if (bundleContext_installBundle(context, location, &current) == CELIX_SUCCESS) {
                         // Only add bundle if it is installed correctly
-                        LOGI("bundle from %s sucessfully installed\n", location);
+                        printf("bundle from %s sucessfully installed\n", location);
                         arrayList_add(installed, current);
                         if (bundle_startWithOptions(current,0) == CELIX_SUCCESS) {
-                            LOGI("bundle from %s succesfully started\n", location);
+                            printf("bundle from %s succesfully started\n", location);
                         } else {
-                            LOGI("failed to start bundle from %s", location);
+                            printf("failed to start bundle from %s\n", location);
                         }
                     } else {
-                        LOGI("Could not install bundle from %s\n", location);
+                        printf("Could not install bundle from %s\n", location);
                     }
                     linkedListIterator_remove(iter);
                 }
@@ -257,14 +379,13 @@ void* startCelix(void* param) {
         }
 
         if (status != CELIX_SUCCESS) {
-            LOGI("Problem creating framework\n");
+            printf("Problem creating framework\n");
         }
     }
 	// Cleanup Curl
 	curl_global_cleanup();
 
 }
-char * psCommand_stateString(bundle_state_e state);
 
 array_list_pt printBundles() {
     if (framework != NULL) {
@@ -313,6 +434,8 @@ char * psCommand_stateString(bundle_state_e state) {
             return "Starting";
         case OSGI_FRAMEWORK_BUNDLE_STOPPING:
             return "Stopping";
+        case OSGI_FRAMEWORK_BUNDLE_UNINSTALLED:
+            return "Deleted";
         default:
             return "Unknown";
     }
@@ -330,7 +453,7 @@ void* stopCelix(void* param) {
 
     bundle_getCurrentModule(fwBundle, &module);
     module_getSymbolicName(module, &name);
-    LOGI("Stopping %s\n", name);
+    printf("Stopping %s\n", name);
     //-----------------------
 
 
@@ -338,11 +461,22 @@ void* stopCelix(void* param) {
 
     return 0;
 }
-
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_printcmsg(JNIEnv* je, jobject thiz)
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_initCallback(JNIEnv* je, jobject thiz)
 {
-    LOGI("Message van C!");
+    gObject = (jobject)(*je)->NewGlobalRef(je,thiz);
+    jclass clazz = (*je)->GetObjectClass(je, thiz);
+    if (!clazz) {
+        LOGE("Callback handler : failed to get object class");
+    } else {
+        int i = sizeof cb / sizeof cb[0];
+        while(i--) {
+            cb[i].cbMethod = (*je)->GetMethodID(je, clazz, cb[i].cbName, cb[0].cbSignature);
+        }
+    }
+    start_logger("printf");
 }
+
+
 
 JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStartById(JNIEnv* je, jclass jc, jlong javaId)
 {
