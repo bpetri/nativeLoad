@@ -43,6 +43,7 @@ public class Model extends Observable {
         return osgiBundles;
     }
 
+    @Deprecated
     public void addAllOsgiBundles(List<OsgiBundle> osgibundles) {
         this.osgiBundles.clear();
         this.osgiBundles.addAll(osgibundles);

@@ -282,8 +282,9 @@ void* log_changedBundle(void *listener, bundle_event_pt event)
     args.state = state;
     args.name = name;
     args.location = location;
-    pthread_t thread;
-    return pthread_create( &thread, NULL, callback_to_bundleChanged, (void*) NULL);
+    callback_to_bundleChanged();
+//    pthread_t thread;
+//    return pthread_create( &thread, NULL, callback_to_bundleChanged, (void*) NULL);
 
 }
 

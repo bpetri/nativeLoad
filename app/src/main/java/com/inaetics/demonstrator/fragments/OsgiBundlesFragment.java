@@ -27,7 +27,6 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
     private OsgiBundlesAdapter adapter;
     private ListView list;
     private Model model;
-    private Handler handler;
 
     @Nullable
     @Override
@@ -36,7 +35,6 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
 
         model = Model.getInstance();
         Celix.getInstance().addObserver(this);
-        handler = new Handler();
         list = (ListView) rootview.findViewById(R.id.bundles_listview);
         adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundle_item, model.getOsgiBundles());
         list.setAdapter(adapter);
@@ -55,6 +53,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
                 }
             }
             if (existingBundle != null) {
+                Log.e("Changing status","Old: " + existingBundle.getStatus() + " New: " + newBundle.getStatus());
                 if (!existingBundle.getStatus().equals(newBundle.getStatus())) {
                     existingBundle.setStatus(newBundle.getStatus());
                     adapter.notifyDataSetChanged();

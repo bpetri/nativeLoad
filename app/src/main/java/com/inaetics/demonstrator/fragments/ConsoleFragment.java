@@ -22,7 +22,6 @@ import apache.celix.model.CelixUpdate;
  */
 public class ConsoleFragment extends Fragment implements Observer {
     private EditText console;
-    private Handler handler;
 
     @Nullable
     @Override
@@ -31,7 +30,6 @@ public class ConsoleFragment extends Fragment implements Observer {
         final View rootView = inflater.inflate(R.layout.console_fragment, container, false);
 
         console = (EditText) rootView.findViewById(R.id.console_log);
-        handler = new Handler();
         console.setText(Celix.getInstance().getStdio());
 
         Celix.getInstance().addObserver(this);
