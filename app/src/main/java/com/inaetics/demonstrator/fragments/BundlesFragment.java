@@ -50,8 +50,6 @@ public class BundlesFragment extends Fragment implements Observer {
      */
     @Override
     public void update(Observable observable, Object o) {
-        if (o == null) {
-            adapter.notifyDataSetChanged();
-        }
+        adapter.notifyDataSetChanged();
     }
 }

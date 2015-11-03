@@ -232,8 +232,8 @@ char * psCommand_stateString(bundle_state_e state);
 void* callback_to_bundleChanged() {
     char * stateString = psCommand_stateString(args.state);
 
-    char str[512];
-    snprintf(str, 512, "%ld %s %s %s", args.id,  stateString, args.name, args.location);
+    char str[256];
+    snprintf(str, 256, "%ld %s %s %s", args.id,  stateString, args.name, args.location);
     puts(str);
     JNIEnv* je;
     int isAttached = 0;
@@ -283,8 +283,6 @@ void* log_changedBundle(void *listener, bundle_event_pt event)
     args.name = name;
     args.location = location;
     callback_to_bundleChanged();
-//    pthread_t thread;
-//    return pthread_create( &thread, NULL, callback_to_bundleChanged, (void*) NULL);
 
 }
 
