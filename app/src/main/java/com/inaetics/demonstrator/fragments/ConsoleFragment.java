@@ -43,17 +43,11 @@ public class ConsoleFragment extends Fragment implements Observer {
     public void update(Observable observable, Object data) {
         if (data == CelixUpdate.LOG_CHANGED) {
             final String newLines = Celix.getInstance().getStdio();
-            handler.post(new Runnable()
-            {
-                public void run() {
-                    console.append(newLines);
-                    if (console.getText().length() > 3000) {
-                        console.setText(console.getText().toString().substring(500));
-                    }
-                    console.setSelection(console.getText().length());
-
-                }
-            });
+            console.append(newLines);
+            if (console.getText().length() > 3000) {
+                console.setText(console.getText().toString().substring(500));
+            }
+            console.setSelection(console.getText().length());
         }
     }
 }

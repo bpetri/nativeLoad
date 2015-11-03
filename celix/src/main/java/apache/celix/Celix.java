@@ -1,6 +1,7 @@
 package apache.celix;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class Celix extends Observable {
     private Context context;
     private static Celix self;
     private String stdio;
-    private ArrayList<OsgiBundle> bundles;
+    private Handler handler;
 
     static {
         System.loadLibrary("celix_utils");
@@ -31,7 +32,7 @@ public class Celix extends Observable {
 
     // INIT METHODS/CONSTRUCTORS
     private Celix() {
-        bundles = new ArrayList<>();
+        handler = new Handler();
         initCallback();
         stdio = "";
     }
@@ -159,23 +160,20 @@ public class Celix extends Observable {
         return result;
     }
 
-    private OsgiBundle getBundleById(long id) {
-        for (OsgiBundle b : bundles) {
-            if (b.getId() == id) {
-                return b;
-            }
-        }
-        return null;
-    }
-
     // CALLBACK
     private void confirmLogChanged(String newLine) {
         if (stdio.length() > 25000) {
             stdio = stdio.substring(10000);
         }
         stdio += newLine + "\n";
-        setChanged();
-        notifyObservers(CelixUpdate.LOG_CHANGED);
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                setChanged();
+                notifyObservers(CelixUpdate.LOG_CHANGED);
+            }
+        });
     }
 
     private void bundleChanged(String bundle) {
@@ -189,14 +187,17 @@ public class Celix extends Observable {
         }
         sc.close();
 
-        OsgiBundle osgiBundle = getBundleById(id);
-        if (osgiBundle != null) {
-            osgiBundle.setStatus(status);
-        } else {
-            osgiBundle = new OsgiBundle(symbolicName, status, id, location);
-        }
-        setChanged();
-        notifyObservers(osgiBundle);
+
+        OsgiBundle osgiBundle = new OsgiBundle(symbolicName, status, id, location);
+        final OsgiBundle finalOsgiBundle = osgiBundle;
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                setChanged();
+                notifyObservers(finalOsgiBundle);
+
+            }
+        });
     }
 
 

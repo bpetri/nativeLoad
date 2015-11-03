@@ -47,24 +47,22 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
     @Override
     public void update(Observable observable, final Object o) {
         if (o instanceof OsgiBundle) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    final OsgiBundle newBundle = (OsgiBundle) o;
-                    OsgiBundle existingBundle = null;
-                    for (OsgiBundle b : model.getOsgiBundles()) {
-                        if (newBundle.getId() == b.getId()) {
-                            existingBundle = b;
-                        }
-                    }
-                    if (existingBundle != null) {
-                        existingBundle.setStatus(newBundle.getStatus());
-                    } else {
-                        model.getOsgiBundles().add(newBundle);
-                    }
+            final OsgiBundle newBundle = (OsgiBundle) o;
+            OsgiBundle existingBundle = null;
+            for (OsgiBundle b : model.getOsgiBundles()) {
+                if (newBundle.getId() == b.getId()) {
+                    existingBundle = b;
+                }
+            }
+            if (existingBundle != null) {
+                if (!existingBundle.getStatus().equals(newBundle.getStatus())) {
+                    existingBundle.setStatus(newBundle.getStatus());
                     adapter.notifyDataSetChanged();
                 }
-            });
+            } else {
+                model.getOsgiBundles().add(newBundle);
+                adapter.notifyDataSetChanged();
+            }
         }
 
     }

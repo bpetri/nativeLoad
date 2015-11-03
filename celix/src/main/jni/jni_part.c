@@ -221,10 +221,20 @@ void* deleteBundleById(long id) {
 
 }
 
-bundle_listener_pt bundleListener;
+struct arg_struct {
+    long id;
+    bundle_state_e state;
+    char * name;
+    char * location;
+}args;
 char * psCommand_stateString(bundle_state_e state);
 
-void* callback_to_bundleChanged(char * str) {
+void* callback_to_bundleChanged() {
+    char * stateString = psCommand_stateString(args.state);
+
+    char str[512];
+    snprintf(str, 512, "%ld %s %s %s", args.id,  stateString, args.name, args.location);
+    puts(str);
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
@@ -252,32 +262,28 @@ void* log_changedBundle(void *listener, bundle_event_pt event)
     bundle_archive_pt archive = NULL;
     long id;
     bundle_state_e state;
-    char * stateString = NULL;
     module_pt module = NULL;
     char * name = NULL;
     char * location = NULL;
 
     if (bundle) {
         bundle_getState(bundle, &state);
-        stateString = psCommand_stateString(state);
-
         bundle_getArchive(bundle, &archive);
         if (archive) {
             bundleArchive_getId(archive, &id);
             bundleArchive_getLocation(archive, &location);
         }
-
         bundle_getCurrentModule(bundle, &module);
         if (module) {
             module_getSymbolicName(module, &name);
         }
     }
-
-    char str[512];
-    snprintf(str, 512, "%ld %s %s %s", id,  stateString, name, location);
-    puts(str);
+    args.id = id;
+    args.state = state;
+    args.name = name;
+    args.location = location;
     pthread_t thread;
-    return pthread_create( &thread, NULL, callback_to_bundleChanged, (void*) str);
+    return pthread_create( &thread, NULL, callback_to_bundleChanged, (void*) NULL);
 
 }
 
@@ -319,7 +325,7 @@ void* startCelix(void* param) {
                 bundle_context_pt fwbundlecontext = NULL;
                 bundle_getContext(fwBundle, &fwbundlecontext);
                 //Add listeners to bundle- and framework events
-                bundleListener = calloc(1,sizeof(bundleListener));
+                bundle_listener_pt bundleListener = calloc(1,sizeof(bundleListener));
                 bundleListener->bundleChanged = log_changedBundle;
                 bundleContext_addBundleListener(fwbundlecontext, bundleListener);
 
