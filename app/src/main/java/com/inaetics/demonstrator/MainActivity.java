@@ -118,13 +118,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
                         }
                     });
                 } else {
-                    // Retrieve new list
-                    final List<BundleItem> items = model.readBundles(bundles);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
                             model.setCelixStatus(BundleStatus.CELIX_RUNNING);
-                            model.addAllBundleItems(items);
                         }
                     });
                 }

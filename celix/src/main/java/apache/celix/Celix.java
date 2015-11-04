@@ -87,8 +87,18 @@ public class Celix extends Observable {
         bundleStop(bundlePath);
     }
 
+    public void stopBundleById(long id) {
+        bundleStopById(id);
+    }
+
     public void deleteBundle(String bundlePath) {
         bundleDelete(bundlePath);
+    }
+    public void deleteBundleById(long id) {
+        if(id == 0) {
+            return;
+        }
+        bundleDeleteById(id);
     }
 
     /**

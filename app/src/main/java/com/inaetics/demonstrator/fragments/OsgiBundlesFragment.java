@@ -1,18 +1,27 @@
 package com.inaetics.demonstrator.fragments;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.andexert.expandablelayout.library.ExpandableLayoutListView;
 import com.inaetics.demonstrator.R;
+import com.inaetics.demonstrator.controller.DialogItemAdapter;
 import com.inaetics.demonstrator.controller.OsgiBundlesAdapter;
 import com.inaetics.demonstrator.model.Model;
 
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -24,20 +33,88 @@ import apache.celix.model.OsgiBundle;
  */
 public class OsgiBundlesFragment extends Fragment implements Observer {
     private OsgiBundlesAdapter adapter;
+    private ExpandableLayoutListView list;
+    private FloatingActionButton fab;
     private Model model;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootview = inflater.inflate(R.layout.bundles_fragment, container, false);
+        View rootview = inflater.inflate(R.layout.osgi_bundles_fragment, container, false);
 
         model = Model.getInstance();
         Celix.getInstance().addObserver(this);
-        ListView list = (ListView) rootview.findViewById(R.id.bundles_listview);
-        adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundle_item, model.getOsgiBundles());
+        list = (ExpandableLayoutListView) rootview.findViewById(R.id.osgi_listview);
+        fab = (FloatingActionButton) rootview.findViewById(R.id.fab);
+
+        String[] array = {"Hallo", "Doei", "Welkom"};
+
+//        ArrayAdapter<String> adap = new ArrayAdapter<>(getActivity(), R.layout.osgi_bundles_row, R.id.symb_name_text, array);
+
+        adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundles_row, model.getOsgiBundles());
         list.setAdapter(adapter);
 
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final OsgiBundle bundle = adapter.getItem(position);
+                AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                dialog.setTitle("Warning");
+                dialog.setMessage("Are you sure to delete " + bundle.getSymbolicName() + "?");
+                dialog.setNegativeButton("Cancel", null);
+                dialog.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Celix.getInstance().deleteBundleById(bundle.getId());
+
+                    }
+                });
+                dialog.show();
+                return true;
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialog();
+            }
+        });
+
         return rootview;
+    }
+
+    private void showDialog() {
+        Context context = getActivity();
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+        dialog.setTitle("Select bundle to install");
+        String[] files = new File(model.getBundleLocation()).list();
+
+        ListView listView = new ListView(context);
+        final DialogItemAdapter adapter = new DialogItemAdapter(context, files);
+        listView.setAdapter(adapter);
+        dialog.setView(listView);
+
+        dialog.setPositiveButton("Install", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String bundleLocation = model.getBundleLocation();
+                Celix celix = Celix.getInstance();
+                for(String fileName : adapter.getInstallBundles()) {
+                    celix.installBundle(bundleLocation + "/" + fileName);
+                }
+            }
+        });
+
+        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        dialog.show();
+
+
     }
 
     @Override

@@ -28,4 +28,12 @@
         android:text="Medium Text"
         android:layout_weight="0.75"
         android:id="@+id/symb_name_text" />
+
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_keyboard_arrow_down_black_48dp"
+        android:id="@+id/imageView"/>
+
+
 </LinearLayout>
