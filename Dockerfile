@@ -23,11 +23,11 @@ RUN curl -L -O http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bi
 	7z x android-ndk-r10e-linux-x86_64.bin | grep -v "Extracting"
 
 # Installing sdk
-RUN curl -L -O http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz && \
-    tar -zxf android-sdk_r23.0.2-linux.tgz && \ 
+RUN curl -L -O http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz && \
+    tar -zxf android-sdk_r24.4.1-linux.tgz && \
     cd android-sdk-linux && \ 
-    echo y | tools/android update sdk --all --filter tools,platform-tools,build-tools-22.0.1,android-21,extra-android-support,extra-android-m2repository,extra-google-m2repository --no-ui && \
-    cd  -
+    echo y | tools/android update sdk --all --filter tools,platform-tools,build-tools-23.0.0,android-23,extra-android-support,extra-android-m2repository,extra-google-m2repository --no-ui && \
+             cd  -
 
 ADD . nativeLoad
 

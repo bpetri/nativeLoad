@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         pager.setAdapter(pagerAdapter);
         tabs.setViewPager(pager);
-        pager.setOffscreenPageLimit(5);
+        pager.setOffscreenPageLimit(2);
 
         model = Model.getInstance();
         model.setContext(this);
@@ -114,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            model.clearOsgi();
                             model.setCelixStatus(BundleStatus.CELIX_STOPPED);
                         }
                     });
