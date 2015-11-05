@@ -243,19 +243,13 @@ void* deleteBundleById(long id) {
 
 }
 
-struct arg_struct {
-    long id;
-    bundle_state_e state;
-    char * name;
-    char * location;
-}args;
 char * psCommand_stateString(bundle_state_e state);
 
-void* callback_to_bundleChanged() {
-    char * stateString = psCommand_stateString(args.state);
+void* callback_to_bundleChanged(long id, bundle_state_e state, char * name, char * location) {
+    char * stateString = psCommand_stateString(state);
 
     char str[256];
-    snprintf(str, 256, "%ld %s %s %s", args.id,  stateString, args.name, args.location);
+    snprintf(str, 256, "%ld %s %s %s", id, stateString, name, location);
     puts(str);
     JNIEnv* je;
     int isAttached = 0;
@@ -271,29 +265,6 @@ void* callback_to_bundleChanged() {
 
     jstring jstr = (*je)->NewStringUTF(je, str);
     (*je)->CallVoidMethod(je, gObject, cb[1].cbMethod, jstr);
-
-    if(isAttached)
-        (*gJavaVM)->DetachCurrentThread(gJavaVM);
-}
-
-void* callback_celix_changed(bool is_running) {
-    JNIEnv* je;
-    int isAttached = 0;
-    int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
-    if(status < 0) {
-        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
-
-        if(status < 0) {
-            LOGE("callback_handler: failed to attach current thread");
-        }
-        isAttached = 1;
-    }
-
-    jboolean result = false;
-    if(is_running) {
-        result = true;
-    }
-    (*je)->CallVoidMethod(je, gObject, cb[2].cbMethod, result);
 
     if(isAttached)
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
@@ -323,13 +294,33 @@ void* log_changedBundle(void *listener, bundle_event_pt event)
             module_getSymbolicName(module, &name);
         }
     }
-    args.id = id;
-    args.state = state;
-    args.name = name;
-    args.location = location;
-    callback_to_bundleChanged();
 
+    callback_to_bundleChanged(id, state, name, location);
 }
+
+void* callback_celix_changed(bool is_running) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jboolean result = false;
+    if(is_running) {
+        result = true;
+    }
+    (*je)->CallVoidMethod(je, gObject, cb[2].cbMethod, result);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
+
 
 void* startCelix(void* param) {
 	properties_pt config = NULL;

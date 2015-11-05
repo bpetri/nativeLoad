@@ -23,14 +23,16 @@ import apache.celix.model.OsgiBundle;
 public class Model extends Observable {
 
     private static Model self;
-    private ArrayList<BundleItem> bundles;
+    private ArrayList<File> localBundles;
+    private boolean bundlesMoved;
     private ArrayList<OsgiBundle> osgiBundles;
     private Config config;
     private String bundleLocation;
     private BundleStatus celixStatus;
 
     private Model() {
-        bundles = new ArrayList<>();
+        bundlesMoved = false;
+        localBundles = new ArrayList<>();
         osgiBundles = new ArrayList<>();
     }
 
@@ -43,12 +45,6 @@ public class Model extends Observable {
         return osgiBundles;
     }
 
-    @Deprecated
-    public void addAllOsgiBundles(List<OsgiBundle> osgibundles) {
-        this.osgiBundles.clear();
-        this.osgiBundles.addAll(osgibundles);
-    }
-
     public static Model getInstance() {
         if (self == null) {
             self = new Model();
@@ -56,31 +52,12 @@ public class Model extends Observable {
         return self;
     }
 
-    public BundleItem addBundle(String fileName, boolean checked) {
-        BundleItem item = new BundleItem(fileName, checked);
-        for (BundleItem bundle : bundles) {
-            if (bundle.getFilename().equals(fileName)) {
-                return null;
-            }
-        }
-        bundles.add(item);
-        return item;
+    public boolean areBundlesMoved() {
+        return bundlesMoved;
     }
 
     public BundleStatus getCelixStatus() {
         return celixStatus;
-    }
-
-    public void setCelixStatus(BundleStatus status) {
-        if (status != celixStatus) {
-            celixStatus = status;
-            setChanged();
-            notifyObservers(celixStatus);
-        }
-    }
-
-    public ArrayList<BundleItem> getBundles() {
-        return bundles;
     }
 
     public String getBundleLocation() {
@@ -102,6 +79,8 @@ public class Model extends Observable {
 
         String[] files = null;
         String abi = Build.CPU_ABI;
+
+        //Get cpu_abi for SDK versions above API 21
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String[] abis = Build.SUPPORTED_ABIS;
             for (String ab : abis) {
@@ -116,6 +95,7 @@ public class Model extends Observable {
                 }
             }
         } else {
+            //Get cpu_abi for SDK version below API 21
             try {
                 files = assetManager.list("celix_bundles/" + Build.CPU_ABI);
                 if (files == null || files.length == 0) {
@@ -132,19 +112,32 @@ public class Model extends Observable {
         if (files != null) {
             //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
             for (String fileName : files) {
-                File newFile = new File(bundleLocation + "/" + fileName);
-                moveBundle(assetManager, newFile, fileName, abi);
+                File bundleFile = new File(bundleLocation + "/" + fileName);
+                try {
+                    InputStream in = assetManager.open("celix_bundles/" + abi + "/" + fileName);
+                    if (moveBundle(in, bundleFile)) {
+                        localBundles.add(bundleFile);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            bundlesMoved = true;
         } else {
             Log.e("Zips", "No zips for supported abis found!");
         }
 
     }
 
-    private void moveBundle(AssetManager assetManager, File newFile, String fileName, String abi) {
+    /**
+     * Moves the File (bundle) from the Assets folder to the internal storage
+     * @param in InputStream to read from
+     * @param newFile File to write to
+     * @return
+     */
+    private boolean moveBundle(InputStream in, File newFile) {
+        String fileName = newFile.getName();
         try {
-            InputStream in;
-            in = assetManager.open("celix_bundles/" + abi + "/" + fileName);
             FileOutputStream out = new FileOutputStream(newFile);
             byte[] buffer = new byte[1024];
             int read;
@@ -155,120 +148,10 @@ public class Model extends Observable {
             out.flush();
             out.close();
             Log.i("BundleMover", fileName + " copied to " + bundleLocation);
+            return true;
         } catch (Exception e) {
             Log.e("BundleMover", "ERROR: " + e.toString());
+            return false;
         }
-    }
-
-    private BundleItem getBundleFromLocation(String location) {
-        String[] words = location.split("/");
-        String fileName = words[words.length - 1];
-        for (BundleItem b : bundles) {
-            if (fileName.equals(b.getFilename())) {
-                return b;
-            }
-        }
-        return null;
-    }
-
-    public void setBundleInstall(String location) {
-        BundleItem b = getBundleFromLocation(location);
-        if (b != null) {
-            b.setStatus(BundleStatus.BUNDLE_INSTALLED);
-            Log.d("Model", "Bundle " + b.getFilename() + " has been installed");
-            setChanged();
-            notifyObservers();
-        }
-    }
-
-    public void setBundleDelete(String location) {
-        BundleItem b = getBundleFromLocation(location);
-        if (b != null) {
-            b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
-            Log.d("Model", "Bundle " + b.getFilename() + " has been deleted");
-            setChanged();
-            notifyObservers();
-        }
-    }
-
-    public void setBundleStart(String location) {
-        BundleItem b = getBundleFromLocation(location);
-        if (b != null) {
-            b.setStatus(BundleStatus.BUNDLE_RUNNING);
-            Log.d("Model", "Bundle " + b.getFilename() + " has been started");
-            setChanged();
-            notifyObservers();
-        }
-    }
-
-    public void setBundleStop(String location) {
-        BundleItem b = getBundleFromLocation(location);
-        if (b != null) {
-            b.setStatus(BundleStatus.BUNDLE_INSTALLED);
-            Log.d("Model", "Bundle " + b.getFilename() + " has been stopped");
-            setChanged();
-            notifyObservers();
-        }
-    }
-
-    public void resetBundles() {
-        for(BundleItem bundle : bundles) {
-            bundle.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
-        }
-        setChanged();
-        notifyObservers();
-    }
-
-
-    public ArrayList<BundleItem> readBundles(List<OsgiBundle> bundles) {
-        ArrayList<BundleItem> retlist = new ArrayList<>();
-        for (BundleItem i : this.bundles) {
-            BundleItem bitem = new BundleItem(i.getFilename(),i.isChecked());
-            bitem.setStatus(i.getStatus());
-            retlist.add(bitem);
-        }
-
-        for (BundleItem b : retlist) {
-            boolean present = false;
-            for (OsgiBundle ob : bundles) {
-                if (b.getFilename().equals(ob.getFilename())) {
-                    present = true;
-                    switch (ob.getStatus()) {
-                        case "Active":
-                            b.setStatus(BundleStatus.BUNDLE_RUNNING);
-                            break;
-                        case "Installed":
-                            b.setStatus(BundleStatus.BUNDLE_INSTALLED);
-                            break;
-                        case "Resolved":
-                            b.setStatus(BundleStatus.BUNDLE_INSTALLED);
-                            break;
-                        case "Starting":
-                            b.setStatus(BundleStatus.BUNDLE_STARTING);
-                            break;
-                        case "Stopping":
-                            b.setStatus(BundleStatus.BUNDLE_STOPPING);
-                            break;
-                    }
-                    break;
-                }
-            }
-            if (!present) {
-                b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
-            }
-
-        }
-        return retlist;
-    }
-
-    public void clearOsgi() {
-        osgiBundles.clear();
-    }
-
-    public void addAllBundleItems(List<BundleItem> items) {
-        bundles.clear();
-        bundles.addAll(items);
-        setChanged();
-        notifyObservers();
     }
 }
