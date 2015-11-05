@@ -41,6 +41,7 @@ import java.util.Observer;
 import java.util.Scanner;
 
 import apache.celix.Celix;
+import apache.celix.model.CelixUpdate;
 import apache.celix.model.Config;
 import apache.celix.model.OsgiBundle;
 
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //Initiate celix
         Celix celix = Celix.getInstance();
         celix.setContext(this);
+        celix.addObserver(this);
         handler = new Handler();
 
         pager = (ViewPager) findViewById(R.id.pager);
@@ -72,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         model = Model.getInstance();
         model.setContext(this);
-        model.addObserver(this);
 
         config = model.getConfig();
 
@@ -99,40 +100,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             setStopped();
         }
 
-        t.start();
-
-
     }
-
-    private Thread t = new Thread() {
-        @Override
-        public void run() {
-            super.run();
-            while (true) {
-                final List<OsgiBundle> bundles = Celix.getInstance().getBundlesInList();
-                if (bundles.isEmpty()) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            model.setCelixStatus(BundleStatus.CELIX_STOPPED);
-                        }
-                    });
-                } else {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            model.setCelixStatus(BundleStatus.CELIX_RUNNING);
-                        }
-                    });
-                }
-                try {
-                    sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
 
     @Override
     protected void onStart() {
@@ -291,9 +259,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 btn_start.setEnabled(false);
                 model.resetBundles();
                 Celix.getInstance().startFramework();
-                if (pager != null) {
-                    pager.setCurrentItem(1);
-                }
             }
 
         });
@@ -319,16 +284,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
     };
 
-
-    /**
-     * Observes the model and checks if there's a update from celix (that it is running or stopped)
-     */
     @Override
-    public void update(Observable observable, Object o) {
-        if (o == BundleStatus.CELIX_RUNNING) {
-            setRunning();
-        } else if (o == BundleStatus.CELIX_STOPPED) {
-            setStopped();
+    public void update(Observable observable, Object data) {
+        if(data == CelixUpdate.CELIX_CHANGED) {
+            if(Celix.getInstance().isCelixRunning()) {
+                setRunning();
+            } else {
+                setStopped();
+            }
         }
     }
 }

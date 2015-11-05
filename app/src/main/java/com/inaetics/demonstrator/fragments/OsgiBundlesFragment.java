@@ -26,6 +26,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import apache.celix.Celix;
+import apache.celix.model.CelixUpdate;
 import apache.celix.model.OsgiBundle;
 
 /**
@@ -46,10 +47,6 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
         Celix.getInstance().addObserver(this);
         list = (ExpandableLayoutListView) rootview.findViewById(R.id.osgi_listview);
         fab = (FloatingActionButton) rootview.findViewById(R.id.fab);
-
-        String[] array = {"Hallo", "Doei", "Welkom"};
-
-//        ArrayAdapter<String> adap = new ArrayAdapter<>(getActivity(), R.layout.osgi_bundles_row, R.id.symb_name_text, array);
 
         adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundles_row, model.getOsgiBundles());
         list.setAdapter(adapter);
@@ -81,6 +78,8 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
             }
         });
 
+        fab.hide();
+
         return rootview;
     }
 
@@ -95,18 +94,29 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
         listView.setAdapter(adapter);
         dialog.setView(listView);
 
-        dialog.setPositiveButton("Install", new DialogInterface.OnClickListener() {
+        dialog.setNegativeButton("Install", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String bundleLocation = model.getBundleLocation();
                 Celix celix = Celix.getInstance();
-                for(String fileName : adapter.getInstallBundles()) {
+                for (String fileName : adapter.getInstallBundles()) {
                     celix.installBundle(bundleLocation + "/" + fileName);
                 }
             }
         });
 
-        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        dialog.setPositiveButton("Start", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String bundleLocation = model.getBundleLocation();
+                Celix celix = Celix.getInstance();
+                for (String fileName : adapter.getInstallBundles()) {
+                    celix.installStartBundle(bundleLocation + "/" + fileName);
+                }
+            }
+        });
+
+        dialog.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
@@ -135,6 +145,14 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
                 }
             } else {
                 model.getOsgiBundles().add(newBundle);
+                adapter.notifyDataSetChanged();
+            }
+        } else if (o == CelixUpdate.CELIX_CHANGED) {
+            if(Celix.getInstance().isCelixRunning()) {
+                fab.show();
+            } else {
+                fab.hide();
+                model.getOsgiBundles().clear();
                 adapter.notifyDataSetChanged();
             }
         }

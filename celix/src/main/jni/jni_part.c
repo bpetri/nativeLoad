@@ -34,7 +34,10 @@ callback_t cb[] = {
         },
         {
                 "bundleChanged", "(Ljava/lang/String;)V",
-        }
+        },
+        {
+                "setCelixRunning", "(Z)V",
+        },
 };
 
 struct framework * framework;
@@ -135,6 +138,26 @@ void* installBundle(void* bundleLocation) {
     if (bundleContext_installBundle(context, location, &current) != CELIX_SUCCESS)
     {
         printf("Failed to install bundle %s \n", location);
+    }
+}
+
+void* installStartBundle(void* bundleLocation) {
+    // Install bundle
+    char* location = (char*) bundleLocation;
+    printf("Installing bundle '%s' \n", getBundleName(location));
+    bundle_pt fw_bundle = NULL;
+    bundle_context_pt context = NULL;
+    bundle_pt current = NULL;
+
+    framework_getFrameworkBundle(framework, &fw_bundle);
+    bundle_getContext(fw_bundle, &context);
+    if (bundleContext_installBundle(context, location, &current) != CELIX_SUCCESS)
+    {
+        printf("Failed to install bundle %s \n", location);
+    } else {
+        if (bundle_startWithOptions(current, 0) != CELIX_SUCCESS) {
+            printf("Failed to start bundle %s \n", location);
+        }
     }
 }
 
@@ -254,6 +277,29 @@ void* callback_to_bundleChanged() {
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
+void* callback_celix_changed(bool is_running) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jboolean result = false;
+    if(is_running) {
+        result = true;
+    }
+    (*je)->CallVoidMethod(je, gObject, cb[2].cbMethod, result);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
+
 void* log_changedBundle(void *listener, bundle_event_pt event)
 {
     bundle_pt bundle = event->bundle;
@@ -330,7 +376,7 @@ void* startCelix(void* param) {
 
                 bundle_start(fwBundle);
 
-
+                callback_celix_changed(true);
 
                 char delims[] = " ";
                 char *result = NULL;
@@ -380,6 +426,7 @@ void* startCelix(void* param) {
                 framework_waitForStop(framework);
                 framework_destroy(framework);
                 framework = NULL;
+                callback_celix_changed(false);
 
             }
         }
@@ -476,7 +523,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_initCallback(JNIEnv* je, jobject 
     } else {
         int i = sizeof cb / sizeof cb[0];
         while(i--) {
-            cb[i].cbMethod = (*je)->GetMethodID(je, clazz, cb[i].cbName, cb[0].cbSignature);
+            cb[i].cbMethod = (*je)->GetMethodID(je, clazz, cb[i].cbName, cb[i].cbSignature);
         }
     }
     start_logger("printf");
@@ -521,6 +568,14 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleInstall(JNIEnv* je, jclass 
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
     pthread_t thread;
     return pthread_create( &thread, NULL, installBundle, (void*) locationString);
+}
+
+JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleInstallStart(JNIEnv* je, jclass jc, jstring i)
+{
+    // convert Java string to UTF-8
+    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
+    pthread_t thread;
+    return pthread_create( &thread, NULL, installStartBundle, (void*) locationString);
 }
 
 JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStart(JNIEnv* je, jclass jc, jstring i)

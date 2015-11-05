@@ -22,6 +22,7 @@ public class Celix extends Observable {
     private static Celix self;
     private String stdio;
     private Handler handler;
+    private boolean celixRunning = false;
 
     static {
         System.loadLibrary("celix_utils");
@@ -58,8 +59,28 @@ public class Celix extends Observable {
         this.context = context;
     }
 
+    /**
+     * Method for checking if celix is running
+     * @return
+     */
+    public boolean isCelixRunning() {
+        return celixRunning;
+    }
 
     // METHODS
+
+    /**
+     * Installs the bundle from specified path
+     *
+     * @param bundlePath
+     */
+    public void installBundle(String bundlePath) {
+        bundleInstall(bundlePath);
+    }
+
+    public void installStartBundle(String bundlePath) {
+        bundleInstallStart(bundlePath);
+    }
 
     /**
      * Starts the bundle from specified path
@@ -74,14 +95,6 @@ public class Celix extends Observable {
         bundleStartById(id);
     }
 
-    /**
-     * Installs the bundle from specified path
-     *
-     * @param bundlePath
-     */
-    public void installBundle(String bundlePath) {
-        bundleInstall(bundlePath);
-    }
 
     public void stopBundle(String bundlePath) {
         bundleStop(bundlePath);
@@ -170,6 +183,18 @@ public class Celix extends Observable {
     }
 
     // CALLBACK
+
+    private void setCelixRunning(boolean isRunning) {
+        this.celixRunning = isRunning;
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                setChanged();
+                notifyObservers(CelixUpdate.CELIX_CHANGED);
+            }
+        });
+    }
+
     private void confirmLogChanged(String newLine) {
         if (stdio.length() > 25000) {
             stdio = stdio.substring(10000);
@@ -216,6 +241,8 @@ public class Celix extends Observable {
     private native int stopCelix();
 
     private native int bundleInstall(String path);
+
+    private native int bundleInstallStart(String path);
 
     private native int bundleStart(String path);
     private native int bundleStartById(long id);
