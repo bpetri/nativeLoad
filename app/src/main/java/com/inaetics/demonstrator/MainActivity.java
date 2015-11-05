@@ -29,13 +29,11 @@ import com.astuetz.PagerSlidingTabStrip;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
-import com.inaetics.demonstrator.model.BundleItem;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
@@ -43,7 +41,6 @@ import java.util.Scanner;
 import apache.celix.Celix;
 import apache.celix.model.CelixUpdate;
 import apache.celix.model.Config;
-import apache.celix.model.OsgiBundle;
 
 
 public class MainActivity extends AppCompatActivity implements Observer {
@@ -78,22 +75,16 @@ public class MainActivity extends AppCompatActivity implements Observer {
         config = model.getConfig();
 
         // Only one time!! After configuration change don't do it again.
-        if (model.getBundles().isEmpty()) {
+        if (!model.areBundlesMoved()) {
             File dirLocation = getExternalFilesDir(null);
             if (dirLocation == null) {
                 dirLocation = getCacheDir();
             }
             model.setBundleLocation(dirLocation.getAbsolutePath());
             model.moveBundles(getResources().getAssets());
-            for (String fileName : dirLocation.list()) {
-                BundleItem b;
-                b = model.addBundle(fileName, false);
-                if (b != null) {
-                    b.setStatus(BundleStatus.BUNDLE_LOCALLY_AVAILABLE);
-                }
-            }
         }
         btn_start = (Button) findViewById(R.id.start_btn);
+
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
             setRunning();
         } else {
@@ -249,15 +240,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String str = "";
-                for (BundleItem b : model.getBundles()) {
-                    if (b.isChecked()) {
-                        str += model.getBundleLocation() + "/" + b.getFilename() + " ";
-                    }
-                }
-                str.trim();
                 config.putProperty("cosgi.auto.start.1", str);
                 btn_start.setEnabled(false);
-                model.resetBundles();
                 Celix.getInstance().startFramework();
             }
 
