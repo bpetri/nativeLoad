@@ -57,6 +57,25 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     }
     return JNI_VERSION_1_4;
 }
+void confirmLogChanged(char* buf) {
+    JNIEnv* je;
+    int isAttached = 0;
+    int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
+    if(status < 0) {
+        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
+
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+        }
+        isAttached = 1;
+    }
+
+    jstring jstr = (*je)->NewStringUTF(je, buf);
+    (*je)->CallVoidMethod(je, gObject, cb[0].cbMethod, jstr);
+
+    if(isAttached)
+        (*gJavaVM)->DetachCurrentThread(gJavaVM);
+}
 
 static int thread_func(void)
 {
@@ -89,26 +108,6 @@ int start_logger(const char *app_name)
         return -1;
     pthread_detach(thr);
     return 0;
-}
-
-void confirmLogChanged(char* buf) {
-    JNIEnv* je;
-    int isAttached = 0;
-    int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);
-    if(status < 0) {
-        status = (*gJavaVM)->AttachCurrentThread(gJavaVM, &je, NULL);
-
-        if(status < 0) {
-            LOGE("callback_handler: failed to attach current thread");
-        }
-        isAttached = 1;
-    }
-
-    jstring jstr = (*je)->NewStringUTF(je, buf);
-    (*je)->CallVoidMethod(je, gObject, cb[0].cbMethod, jstr);
-
-    if(isAttached)
-        (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
 
 char *getBundleName(char* location) {

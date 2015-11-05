@@ -16,7 +16,7 @@ android {
     }
     // call regular ndk-build(.cmd) script from app directory
     task ndkBuild(type: Exec) {
-        commandLine 'ndk-build', '-C', file('src/main').absolutePath
+        commandLine 'ndk-build', 'NDK_APPLICATION_MK=../../../celix/src/main/jni/Application.mk' , '-C', file('src/main').absolutePath
     }
     tasks.withType(JavaCompile) {
         compileTask -> compileTask.dependsOn ndkBuild

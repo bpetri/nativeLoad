@@ -18,7 +18,6 @@ import apache.celix.model.OsgiBundle;
  * Created by mjansen on 28-10-15.
  */
 public class Celix extends Observable {
-    private Context context;
     private static Celix self;
     private String stdio;
     private Handler handler;
@@ -47,16 +46,6 @@ public class Celix extends Observable {
             self = new Celix();
         }
         return self;
-    }
-
-    /**
-     * Method to pass context to the celix object.
-     * This context is needed to do initialize the celix framework.
-     *
-     * @param context Application context, ('this' in MainActivity)
-     */
-    public void setContext(Context context) {
-        this.context = context;
     }
 
     /**
@@ -117,8 +106,8 @@ public class Celix extends Observable {
     /**
      * Starts the celix framework with the config.properties in getFilesDir()
      */
-    public void startFramework() {
-        startCelix(context.getApplicationContext().getFilesDir() + "/" + Config.CONFIG_PROPERTIES);
+    public void startFramework(String configPath) {
+        startCelix(configPath);
     }
 
     /**

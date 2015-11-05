@@ -10,4 +10,16 @@
         <item name="background">@color/inaetics_blue</item>
     </style>
 
+    <style name="DialogTheme" parent="android:Theme.Holo.Light.Dialog">
+
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+
+
+        <!-- No backgrounds, titles or window float -->
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
 </resources>
