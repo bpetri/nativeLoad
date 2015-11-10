@@ -272,30 +272,24 @@ void* callback_to_bundleChanged(long id, bundle_state_e state, char * name, char
 
 void* log_changedBundle(void *listener, bundle_event_pt event)
 {
-    bundle_pt bundle = event->bundle;
     bundle_event_type_e type = event->type;
+    long id = event->bundleId;
+    char * name = event->bundleSymbolicName;
+    char * location = "";
 
-    bundle_archive_pt archive = NULL;
-    long id;
-    bundle_state_e state;
-    module_pt module = NULL;
-    char * name = NULL;
-    char * location = NULL;
+    if (type == OSGI_FRAMEWORK_BUNDLE_EVENT_INSTALLED) {
+        bundle_pt bundle = framework_getBundleById(framework, id);
 
-    if (bundle) {
-        bundle_getState(bundle, &state);
-        bundle_getArchive(bundle, &archive);
-        if (archive) {
-            bundleArchive_getId(archive, &id);
-            bundleArchive_getLocation(archive, &location);
-        }
-        bundle_getCurrentModule(bundle, &module);
-        if (module) {
-            module_getSymbolicName(module, &name);
+        if (bundle) {
+            bundle_archive_pt archive = NULL;
+            bundle_getArchive(bundle, &archive);
+            if (archive) {
+                bundleArchive_getLocation(archive, &location);
+            }
         }
     }
 
-    callback_to_bundleChanged(id, state, name, location);
+    callback_to_bundleChanged(id, type, name, location);
 }
 
 void* callback_celix_changed(bool is_running) {
@@ -467,17 +461,19 @@ array_list_pt printBundles() {
 
 char * psCommand_stateString(bundle_state_e state) {
     switch (state) {
-        case OSGI_FRAMEWORK_BUNDLE_ACTIVE:
+        case OSGI_FRAMEWORK_BUNDLE_EVENT_STARTED:
             return "Active";
-        case OSGI_FRAMEWORK_BUNDLE_INSTALLED:
+        case OSGI_FRAMEWORK_BUNDLE_EVENT_INSTALLED:
             return "Installed";
-        case OSGI_FRAMEWORK_BUNDLE_RESOLVED:
+        case OSGI_FRAMEWORK_BUNDLE_EVENT_RESOLVED:
             return "Resolved";
-        case OSGI_FRAMEWORK_BUNDLE_STARTING:
+        case OSGI_FRAMEWORK_BUNDLE_EVENT_STARTING:
             return "Starting";
-        case OSGI_FRAMEWORK_BUNDLE_STOPPING:
+        case OSGI_FRAMEWORK_BUNDLE_EVENT_STOPPING:
             return "Stopping";
-        case OSGI_FRAMEWORK_BUNDLE_UNINSTALLED:
+        case OSGI_FRAMEWORK_BUNDLE_EVENT_STOPPED:
+            return "Resolved";
+        case OSGI_FRAMEWORK_BUNDLE_EVENT_UNINSTALLED:
             return "Deleted";
         default:
             return "Unknown";

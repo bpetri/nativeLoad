@@ -31,8 +31,8 @@
 #include "celix_threads.h"
 
 struct remote_endpoint {
-    celix_thread_mutex_t serviceLock;
-    void *service;
+	celix_thread_mutex_t serviceLock;
+	void *service;
 };
 
 #endif /* REMOTE_ENDPOINT_IMPL_H_ */

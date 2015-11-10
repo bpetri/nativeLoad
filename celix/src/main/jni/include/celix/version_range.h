@@ -41,7 +41,7 @@
 /**
  * Type definition for the version_range_pt abstract data type.
  */
-typedef struct versionRange *version_range_pt;
+typedef struct versionRange * version_range_pt;
 
 /**
  * Creates a new <code>version_range_pt</code>.
@@ -55,9 +55,7 @@ typedef struct versionRange *version_range_pt;
  * 		- CELIX_SUCCESS when no errors are encountered.
  * 		- CELIX_ENOMEM If allocating memory for <code>versionRange</code> failed.
  */
-celix_status_t versionRange_createVersionRange(version_pt low, bool isLowInclusive, version_pt high,
-                                               bool isHighInclusive,
-                                               version_range_pt *versionRange);
+celix_status_t versionRange_createVersionRange(version_pt low, bool isLowInclusive, version_pt high, bool isHighInclusive, version_range_pt *versionRange);
 
 /**
  * Creates an infinite version range using ::version_createEmptyVersion for the low version,
@@ -81,8 +79,7 @@ celix_status_t versionRange_destroy(version_range_pt range);
  * @return Status code indication failure or success:
  * 		- CELIX_SUCCESS when no errors are encountered.
  */
-celix_status_t versionRange_isInRange(version_range_pt versionRange, version_pt version,
-                                      bool *inRange);
+celix_status_t versionRange_isInRange(version_range_pt versionRange, version_pt version, bool *inRange);
 
 /**
  * Parses a version range from the specified string.
@@ -106,7 +103,7 @@ celix_status_t versionRange_isInRange(version_range_pt versionRange, version_pt 
  * 		- CELIX_ILLEGAL_ARGUMENT If the numerical components are negative,
  * 		  	the qualifier string is invalid or <code>versionStr</code> is impropertly formatted.
  */
-celix_status_t versionRange_parse(char *rangeStr, version_range_pt *range);
+celix_status_t versionRange_parse(char * rangeStr, version_range_pt *range);
 
 /**
  * @}

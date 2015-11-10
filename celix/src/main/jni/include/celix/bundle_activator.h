@@ -54,8 +54,7 @@
  * 		- Any other status code will mark the bundle as stopped and the framework will remove this
  * 		  bundle's listeners, unregister all services, and release all services used by this bundle.
  */
-ACTIVATOR_EXPORT celix_status_t bundleActivator_create(bundle_context_pt context_ptr,
-                                                       void **userData);
+ACTIVATOR_EXPORT celix_status_t bundleActivator_create(bundle_context_pt context_ptr, void **userData);
 
 /**
  * Called when this bundle is started so the Framework can perform the bundle-specific activities necessary
@@ -109,8 +108,7 @@ ACTIVATOR_EXPORT celix_status_t bundleActivator_stop(void *userData, bundle_cont
  * 		- Any other status code will mark the bundle as stopped and the framework will remove this
  * 		  bundle's listeners, unregister all services, and release all services used by this bundle.
  */
-ACTIVATOR_EXPORT celix_status_t bundleActivator_destroy(void *userData,
-                                                        bundle_context_pt  __attribute__((unused))  __attribute__((unused)) context);
+ACTIVATOR_EXPORT celix_status_t bundleActivator_destroy(void *userData, bundle_context_pt  __attribute__((unused))  __attribute__((unused)) context);
 
 #endif /* BUNDLE_ACTIVATOR_H_ */
 

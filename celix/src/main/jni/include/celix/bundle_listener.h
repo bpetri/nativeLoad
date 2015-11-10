@@ -35,10 +35,10 @@ typedef struct bundle_listener *bundle_listener_pt;
 #include "bundle_event.h"
 
 struct bundle_listener {
-    void *handle;
-
-    celix_status_t (*bundleChanged)(void *listener, bundle_event_pt event);
+	void * handle;
+	celix_status_t (*bundleChanged)(void * listener, bundle_event_pt event);
 };
+
 
 
 #endif /* service_listener_t_H_ */

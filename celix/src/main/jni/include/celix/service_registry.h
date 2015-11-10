@@ -27,7 +27,7 @@
 #ifndef SERVICE_REGISTRY_H_
 #define SERVICE_REGISTRY_H_
 
-typedef struct serviceRegistry *service_registry_pt;
+typedef struct serviceRegistry * service_registry_pt;
 
 #include "properties.h"
 #include "filter.h"
@@ -36,75 +36,31 @@ typedef struct serviceRegistry *service_registry_pt;
 #include "array_list.h"
 #include "service_registration.h"
 
-typedef void (*serviceChanged_function_pt)(framework_pt, service_event_type_e,
-                                           service_registration_pt, properties_pt);
+typedef void (*serviceChanged_function_pt)(framework_pt, service_event_type_e, service_registration_pt, properties_pt);
 
-celix_status_t serviceRegistry_create(framework_pt framework,
-                                      serviceChanged_function_pt serviceChanged,
-                                      service_registry_pt *registry);
-
+celix_status_t serviceRegistry_create(framework_pt framework, serviceChanged_function_pt serviceChanged, service_registry_pt *registry);
 celix_status_t serviceRegistry_destroy(service_registry_pt registry);
 
-celix_status_t serviceRegistry_getRegisteredServices(service_registry_pt registry, bundle_pt bundle,
-                                                     array_list_pt *services);
-
-celix_status_t serviceRegistry_getServicesInUse(service_registry_pt registry, bundle_pt bundle,
-                                                array_list_pt *services);
-
-celix_status_t serviceRegistry_registerService(service_registry_pt registry, bundle_pt bundle,
-                                               char *serviceName, void *serviceObject,
-                                               properties_pt dictionary,
-                                               service_registration_pt *registration);
-
-celix_status_t serviceRegistry_registerServiceFactory(service_registry_pt registry,
-                                                      bundle_pt bundle, char *serviceName,
-                                                      service_factory_pt factory,
-                                                      properties_pt dictionary,
-                                                      service_registration_pt *registration);
-
-celix_status_t serviceRegistry_unregisterService(service_registry_pt registry, bundle_pt bundle,
-                                                 service_registration_pt registration);
-
+celix_status_t serviceRegistry_getRegisteredServices(service_registry_pt registry, bundle_pt bundle, array_list_pt *services);
+celix_status_t serviceRegistry_getServicesInUse(service_registry_pt registry, bundle_pt bundle, array_list_pt *services);
+celix_status_t serviceRegistry_registerService(service_registry_pt registry, bundle_pt bundle, char * serviceName, void * serviceObject, properties_pt dictionary, service_registration_pt *registration);
+celix_status_t serviceRegistry_registerServiceFactory(service_registry_pt registry, bundle_pt bundle, char * serviceName, service_factory_pt factory, properties_pt dictionary, service_registration_pt *registration);
+celix_status_t serviceRegistry_unregisterService(service_registry_pt registry, bundle_pt bundle, service_registration_pt registration);
 celix_status_t serviceRegistry_unregisterServices(service_registry_pt registry, bundle_pt bundle);
-
-celix_status_t serviceRegistry_getServiceReferences(service_registry_pt registry, bundle_pt bundle,
-                                                    const char *serviceName, filter_pt filter,
-                                                    array_list_pt *references);
-
-celix_status_t serviceRegistry_getService(service_registry_pt registry, bundle_pt bundle,
-                                          service_reference_pt reference, void **service);
-
-celix_status_t serviceRegistry_ungetService(service_registry_pt registry, bundle_pt bundle,
-                                            service_reference_pt reference, bool *result);
-
+celix_status_t serviceRegistry_getServiceReferences(service_registry_pt registry, bundle_pt bundle, const char *serviceName, filter_pt filter, array_list_pt *references);
+celix_status_t serviceRegistry_getService(service_registry_pt registry, bundle_pt bundle, service_reference_pt reference, void **service);
+celix_status_t serviceRegistry_ungetService(service_registry_pt registry, bundle_pt bundle, service_reference_pt reference, bool *result);
 void serviceRegistry_ungetServices(service_registry_pt registry, bundle_pt bundle);
+array_list_pt serviceRegistry_getUsingBundles(service_registry_pt registry, service_reference_pt reference);
+service_registration_pt serviceRegistry_findRegistration(service_registry_pt registry, service_reference_pt reference);
+celix_status_t serviceRegistry_ungetServiceReference(service_registry_pt registry, bundle_pt bundle, service_reference_pt reference);
+celix_status_t serviceRegistry_ungetServiceReferences(service_registry_pt registry, bundle_pt bundle);
 
-array_list_pt serviceRegistry_getUsingBundles(service_registry_pt registry,
-                                              service_reference_pt reference);
+celix_status_t serviceRegistry_createServiceReference(service_registry_pt registry, bundle_pt bundle, service_registration_pt registration, service_reference_pt *reference);
+celix_status_t serviceRegistry_getServiceReferencesForRegistration(service_registry_pt registry, service_registration_pt registration, array_list_pt *references);
 
-service_registration_pt serviceRegistry_findRegistration(service_registry_pt registry,
-                                                         service_reference_pt reference);
+celix_status_t serviceRegistry_getListenerHooks(service_registry_pt registry, bundle_pt bundle, array_list_pt *hooks);
 
-celix_status_t serviceRegistry_ungetServiceReference(service_registry_pt registry, bundle_pt bundle,
-                                                     service_reference_pt reference);
-
-celix_status_t serviceRegistry_ungetServiceReferences(service_registry_pt registry,
-                                                      bundle_pt bundle);
-
-celix_status_t serviceRegistry_createServiceReference(service_registry_pt registry,
-                                                      bundle_pt bundle,
-                                                      service_registration_pt registration,
-                                                      service_reference_pt *reference);
-
-celix_status_t serviceRegistry_getServiceReferencesForRegistration(service_registry_pt registry,
-                                                                   service_registration_pt registration,
-                                                                   array_list_pt *references);
-
-celix_status_t serviceRegistry_getListenerHooks(service_registry_pt registry, bundle_pt bundle,
-                                                array_list_pt *hooks);
-
-celix_status_t serviceRegistry_servicePropertiesModified(service_registry_pt registry,
-                                                         service_registration_pt registration,
-                                                         properties_pt oldprops);
+celix_status_t serviceRegistry_servicePropertiesModified(service_registry_pt registry, service_registration_pt registration, properties_pt oldprops);
 
 #endif /* SERVICE_REGISTRY_H_ */

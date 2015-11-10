@@ -37,17 +37,15 @@ typedef struct listener_hook_service *listener_hook_service_pt;
 #define OSGI_FRAMEWORK_LISTENER_HOOK_SERVICE_NAME "listener_hook_service"
 
 struct listener_hook_info {
-    bundle_context_pt context;
-    char *filter;
-    bool removed;
+	bundle_context_pt context;
+	char *filter;
+	bool removed;
 };
 
 struct listener_hook_service {
-    void *handle;
-
-    celix_status_t (*added)(void *hook, array_list_pt listeners);
-
-    celix_status_t (*removed)(void *hook, array_list_pt listeners);
+	void *handle;
+	celix_status_t (*added)(void *hook, array_list_pt listeners);
+	celix_status_t (*removed)(void *hook, array_list_pt listeners);
 };
 
 #endif /* LISTENER_HOOK_SERVICE_H_ */

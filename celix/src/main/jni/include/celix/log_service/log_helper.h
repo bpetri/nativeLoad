@@ -24,16 +24,12 @@
 #include "bundle_context.h"
 #include "log_service.h"
 
-typedef struct log_helper *log_helper_pt;
+typedef struct log_helper* log_helper_pt;
 
-celix_status_t logHelper_create(bundle_context_pt context, log_helper_pt *log_helper);
-
+celix_status_t logHelper_create(bundle_context_pt context, log_helper_pt* log_helper);
 celix_status_t logHelper_start(log_helper_pt loghelper);
-
 celix_status_t logHelper_stop(log_helper_pt loghelper);
-
-celix_status_t logHelper_destroy(log_helper_pt *loghelper);
-
-celix_status_t logHelper_log(log_helper_pt loghelper, log_level_t level, char *message, ...);
+celix_status_t logHelper_destroy(log_helper_pt* loghelper);
+celix_status_t logHelper_log(log_helper_pt loghelper, log_level_t level, char* message, ... );
 
 #endif /* LOGHELPER_H_ */

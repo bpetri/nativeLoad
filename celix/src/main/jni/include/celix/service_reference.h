@@ -27,7 +27,7 @@
 #ifndef SERVICE_REFERENCE_H_
 #define SERVICE_REFERENCE_H_
 
-typedef struct serviceReference *service_reference_pt;
+typedef struct serviceReference * service_reference_pt;
 
 #include "celixbool.h"
 #include "array_list.h"
@@ -35,31 +35,20 @@ typedef struct serviceReference *service_reference_pt;
 #include "bundle.h"
 #include "framework_exports.h"
 
-FRAMEWORK_EXPORT celix_status_t serviceReference_getBundle(service_reference_pt reference,
-                                                           bundle_pt *bundle);
+FRAMEWORK_EXPORT celix_status_t serviceReference_getBundle(service_reference_pt reference, bundle_pt *bundle);
 
-FRAMEWORK_EXPORT bool serviceReference_isAssignableTo(service_reference_pt reference,
-                                                      bundle_pt requester, char *serviceName);
+FRAMEWORK_EXPORT bool serviceReference_isAssignableTo(service_reference_pt reference, bundle_pt requester, char * serviceName);
 
-FRAMEWORK_EXPORT celix_status_t serviceReference_getUsingBundles(service_reference_pt reference,
-                                                                 array_list_pt *bundles);
+FRAMEWORK_EXPORT celix_status_t serviceReference_getUsingBundles(service_reference_pt reference, array_list_pt *bundles);
 
-FRAMEWORK_EXPORT celix_status_t serviceReference_getProperty(service_reference_pt reference,
-                                                             char *key, char **value);
+FRAMEWORK_EXPORT celix_status_t serviceReference_getProperty(service_reference_pt reference, char *key, char **value);
+FRAMEWORK_EXPORT celix_status_t serviceReference_getPropertyKeys(service_reference_pt reference, char **keys[], unsigned int *size);
 
-FRAMEWORK_EXPORT celix_status_t serviceReference_getPropertyKeys(service_reference_pt reference,
-                                                                 char **keys[], unsigned int *size);
+FRAMEWORK_EXPORT celix_status_t serviceReference_getServiceRegistration(service_reference_pt reference, service_registration_pt *registration);
 
-FRAMEWORK_EXPORT celix_status_t serviceReference_equals(service_reference_pt reference,
-                                                        service_reference_pt compareTo,
-                                                        bool *equal);
-
+FRAMEWORK_EXPORT celix_status_t serviceReference_equals(service_reference_pt reference, service_reference_pt compareTo, bool *equal);
 FRAMEWORK_EXPORT unsigned int serviceReference_hashCode(void *referenceP);
-
 FRAMEWORK_EXPORT int serviceReference_equals2(void *reference1, void *reference2);
-
-FRAMEWORK_EXPORT celix_status_t serviceReference_compareTo(service_reference_pt reference,
-                                                           service_reference_pt compareTo,
-                                                           int *compare);
+FRAMEWORK_EXPORT celix_status_t serviceReference_compareTo(service_reference_pt reference, service_reference_pt compareTo, int *compare);
 
 #endif /* SERVICE_REFERENCE_H_ */

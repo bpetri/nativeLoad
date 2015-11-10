@@ -34,13 +34,12 @@
 #include "framework_exports.h"
 #include "celix_threads.h"
 
-FRAMEWORK_EXPORT unsigned int utils_stringHash(void *string);
+FRAMEWORK_EXPORT unsigned int utils_stringHash(void * string);
+FRAMEWORK_EXPORT int utils_stringEquals(void * string, void * toCompare);
+FRAMEWORK_EXPORT char * string_ndup(const char *s, size_t n);
+FRAMEWORK_EXPORT char * utils_stringTrim(char * string);
 
-FRAMEWORK_EXPORT int utils_stringEquals(void *string, void *toCompare);
-
-FRAMEWORK_EXPORT char *string_ndup(const char *s, size_t n);
-
-FRAMEWORK_EXPORT char *utils_stringTrim(char *string);
+FRAMEWORK_EXPORT int utils_compareServiceIdsAndRanking(long servId, long servRank, long otherServId, long otherServRank);
 
 FRAMEWORK_EXPORT celix_status_t thread_equalsSelf(celix_thread_t thread, bool *equals);
 

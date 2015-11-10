@@ -39,7 +39,7 @@
 /**
  * The definition of the version_pt abstract data type.
  */
-typedef struct version *version_pt;
+typedef struct version * version_pt;
 
 /**
  * Creates a new version_pt using the supplied arguments.
@@ -57,8 +57,7 @@ typedef struct version *version_pt;
  * 		- CELIX_ILLEGAL_ARGUMENT If the numerical components are negative
  * 		  or the qualifier string is invalid.
  */
-FRAMEWORK_EXPORT celix_status_t version_createVersion(int major, int minor, int micro,
-                                                      char *qualifier, version_pt *version);
+FRAMEWORK_EXPORT celix_status_t version_createVersion(int major, int minor, int micro, char * qualifier, version_pt *version);
 
 FRAMEWORK_EXPORT celix_status_t version_destroy(version_pt version);
 
@@ -101,8 +100,7 @@ FRAMEWORK_EXPORT celix_status_t version_clone(version_pt version, version_pt *cl
  * 		- CELIX_ILLEGAL_ARGUMENT If the numerical components are negative,
  * 		  	the qualifier string is invalid or <code>versionStr</code> is improperly formatted.
  */
-FRAMEWORK_EXPORT celix_status_t version_createVersionFromString(char *versionStr,
-                                                                version_pt *version);
+FRAMEWORK_EXPORT celix_status_t version_createVersionFromString(char * versionStr, version_pt *version);
 
 /**
  * The empty version "0.0.0".
@@ -117,11 +115,8 @@ FRAMEWORK_EXPORT celix_status_t version_createVersionFromString(char *versionStr
 FRAMEWORK_EXPORT celix_status_t version_createEmptyVersion(version_pt *version);
 
 FRAMEWORK_EXPORT celix_status_t version_getMajor(version_pt version, int *major);
-
 FRAMEWORK_EXPORT celix_status_t version_getMinor(version_pt version, int *minor);
-
 FRAMEWORK_EXPORT celix_status_t version_getMicro(version_pt version, int *micro);
-
 FRAMEWORK_EXPORT celix_status_t version_getQualifier(version_pt version, char **qualifier);
 
 /**
@@ -149,8 +144,7 @@ FRAMEWORK_EXPORT celix_status_t version_getQualifier(version_pt version, char **
  * @return Status code indication failure or success:
  * 		- CELIX_SUCCESS when no errors are encountered.
  */
-FRAMEWORK_EXPORT celix_status_t version_compareTo(version_pt version, version_pt compare,
-                                                  int *result);
+FRAMEWORK_EXPORT celix_status_t version_compareTo(version_pt version, version_pt compare, int *result);
 
 /**
  * Returns the string representation of <code>version</code> identifier.

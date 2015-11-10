@@ -29,16 +29,16 @@
 #ifndef SERVICE_LISTENER_H_
 #define SERVICE_LISTENER_H_
 
-typedef struct serviceListener *service_listener_pt;
+typedef struct serviceListener * service_listener_pt;
 
 #include "celix_errno.h"
 #include "service_event.h"
 
 struct serviceListener {
-    void *handle;
-
-    celix_status_t (*serviceChanged)(void *listener, service_event_pt event);
+	void * handle;
+	celix_status_t (*serviceChanged)(void * listener, service_event_pt event);
 };
+
 
 
 #endif /* SERVICE_LISTENER_H_ */

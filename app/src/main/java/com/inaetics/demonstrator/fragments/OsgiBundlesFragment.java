@@ -85,8 +85,8 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
 
     private void showDialog() {
         Context context = getActivity();
-        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-        dialog.setTitle("Select bundle to install");
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context,R.style.DialogTheme);
+        dialog.setTitle("Select bundle(s)");
         String[] files = new File(model.getBundleLocation()).list();
 
         ListView listView = new ListView(context);
@@ -138,9 +138,12 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
                 }
             }
             if (existingBundle != null) {
-                Log.e("Changing status","Old: " + existingBundle.getStatus() + " New: " + newBundle.getStatus());
                 if (!existingBundle.getStatus().equals(newBundle.getStatus())) {
-                    existingBundle.setStatus(newBundle.getStatus());
+                    if (newBundle.getStatus().equals("Deleted")) {
+                        model.getOsgiBundles().remove(existingBundle);
+                    } else {
+                        existingBundle.setStatus(newBundle.getStatus());
+                    }
                     adapter.notifyDataSetChanged();
                 }
             } else {

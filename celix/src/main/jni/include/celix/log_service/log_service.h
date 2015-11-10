@@ -30,11 +30,12 @@
 #include "celix_errno.h"
 #include "service_reference.h"
 
-static const char *const OSGI_LOGSERVICE_NAME = "log_service";
+static const char * const OSGI_LOGSERVICE_NAME = "log_service";
 
 typedef struct log_service_data *log_service_data_pt;
 
-enum log_level {
+enum log_level
+{
     OSGI_LOGSERVICE_ERROR = 0x00000001,
     OSGI_LOGSERVICE_WARNING = 0x00000002,
     OSGI_LOGSERVICE_INFO = 0x00000003,
@@ -45,14 +46,12 @@ typedef enum log_level log_level_t;
 
 struct log_service {
     log_service_data_pt logger;
-
-    celix_status_t (*log)(log_service_data_pt logger, log_level_t level, char *message);
-
-    celix_status_t (*logSr)(log_service_data_pt logger, service_reference_pt reference,
-                            log_level_t level, char *message);
+    celix_status_t (*log)(log_service_data_pt logger, log_level_t level, char * message);
+    celix_status_t (*logSr)(log_service_data_pt logger, service_reference_pt reference, log_level_t level, char * message);
 };
 
 typedef struct log_service *log_service_pt;
+
 
 
 #endif /* LOG_SERVICE_H_ */

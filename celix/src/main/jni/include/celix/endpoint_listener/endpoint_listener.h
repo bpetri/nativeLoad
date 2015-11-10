@@ -32,18 +32,14 @@
 
 #include "endpoint_description.h"
 
-static const char *const OSGI_ENDPOINT_LISTENER_SERVICE = "endpoint_listener";
+static const char * const OSGI_ENDPOINT_LISTENER_SERVICE = "endpoint_listener";
 
-static const char *const OSGI_ENDPOINT_LISTENER_SCOPE = "endpoint.listener.scope";
+static const char * const OSGI_ENDPOINT_LISTENER_SCOPE = "endpoint.listener.scope";
 
 struct endpoint_listener {
-    void *handle;
-
-    celix_status_t (*endpointAdded)(void *handle, endpoint_description_pt endpoint,
-                                    char *machtedFilter);
-
-    celix_status_t (*endpointRemoved)(void *handle, endpoint_description_pt endpoint,
-                                      char *machtedFilter);
+	void *handle;
+	celix_status_t (*endpointAdded)(void *handle, endpoint_description_pt endpoint, char *machtedFilter);
+	celix_status_t (*endpointRemoved)(void *handle, endpoint_description_pt endpoint, char *machtedFilter);
 };
 
 typedef struct endpoint_listener *endpoint_listener_pt;

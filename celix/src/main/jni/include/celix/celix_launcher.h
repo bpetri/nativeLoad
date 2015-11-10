@@ -17,35 +17,25 @@
  *under the License.
  */
 /*
- * command_impl.h
+ * celix_launcher.h
  *
- *  \date       Aug 13, 2010
+ *  \date       Jul 30, 2015
  *  \author    	<a href="mailto:dev@celix.apache.org">Apache Celix Project Team</a>
  *  \copyright	Apache License, Version 2.0
  */
 
-#ifndef COMMAND_PRIVATE_H_
-#define COMMAND_PRIVATE_H_
+#ifndef CELIX_LAUNCHER_H
+#define CELIX_LAUNCHER_H
 
-#include "command.h"
-#include "bundle_context.h"
+#include <stdio.h>
+#include "framework.h"
 
-struct command {
-    char *name;
-    char *usage;
-    char *shortDescription;
+int celixLauncher_launch(const char *configFile, framework_pt *framework);
+int celixLauncher_launchWithStream(FILE *config, framework_pt *framework);
 
-    bundle_context_pt bundleContext;
-    void *handle;
+void celixLauncher_stop(framework_pt framework);
+void celixLauncher_destroy(framework_pt framework);
 
-    void (*executeCommand)(command_pt command, char *commandLine, void (*out)(char *),
-                           void (*error)(char *));
-};
+void celixLauncher_waitForShutdown(framework_pt framework);
 
-char *command_getName(command_pt command);
-
-char *command_getUsage(command_pt command);
-
-char *command_getShortDescription(command_pt command);
-
-#endif /* COMMAND_PRIVATE_H_ */
+#endif //CELIX_LAUNCHER_H
