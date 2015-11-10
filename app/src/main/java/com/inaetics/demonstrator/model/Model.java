@@ -28,6 +28,7 @@ public class Model extends Observable {
     private ArrayList<OsgiBundle> osgiBundles;
     private Config config;
     private String bundleLocation;
+    private String cpu_abi;
     private BundleStatus celixStatus;
 
     private Model() {
@@ -78,16 +79,16 @@ public class Model extends Observable {
     public void moveBundles(AssetManager assetManager) {
 
         String[] files = null;
-        String abi = Build.CPU_ABI;
 
         //Get cpu_abi for SDK versions above API 21
+        cpu_abi = Build.CPU_ABI;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String[] abis = Build.SUPPORTED_ABIS;
             for (String ab : abis) {
                 try {
                     files = assetManager.list("celix_bundles/" + ab);
                     if (files != null && files.length > 0) {
-                        abi = ab;
+                        cpu_abi = ab;
                         break;
                     }
                 } catch (IOException e) {
@@ -100,13 +101,13 @@ public class Model extends Observable {
                 files = assetManager.list("celix_bundles/" + Build.CPU_ABI);
                 if (files == null || files.length == 0) {
                     files = assetManager.list("celix_bundles/" + Build.CPU_ABI2);
-                    abi = Build.CPU_ABI2;
+                    cpu_abi = Build.CPU_ABI2;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        Log.e("Bundles", "Using " + abi + " bundles");
+        Log.e("Bundles", "Using " + cpu_abi + " bundles");
 
 
         if (files != null) {
@@ -114,7 +115,7 @@ public class Model extends Observable {
             for (String fileName : files) {
                 File bundleFile = new File(bundleLocation + "/" + fileName);
                 try {
-                    InputStream in = assetManager.open("celix_bundles/" + abi + "/" + fileName);
+                    InputStream in = assetManager.open("celix_bundles/" + cpu_abi + "/" + fileName);
                     if (moveBundle(in, bundleFile)) {
                         localBundles.add(bundleFile);
                     }
@@ -126,7 +127,6 @@ public class Model extends Observable {
         } else {
             Log.e("Zips", "No zips for supported abis found!");
         }
-
     }
 
     /**
@@ -153,5 +153,10 @@ public class Model extends Observable {
             Log.e("BundleMover", "ERROR: " + e.toString());
             return false;
         }
+    }
+
+
+    public String getCpuAbi() {
+        return cpu_abi;
     }
 }

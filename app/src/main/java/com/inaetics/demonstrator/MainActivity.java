@@ -38,18 +38,16 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
 
+
 import apache.celix.Celix;
 import apache.celix.model.CelixUpdate;
 import apache.celix.model.Config;
-
-
 public class MainActivity extends AppCompatActivity implements Observer {
 
     private Model model;
     private Config config;
     private Button btn_start;
     private ViewPager pager;
-    private Handler handler;
 
 
     @Override
@@ -59,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //Initiate celix
         Celix celix = Celix.getInstance();
         celix.addObserver(this);
-        handler = new Handler();
 
         pager = (ViewPager) findViewById(R.id.pager);
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
@@ -232,7 +229,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
      * Changes button to a start button and the onclicklistener.
      */
     private void setStopped() {
-
         btn_start.setText("Start");
         btn_start.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
 
