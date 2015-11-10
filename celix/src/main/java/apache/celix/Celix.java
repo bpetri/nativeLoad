@@ -97,9 +97,6 @@ public class Celix extends Observable {
         bundleDelete(bundlePath);
     }
     public void deleteBundleById(long id) {
-        if(id == 0) {
-            return;
-        }
         bundleDeleteById(id);
     }
 
