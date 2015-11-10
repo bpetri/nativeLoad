@@ -1,0 +1,111 @@
+#
+# Licensed under Apache License v2. See LICENSE for more information.
+#
+
+# Setup aarch64 (Armv8a)
+
+FROM ubuntu:14.04
+MAINTAINER Bjoern Petri <bjoern.petri@sundevil.de>
+
+ENV http_proxy=http://10.160.64.104:8080
+ENV https_proxy=http://10.160.64.104:8080
+ENV ARCH armv7
+ENV PLATFORM android-21
+ENV ANDROID_STANDALONE_TOOLCHAIN  /build/toolchain-arm
+ENV ANDROID_CMAKE_HOME /build/resources/android-cmake
+ENV SYSROOT $ANDROID_STANDALONE_TOOLCHAIN/sysroot
+ENV PATH $ANDROID_STANDALONE_TOOLCHAIN/bin:$ANDROID_STANDALONE_TOOLCHAIN/usr/local/bin:$PATH
+ENV PATH $PATH:/build/resources/android-ndk-r10e
+ENV CROSS_COMPILE aarch64-linux-android
+ENV CC aarch64-linux-android-gcc
+ENV CCX aarch64-linux-android-g++
+ENV AR aarch64-linux-android-ar
+ENV AS aarch64-linux-android-as
+ENV LD aarch64-linux-android-ld
+ENV RANLIB aarch64-linux-android-ranlib
+ENV NM aarch64-linux-android-nm
+ENV STRIP aarch64-linux-android-strip
+ENV CHOST aarch64-linux-android
+
+# install needed tools
+
+RUN apt-get update && apt-get install -y \
+    automake \
+    build-essential \
+    wget \
+    p7zip-full \
+    bash \
+    curl \
+    cmake \
+    git \
+    dejagnu \
+    texinfo \
+    libtool
+
+
+RUN mkdir -p build/output
+
+WORKDIR /build/resources
+
+
+# Extracting ndk/sdk
+# create standalone toolchain
+RUN curl -L -O http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin && \
+	chmod a+x android-ndk-r10e-linux-x86_64.bin && \
+	7z x android-ndk-r10e-linux-x86_64.bin && \
+	bash android-ndk-r10e/build/tools/make-standalone-toolchain.sh --verbose --platform=$PLATFORM --install-dir=$ANDROID_STANDALONE_TOOLCHAIN --toolchain=aarch64-linux-android-4.9 --system=linux-x86_64
+
+
+
+# uuid
+
+RUN curl -L -O http://downloads.sourceforge.net/libuuid/libuuid-1.0.3.tar.gz && \
+	tar -xvzf libuuid-1.0.3.tar.gz && \
+	cd libuuid-1.0.3 && \
+	./configure --host=aarch64-linux-android  --disable-shared --enable-static --prefix=/build/output/uuid && \
+	make && make install
+
+
+# zlib
+
+RUN curl -L -O http://zlib.net/zlib-1.2.8.tar.gz && \
+	tar -xvzf zlib-1.2.8.tar.gz && \
+	cd zlib-1.2.8 && \
+	./configure --prefix=/build/output/zlib && make && make install
+
+# curl
+
+RUN curl -L -O http://curl.haxx.se/download/curl-7.38.0.tar.gz && \
+	tar -xvzf curl-7.38.0.tar.gz && \ 
+	cd curl-7.38.0 && \
+	./configure --host=aarch64-linux-android --disable-shared --enable-static --disable-dependency-tracking --with-zlib=`pwd`/../../output/zlib --without-ca-bundle --without-ca-path --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gopher --disable-sspi --disable-manual --target=aarch64-linux-android --build=x86_64-unknown-linux-gnu --prefix=/build/output/curl && \
+	make && make install
+
+# jansson
+RUN curl -L -O http://www.digip.org/jansson/releases/jansson-2.7.tar.bz2 && \
+	tar -xvjf jansson-2.7.tar.bz2 && \
+	cd jansson-2.7 && ./configure --host=aarch64-linux-android  --disable-shared --enable-static --prefix=/build/output/jansson && \
+	make && make install
+
+
+# libmxl2
+
+RUN curl -L -O http://xmlsoft.org/sources/libxml2-2.7.2.tar.gz && \
+	curl -L -O https://raw.githubusercontent.com/bpetri/libxml2_android/master/config.guess && \
+	curl -L -O https://raw.githubusercontent.com/bpetri/libxml2_android/master/config.sub && \
+	curl -L -O https://raw.githubusercontent.com/bpetri/libxml2_android/master/libxml2.patch && \ 
+	tar -xvzf libxml2-2.7.2.tar.gz && cp config.guess config.sub libxml2-2.7.2 && \
+	patch -p1 < libxml2.patch && \
+	cd libxml2-2.7.2 && \
+	./configure --host=aarch64-linux-android  --disable-shared --enable-static --prefix=/build/output/libxml2 && \
+	make && make install
+
+# libffi
+RUN git clone https://github.com/atgreen/libffi.git && \
+	cd libffi && \
+	./autogen.sh && \
+	./configure --prefix=/build/output/libffi --host=aarch64-linux-android --disable-shared --enable-static && \
+	make && make install
+
+# done
+
