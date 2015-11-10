@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         super.setContentView(R.layout.pager_tab);
         //Initiate celix
         Celix celix = Celix.getInstance();
-        celix.setContext(this);
         celix.addObserver(this);
         handler = new Handler();
 
@@ -170,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 }
                 sc.close();
                 if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
-                    Celix.getInstance().startFramework();
+                    Celix.getInstance().startFramework(getFilesDir() + "/" + Config.CONFIG_PROPERTIES);
                 }
                 Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();
             }
@@ -242,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 String str = "";
                 config.putProperty("cosgi.auto.start.1", str);
                 btn_start.setEnabled(false);
-                Celix.getInstance().startFramework();
+                Celix.getInstance().startFramework(getFilesDir() + "/" + Config.CONFIG_PROPERTIES);
             }
 
         });

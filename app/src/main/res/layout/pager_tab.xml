@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
@@ -32,6 +33,6 @@
         android:text="Start Celix"
         android:id="@+id/start_btn"
         android:background="@android:color/holo_green_light"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"/>
 
 </LinearLayout>
