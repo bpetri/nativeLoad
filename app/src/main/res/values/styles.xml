@@ -7,19 +7,21 @@
         <!--   darker variant for the status bar and contextual app bars -->
         <item name="colorPrimaryDark">#303F9F</item>
         <!--   theme UI controls like checkboxes and text fields -->
-        <item name="colorAccent">@android:color/holo_green_light</item>>
+        <item name="colorAccent">@android:color/holo_green_light</item>
     </style>
 
     <style name="DialogTheme" parent="android:Theme.Holo.Light.Dialog">
-
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">fill_parent</item>
-
-
-        <!-- No backgrounds, titles or window float -->
+        <!-- No backgrounds or titles -->
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">false</item>
     </style>
+
+    <style name="floating_action_button">
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
 
 </resources>
