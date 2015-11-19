@@ -8,17 +8,24 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_awesome_toolbar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="6dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-    <com.astuetz.PagerSlidingTabStrip
+    <android.support.design.widget.TabLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:fillViewport="false"
-        app:pstsTabBackground="@android:color/white"
-        app:pstsTabTextColor="@color/inaetics_blue"
-        app:pstsShouldExpand="true"
-        app:pstsIndicatorColor="@color/inaetics_blue" />
-
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="6dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"

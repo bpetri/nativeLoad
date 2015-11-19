@@ -12,10 +12,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -25,7 +26,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.astuetz.PagerSlidingTabStrip;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
@@ -54,15 +54,18 @@ public class MainActivity extends AppCompatActivity implements Observer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         super.setContentView(R.layout.pager_tab);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
+        setSupportActionBar(toolbar);
         //Initiate celix
         Celix celix = Celix.getInstance();
         celix.addObserver(this);
 
         pager = (ViewPager) findViewById(R.id.pager);
-        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         pager.setAdapter(pagerAdapter);
-        tabs.setViewPager(pager);
+        tabLayout.setupWithViewPager(pager);
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         pager.setOffscreenPageLimit(2);
 
         model = Model.getInstance();
