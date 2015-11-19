@@ -2,7 +2,7 @@
  * Licensed under Apache License v2. See LICENSE for more information.
  */
 
-package com.inaetics.demonstrator;
+package org.apache.celix.app;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -30,10 +30,12 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.inaetics.demonstrator.controller.DownloadTask;
-import com.inaetics.demonstrator.controller.MyPagerAdapter;
-import com.inaetics.demonstrator.model.BundleStatus;
-import com.inaetics.demonstrator.model.Model;
+
+import org.apache.celix.Celix;
+import org.apache.celix.app.controller.DownloadTask;
+import org.apache.celix.app.controller.MyPagerAdapter;
+import org.apache.celix.app.model.BundleStatus;
+import org.apache.celix.app.model.Model;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -44,9 +46,9 @@ import java.util.Observer;
 import java.util.Scanner;
 
 
-import apache.celix.Celix;
-import apache.celix.model.CelixUpdate;
-import apache.celix.model.Config;
+import org.apache.celix.model.CelixUpdate;
+import org.apache.celix.model.Config;
+
 public class MainActivity extends AppCompatActivity implements Observer {
 
     private Model model;
@@ -79,14 +81,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
         config = model.getConfig();
 
         // Only one time!! After configuration change don't do it again.
-        if (!model.areBundlesMoved()) {
+//        if (!model.areBundlesMoved()) {
             File dirLocation = getExternalFilesDir(null);
-            if (dirLocation == null) {
-                dirLocation = getCacheDir();
-            }
+//            if (dirLocation == null) {
+//                dirLocation = getCacheDir();
+//            }
             model.setBundleLocation(dirLocation.getAbsolutePath());
-            model.moveBundles(getResources().getAssets());
-        }
+//            model.moveBundles(getResources().getAssets());
+//        }
         btn_start = (Button) findViewById(R.id.start_btn);
 
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
@@ -287,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         });
         btn_start.setEnabled(true);
     }
+
 
     // Used to determine if the ip has changed.
     private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {

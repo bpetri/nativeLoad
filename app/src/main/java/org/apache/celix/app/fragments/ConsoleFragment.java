@@ -1,4 +1,4 @@
-package com.inaetics.demonstrator.fragments;
+package org.apache.celix.app.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,13 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.inaetics.demonstrator.R;
 
 import java.util.Observable;
 import java.util.Observer;
 
-import apache.celix.Celix;
-import apache.celix.model.CelixUpdate;
+import org.apache.celix.Celix;
+import org.apache.celix.app.R;
+import org.apache.celix.model.CelixUpdate;
 
 /**
  * Created by mjansen on 17-9-15.

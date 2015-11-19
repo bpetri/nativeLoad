@@ -1,4 +1,4 @@
-package com.inaetics.demonstrator;
+package org.apache.celix.app;
 
 
 import com.journeyapps.barcodescanner.CaptureActivity;

@@ -1,4 +1,4 @@
-package apache.celix.model;
+package org.apache.celix.model;
 
 /**
  * Created by mjansen on 27-10-15.

@@ -1,4 +1,5 @@
-package com.inaetics.demonstrator.controller;
+package org.apache.celix.app.controller;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -87,7 +88,6 @@ public class DownloadTask extends AsyncTask<String,Void,Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        Toast.makeText(context, "Downloading successfull!", Toast.LENGTH_SHORT).show();
         dialog.dismiss();
 
     }

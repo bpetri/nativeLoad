@@ -1,4 +1,4 @@
-package com.inaetics.demonstrator.controller;
+package org.apache.celix.app.controller;
 
 import android.content.Context;
 import android.util.Log;
@@ -6,22 +6,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andexert.expandablelayout.library.ExpandableLayoutItem;
-import com.inaetics.demonstrator.R;
-import com.inaetics.demonstrator.model.BundleStatus;
 
 import java.util.List;
 
-import apache.celix.Celix;
-import apache.celix.model.OsgiBundle;
+import org.apache.celix.Celix;
+import org.apache.celix.app.R;
+import org.apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 27-10-15.

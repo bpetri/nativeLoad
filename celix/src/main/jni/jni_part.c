@@ -499,7 +499,7 @@ void* stopCelix(void* param) {
 
     return 0;
 }
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_initCallback(JNIEnv* je, jobject thiz)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_initCallback(JNIEnv* je, jobject thiz)
 {
     gObject = (jobject)(*je)->NewGlobalRef(je,thiz);
     jclass clazz = (*je)->GetObjectClass(je, thiz);
@@ -517,7 +517,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_initCallback(JNIEnv* je, jobject 
 
 
 
-JNIEXPORT jobjectArray JNICALL Java_apache_celix_Celix_printBundles(JNIEnv *je, jobject thiz)
+JNIEXPORT jobjectArray JNICALL Java_org_apache_celix_Celix_printBundles(JNIEnv *je, jobject thiz)
 {
     pthread_t thread;
     array_list_pt values = printBundles();
@@ -539,7 +539,7 @@ JNIEXPORT jobjectArray JNICALL Java_apache_celix_Celix_printBundles(JNIEnv *je, 
     }
     return ret;
 }
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_startCelix(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_startCelix(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *propertyString = (*je)->GetStringUTFChars(je, i, NULL);
@@ -547,7 +547,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_startCelix(JNIEnv* je, jclass jc,
 	return pthread_create( &thread, NULL, startCelix, (void*) propertyString);
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleInstall(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleInstall(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
@@ -555,7 +555,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleInstall(JNIEnv* je, jclass 
     return pthread_create( &thread, NULL, installBundle, (void*) locationString);
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleInstallStart(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleInstallStart(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
@@ -563,7 +563,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleInstallStart(JNIEnv* je, jc
     return pthread_create( &thread, NULL, installStartBundle, (void*) locationString);
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStart(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleStart(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
@@ -571,7 +571,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStart(JNIEnv* je, jclass jc
     return pthread_create( &thread, NULL, startBundle, (void*) locationString);
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStartById(JNIEnv* je, jclass jc, jlong javaId)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleStartById(JNIEnv* je, jclass jc, jlong javaId)
 {
     long id = (long) javaId;
     pthread_t thread;
@@ -579,7 +579,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStartById(JNIEnv* je, jclas
 
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStop(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleStop(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
@@ -587,7 +587,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStop(JNIEnv* je, jclass jc,
     return pthread_create( &thread, NULL, stopBundle, (void*) locationString);
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStopById(JNIEnv* je, jclass jc, jlong javaId)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleStopById(JNIEnv* je, jclass jc, jlong javaId)
 {
     long id = (long) javaId;
     pthread_t thread;
@@ -595,7 +595,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleStopById(JNIEnv* je, jclass
 
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleDelete(JNIEnv* je, jclass jc, jstring i)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleDelete(JNIEnv* je, jclass jc, jstring i)
 {
     // convert Java string to UTF-8
     const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
@@ -603,7 +603,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleDelete(JNIEnv* je, jclass j
     return pthread_create( &thread, NULL, deleteBundle, (void*) locationString);
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleDeleteById(JNIEnv* je, jclass jc, jlong javaId)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_bundleDeleteById(JNIEnv* je, jclass jc, jlong javaId)
 {
     long id = (long) javaId;
     pthread_t thread;
@@ -611,7 +611,7 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleDeleteById(JNIEnv* je, jcla
 
 }
 
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_stopCelix(JNIEnv* je, jobject thiz)
+JNIEXPORT jint JNICALL Java_org_apache_celix_Celix_stopCelix(JNIEnv* je, jobject thiz)
 {
     pthread_t thread;
     return pthread_create( &thread, NULL, stopCelix, (void*) NULL);

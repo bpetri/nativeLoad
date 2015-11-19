@@ -1,4 +1,4 @@
-package com.inaetics.demonstrator.model;
+package org.apache.celix.app.model;
 
 /**
  * Created by mjansen on 16-9-15.

@@ -1,4 +1,4 @@
-package apache.celix;
+package org.apache.celix;
 
 import android.os.Handler;
 
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Scanner;
 
-import apache.celix.model.CelixUpdate;
-import apache.celix.model.OsgiBundle;
+import org.apache.celix.model.CelixUpdate;
+import org.apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 28-10-15.

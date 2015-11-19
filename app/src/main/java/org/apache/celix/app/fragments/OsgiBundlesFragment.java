@@ -1,4 +1,4 @@
-package com.inaetics.demonstrator.fragments;
+package org.apache.celix.app.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,18 +14,19 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 
 import com.andexert.expandablelayout.library.ExpandableLayoutListView;
-import com.inaetics.demonstrator.R;
-import com.inaetics.demonstrator.controller.DialogItemAdapter;
-import com.inaetics.demonstrator.controller.OsgiBundlesAdapter;
-import com.inaetics.demonstrator.model.Model;
+
+import org.apache.celix.app.R;
+import org.apache.celix.app.controller.DialogItemAdapter;
+import org.apache.celix.app.controller.OsgiBundlesAdapter;
+import org.apache.celix.app.model.Model;
 
 import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
-import apache.celix.Celix;
-import apache.celix.model.CelixUpdate;
-import apache.celix.model.OsgiBundle;
+import org.apache.celix.Celix;
+import org.apache.celix.model.CelixUpdate;
+import org.apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 27-10-15.
@@ -85,7 +86,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
 
     private void showDialog() {
         Context context = getActivity();
-        AlertDialog.Builder dialog = new AlertDialog.Builder(context,R.style.DialogTheme);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context, R.style.DialogTheme);
         dialog.setTitle("Select bundle(s)");
         String[] files = new File(model.getBundleLocation()).list();
 

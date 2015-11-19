@@ -1,11 +1,11 @@
-package com.inaetics.demonstrator.controller;
+package org.apache.celix.app.controller;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.inaetics.demonstrator.fragments.ConsoleFragment;
-import com.inaetics.demonstrator.fragments.OsgiBundlesFragment;
+import org.apache.celix.app.fragments.ConsoleFragment;
+import org.apache.celix.app.fragments.OsgiBundlesFragment;
 
 /**
  * Created by mjansen on 17-9-15.

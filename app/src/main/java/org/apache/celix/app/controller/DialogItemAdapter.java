@@ -2,7 +2,7 @@
  * Licensed under Apache License v2. See LICENSE for more information.
  */
 
-package com.inaetics.demonstrator.controller;
+package org.apache.celix.app.controller;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.inaetics.demonstrator.R;
+import org.apache.celix.app.R;
 
 import java.util.ArrayList;
 import java.util.List;

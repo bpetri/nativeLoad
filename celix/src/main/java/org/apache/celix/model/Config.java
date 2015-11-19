@@ -1,4 +1,4 @@
-package apache.celix.model;
+package org.apache.celix.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
