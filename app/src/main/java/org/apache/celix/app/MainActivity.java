@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
      */
     private void setStopped() {
         btn_start.setText("Start");
-        btn_start.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
+        btn_start.setBackgroundColor(ContextCompat.getColor(this, R.color.celix_blue));
 
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

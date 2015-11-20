@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="inaetics_blue" type="color">#004262</item>
+    <item name="celix_blue" type="color">#0288D1</item>
+    <item name="celix_blue_dark" type="color">#0277BD</item>
 </resources>

@@ -3,11 +3,11 @@
     <!-- Base application theme. -->
     <style name="CustomTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!--   your app branding color for the app bar -->
-        <item name="colorPrimary">#3F51B5</item>
+        <item name="colorPrimary">@color/celix_blue</item>
         <!--   darker variant for the status bar and contextual app bars -->
-        <item name="colorPrimaryDark">#303F9F</item>
+        <item name="colorPrimaryDark">@color/celix_blue_dark</item>
         <!--   theme UI controls like checkboxes and text fields -->
-        <item name="colorAccent">@android:color/holo_green_light</item>
+        <item name="colorAccent">@android:color/holo_red_light</item>
     </style>
 
     <style name="DialogTheme" parent="android:Theme.Holo.Light.Dialog">
