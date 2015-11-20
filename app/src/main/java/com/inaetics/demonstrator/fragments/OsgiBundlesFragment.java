@@ -7,13 +7,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.andexert.expandablelayout.library.ExpandableLayoutListView;
 import com.inaetics.demonstrator.R;
@@ -55,7 +53,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 final OsgiBundle bundle = adapter.getItem(position);
-                AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity(), R.style.DialogTheme);
                 dialog.setTitle("Warning");
                 dialog.setMessage("Are you sure to delete " + bundle.getSymbolicName() + "?");
                 dialog.setNegativeButton("Cancel", null);
@@ -66,7 +64,9 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
 
                     }
                 });
-                dialog.show();
+                AlertDialog realDialog = dialog.create();
+                realDialog.getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
+                realDialog.show();
                 return true;
             }
         });
@@ -89,10 +89,8 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
         dialog.setTitle("Select bundle(s)");
         String[] files = new File(model.getBundleLocation()).list();
 
-        ListView listView = new ListView(context);
         final DialogItemAdapter adapter = new DialogItemAdapter(context, files);
-        listView.setAdapter(adapter);
-        dialog.setView(listView);
+        dialog.setAdapter(adapter, null);
 
         dialog.setNegativeButton("Install", new DialogInterface.OnClickListener() {
             @Override
@@ -122,7 +120,9 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
                 dialog.cancel();
             }
         });
-        dialog.show();
+        AlertDialog realDialog = dialog.create();
+        realDialog.getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
+        realDialog.show();
 
 
     }

@@ -15,4 +15,12 @@
         android:orderInCategory="100"
         app:showAsAction="always"
         android:icon="@android:drawable/ic_menu_camera" />
+
+    <item
+        android:id="@+id/action_download"
+        android:title="Download"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_more"
+        />
 </menu>

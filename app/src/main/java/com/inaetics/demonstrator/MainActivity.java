@@ -4,7 +4,7 @@
 
 package com.inaetics.demonstrator;
 
-import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,12 +23,14 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.inaetics.demonstrator.controller.DownloadTask;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
@@ -132,6 +135,29 @@ public class MainActivity extends AppCompatActivity implements Observer {
                         .setOrientationLocked(false)
                         .initiateScan();
                 return true;
+            case R.id.action_download:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
+                final EditText text = new EditText(this);
+                builder.setView(text);
+                builder.setPositiveButton("Download", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ProgressDialog progress = new ProgressDialog(MainActivity.this);
+                        progress.setTitle("Downloading");
+                        progress.setMessage("Wait while downloading");
+                        progress.show();
+
+                        DownloadTask task = new DownloadTask(MainActivity.this, progress);
+                        task.execute(text.getText().toString());
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", null);
+                builder.setTitle("Download bundle from URL");
+                AlertDialog realDialog = builder.create();
+                realDialog.getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
+                realDialog.show();
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
@@ -187,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
      */
     private void showInputDialog(final EditText edittext, String title, String msg, String text, DialogInterface.OnClickListener positiveListener) {
 
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        AlertDialog.Builder alert = new AlertDialog.Builder(this, R.style.DialogTheme);
 
         if (text != null) {
             edittext.setText(text);
@@ -206,8 +232,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 dialog.dismiss();
             }
         });
-
-        alert.show();
+        AlertDialog realDialog = alert.create();
+        realDialog.getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
+        realDialog.show();
     }
 
     /**
@@ -233,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
      */
     private void setStopped() {
         btn_start.setText("Start");
-        btn_start.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
+        btn_start.setBackgroundColor(ContextCompat.getColor(this, R.color.celix_blue));
 
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

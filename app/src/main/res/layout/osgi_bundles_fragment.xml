@@ -10,8 +10,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/linLayout"
-        >
+        android:id="@+id/linLayout">
 
         <com.andexert.expandablelayout.library.ExpandableLayoutListView
             android:id="@+id/osgi_listview"
@@ -27,5 +26,6 @@
         android:clickable="true"
         android:src="@drawable/ic_add_white_48dp"
         app:layout_anchor="@id/linLayout"
+        style="@style/floating_action_button"
         app:layout_anchorGravity="bottom|right|end"/>
 </android.support.design.widget.CoordinatorLayout>
