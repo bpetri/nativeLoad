@@ -25,6 +25,7 @@ public class Celix extends Observable {
 
     static {
         System.loadLibrary("celix_utils");
+        System.loadLibrary("dfi");
         System.loadLibrary("celix_framework");
         System.loadLibrary("jni_part");
     }
