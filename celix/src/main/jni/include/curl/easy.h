@@ -25,12 +25,10 @@
 extern "C" {
 #endif
 
-CURL_EXTERN CURL * curl_easy_init(void);
-CURL_EXTERN CURLcode
-curl_easy_setopt(CURL * curl , CURLoption option, ... ) ;
-CURL_EXTERN CURLcode
-curl_easy_perform(CURL * curl ) ;
-CURL_EXTERN void curl_easy_cleanup(CURL * curl);
+CURL_EXTERN CURL *curl_easy_init(void);
+CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
+CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
+CURL_EXTERN void curl_easy_cleanup(CURL *curl);
 
 /*
  * NAME curl_easy_getinfo()
@@ -45,8 +43,7 @@ CURL_EXTERN void curl_easy_cleanup(CURL * curl);
  * performed transfer, all results from this function are undefined until the
  * transfer is completed.
  */
-CURL_EXTERN CURLcode
-curl_easy_getinfo(CURL * curl , CURLINFO info, ... ) ;
+CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
 
 
 /*
@@ -61,7 +58,7 @@ curl_easy_getinfo(CURL * curl , CURLINFO info, ... ) ;
  * curl_easy_duphandle() for each new thread to avoid a series of identical
  * curl_easy_setopt() invokes in every thread.
  */
-CURL_EXTERN CURL * curl_easy_duphandle(CURL * curl ) ;
+CURL_EXTERN CURL* curl_easy_duphandle(CURL *curl);
 
 /*
  * NAME curl_easy_reset()
@@ -74,7 +71,7 @@ CURL_EXTERN CURL * curl_easy_duphandle(CURL * curl ) ;
  * It does keep: live connections, the Session ID cache, the DNS cache and the
  * cookies.
  */
-CURL_EXTERN void curl_easy_reset(CURL * curl);
+CURL_EXTERN void curl_easy_reset(CURL *curl);
 
 /*
  * NAME curl_easy_recv()
@@ -84,10 +81,8 @@ CURL_EXTERN void curl_easy_reset(CURL * curl);
  * Receives data from the connected socket. Use after successful
  * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
  */
-CURL_EXTERN CURLcode
-curl_easy_recv(CURL * curl , void *buffer, size_t
-buflen ,
-size_t *n ) ;
+CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
+                                    size_t *n);
 
 /*
  * NAME curl_easy_send()
@@ -97,10 +92,8 @@ size_t *n ) ;
  * Sends data over the connected socket. Use after successful
  * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
  */
-CURL_EXTERN CURLcode
-curl_easy_send(CURL * curl , const void *buffer,
-        size_t
-buflen , size_t *n ) ;
+CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
+                                    size_t buflen, size_t *n);
 
 #ifdef  __cplusplus
 }

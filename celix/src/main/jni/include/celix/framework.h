@@ -30,6 +30,7 @@
 typedef struct activator * activator_pt;
 typedef struct framework * framework_pt;
 
+#include "config.h"
 #include "celix_errno.h"
 #include "framework_exports.h"
 #include "bundle.h"
