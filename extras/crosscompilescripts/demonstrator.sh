@@ -27,7 +27,7 @@ arm64() {
   export CXX=aarch64-linux-android-g++
 }
 
-askinput() {
+ask_input() {
   # input which architecture to compile for
   read -p "1) ARM          2) ARM-v7a          3) Aarch64 : " inp
   case $inp in
@@ -47,7 +47,7 @@ askinput() {
   esac
 }
 
-checksandmakedirs() {
+checks_and_makedirs() {
   mkdir -p compiled/$cpu_arch
   libdir=$rootdir/compiled/$cpu_arch
 
@@ -79,18 +79,17 @@ checksandmakedirs() {
   mkdir -p build-$cpu_arch
 }
 
-makeDemonstrator() {
+make_demonstrator() {
   cd build-$cpu_arch
-  cp $rootdir/celix/build-$cpu_arch/config.h $rootdir/demonstrator/build-$cpu_arch/config.h
   cmake -DCELIX_DIR=$libdir/celix -DCMAKE_BUILD_TYPE=Debug -DJANSSON_LIBRARY=$libdir/jansson/lib/libjansson.a -DJANSSON_INCLUDE_DIR=$libdir/jansson/include ..
   make && make deploy
   mv deploy $libdir/demonstrator
 }
 
 main() {
-  askinput
-  checksandmakedirs
-  makeDemonstrator
+  ask_input
+  checks_and_makedirs
+  make_demonstrator
 }
 
 main

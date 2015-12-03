@@ -31,7 +31,7 @@ arm64() {
 }
 
 # input which architecture to compile for
-askinput() {
+ask_input() {
   read -p "1) ARM          2) ARM-v7a          3) Aarch64 : " inp
   case $inp in
     1 )
@@ -50,7 +50,7 @@ askinput() {
   esac
 }
 
-makedirectories() {
+make_directories() {
   mkdir -p compiled/$cpu_arch
   mkdir -p libs
   libdir=$rootdir/libs
@@ -58,62 +58,34 @@ makedirectories() {
   cd $libdir
 }
 
-libffi() {
+download_libraries() {
+  #libffi
   if [ ! -d "libffi" ]; then
     git clone https://github.com/atgreen/libffi.git
   fi
-  cd libffi
-  ./autogen.sh
-  mkdir -p build-$cpu_arch
-  cd build-$cpu_arch
-  ../configure --prefix=$installdir/libffi --host=$host --disable-shared --enable-static
-  echo "#define FFI_MMAP_EXEC_WRIT 1" >> fficonfig.h
-  echo "#define FFI_MMAP_EXEC_SELINUX 0" >> fficonfig.h
-  make && make install
-  cd $libdir
-}
 
-uuid() {
+  #libuuid
   if [ ! -d "libuuid-1.0.3" ]; then
-    curl -L -O http://downloads.sourceforge.net/libuuid/libuuid-1.0.3.tar.gz && \
-    tar -xvzf libuuid-1.0.3.tar.gz &&\
+    curl -L -O http://downloads.sourceforge.net/libuuid/libuuid-1.0.3.tar.gz
+    tar -xvzf libuuid-1.0.3.tar.gz
     rm libuuid-1.0.3.tar.gz
   fi
-  cd libuuid-1.0.3 && mkdir -p build-$cpu_arch
-  cd build-$cpu_arch
-  ../configure --host=$host --disable-shared --enable-static --prefix=$installdir/uuid
-  make && make install
-  cd $libdir
-}
 
-zlib() {
+  #zlib
   if [ ! -d "zlib-1.2.8" ]; then
     curl -L -O http://zlib.net/zlib-1.2.8.tar.gz
     tar -xvzf zlib-1.2.8.tar.gz
     rm zlib-1.2.8.tar.gz
   fi
-  cp -R zlib-1.2.8 zlib-copy
-  cd zlib-copy
-  ./configure --prefix=$installdir/zlib
-  make && make install
-  cd $libdir
-  rm -r zlib-copy
-}
 
-curl() {
+  #curl
   if [ ! -d "curl-7.45.0" ]; then
     curl -L -O http://curl.haxx.se/download/curl-7.45.0.tar.gz
     tar -xvzf curl-7.45.0.tar.gz
     rm curl-7.45.0.tar.gz
   fi
-  cd curl-7.45.0 && mkdir -p build-$cpu_arch
-  cd build-$cpu_arch
-  ../configure --host=$host --disable-shared --enable-static -disable-dependency-tracking --with-zlib=$installdir/zlib --without-ca-bundle --without-ca-path --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gopher --disable-sspi --disable-manual --target=$host --prefix=$installdir/curl
-  make && make install
-  cd $libdir
-}
 
-libxml() {
+  #libxml with patch
   if [ ! -d "libxml2-2.7.2" ]; then
     curl -L -O http://xmlsoft.org/sources/libxml2-2.7.2.tar.gz
     tar -xvzf libxml2-2.7.2.tar.gz
@@ -125,6 +97,54 @@ libxml() {
   mv config.guess config.sub libxml2-2.7.2
   patch -N -p1 < libxml2.patch
   rm libxml2.patch
+
+  #jansson
+  if [ ! -d "jansson-2.7" ]; then
+    curl -L -O http://www.digip.org/jansson/releases/jansson-2.7.tar.bz2
+    tar -xvjf jansson-2.7.tar.bz2
+    rm jansson-2.7.tar.bz2
+  fi
+ 
+}
+
+make_libffi() {
+  cd libffi
+  ./autogen.sh
+  mkdir -p build-$cpu_arch
+  cd build-$cpu_arch
+  ../configure --prefix=$installdir/libffi --host=$host --disable-shared --enable-static
+  echo "#define FFI_MMAP_EXEC_WRIT 1" >> fficonfig.h
+  echo "#define FFI_MMAP_EXEC_SELINUX 0" >> fficonfig.h
+  make && make install
+  cd $libdir
+}
+
+make_uuid() {
+  cd libuuid-1.0.3 && mkdir -p build-$cpu_arch
+  cd build-$cpu_arch
+  ../configure --host=$host --disable-shared --enable-static --prefix=$installdir/uuid
+  make && make install
+  cd $libdir
+}
+
+make_zlib() {
+  cp -R zlib-1.2.8 zlib-copy
+  cd zlib-copy
+  ./configure --prefix=$installdir/zlib
+  make && make install
+  cd $libdir
+  rm -r zlib-copy
+}
+
+make_curl() {
+  cd curl-7.45.0 && mkdir -p build-$cpu_arch
+  cd build-$cpu_arch
+  ../configure --host=$host --disable-shared --enable-static -disable-dependency-tracking --with-zlib=$installdir/zlib --without-ca-bundle --without-ca-path --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-gopher --disable-sspi --disable-manual --enable-threaded-resolver --target=$host --prefix=$installdir/curl
+  make && make install
+  cd $libdir
+}
+
+make_libxml() {
   cd libxml2-2.7.2
   mkdir -p build-$cpu_arch
   cd build-$cpu_arch
@@ -133,12 +153,7 @@ libxml() {
   cd $libdir
 }
 
-jansson() {
-  if [ ! -d "jansson-2.7" ]; then
-    curl -L -O http://www.digip.org/jansson/releases/jansson-2.7.tar.bz2
-    tar -xvjf jansson-2.7.tar.bz2
-    rm jansson-2.7.tar.bz2
-  fi
+make_jansson() {
   cd jansson-2.7 && mkdir -p build-$cpu_arch
   cd build-$cpu_arch
   ../configure --host=$host --disable-shared --enable-static --prefix=$installdir/jansson
@@ -146,14 +161,15 @@ jansson() {
 }
 
 main() {
-  askinput
-  makedirectories
-  libffi
-  uuid
-  zlib
-  curl
-  libxml
-  jansson
+  ask_input
+  make_directories
+  download_libraries
+  make_libffi
+  make_uuid
+  make_zlib
+  make_curl
+  make_libxml
+  make_jansson
 }
 
 main

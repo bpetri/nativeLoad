@@ -29,7 +29,7 @@ arm64() {
   libffi_loc=lib64/libffi.a
 }
 
-askinput() {
+ask_input() {
   # input which architecture to compile for
   read -p "1) ARM          2) ARM-v7a          3) Aarch64 : " inp
   case $inp in
@@ -49,7 +49,7 @@ askinput() {
   esac
 }
 
-checksandmakedirs() {
+checks_and_makedirs() {
   libdir=$rootdir/compiled/$cpu_arch
   mkdir -p compiled/$cpu_arch
 
@@ -75,16 +75,16 @@ checksandmakedirs() {
   mkdir -p build-$cpu_arch
 }
 
-makeCelix() {
+make_celix() {
   cd build-$cpu_arch
-  cmake -DENABLE_TESTING=OFF -DANDROID=TRUE -DBUILD_EXAMPLES=OFF -DBUILD_REMOTE_SERVICE_ADMIN=ON -DBUILD_REMOTE_SHELL=ON -DBUILD_RSA_DISCOVERY_CONFIGURED=ON -DBUILD_RSA_DISCOVERY_ETCD=ON -DBUILD_RSA_EXAMPLES=ON -DBUILD_RSA_REMOTE_SERVICE_ADMIN_DFI=ON -DBUILD_RSA_REMOTE_SERVICE_ADMIN_HTTP=ON -DBUILD_RSA_TOPOLOGY_MANAGER=ON -DJANSSON_LIBRARY=$libdir/jansson/lib/libjansson.a -DJANSSON_INCLUDE_DIR=$libdir/jansson/include -DCURL_LIBRARY=$libdir/curl/lib/libcurl.a -DCURL_INCLUDE_DIR=$libdir/curl/include -DLIBXML2_LIBRARIES=$libdir/libxml2/lib/libxml2.a -DLIBXML2_INCLUDE_DIR=$libdir/libxml2/include/libxml2 -DZLIB_LIBRARY=$libdir/zlib/lib/libz.a -DZLIB_INCLUDE_DIR=$libdir/zlib/include -DUUID_LIBRARY=$libdir/uuid/lib/libuuid.a -DUUID_INCLUDE_DIR=$libdir/uuid/include -DFFI_LIBRARY=$libdir/libffi/$libffi_loc -DFFI_INCLUDE_DIR=$libdir/libffi/lib/libffi-3.99999/include -DCMAKE_INSTALL_PREFIX:PATH=$libdir/celix ..
+  cmake -DENABLE_TESTING=OFF -DCMAKE_SYSTEM_NAME="Android" -DANDROID=TRUE -DBUILD_EXAMPLES=OFF -DBUILD_REMOTE_SERVICE_ADMIN=ON -DBUILD_REMOTE_SHELL=ON -DBUILD_RSA_DISCOVERY_CONFIGURED=ON -DBUILD_RSA_DISCOVERY_ETCD=ON -DBUILD_RSA_EXAMPLES=ON -DBUILD_RSA_REMOTE_SERVICE_ADMIN_DFI=ON -DBUILD_RSA_REMOTE_SERVICE_ADMIN_HTTP=ON -DBUILD_RSA_TOPOLOGY_MANAGER=ON -DJANSSON_LIBRARY=$libdir/jansson/lib/libjansson.a -DJANSSON_INCLUDE_DIR=$libdir/jansson/include -DCURL_LIBRARY=$libdir/curl/lib/libcurl.a -DCURL_INCLUDE_DIR=$libdir/curl/include -DLIBXML2_LIBRARIES=$libdir/libxml2/lib/libxml2.a -DLIBXML2_INCLUDE_DIR=$libdir/libxml2/include/libxml2 -DZLIB_LIBRARY=$libdir/zlib/lib/libz.a -DZLIB_INCLUDE_DIR=$libdir/zlib/include -DUUID_LIBRARY=$libdir/uuid/lib/libuuid.a -DUUID_INCLUDE_DIR=$libdir/uuid/include -DFFI_LIBRARY=$libdir/libffi/$libffi_loc -DFFI_INCLUDE_DIR=$libdir/libffi/lib/libffi-3.99999/include -DCMAKE_INSTALL_PREFIX:PATH=$libdir/celix ..
   make && make install-all
 }
 
 main() {
-  askinput
-  checksandmakedirs
-  makeCelix
+  ask_input
+  checks_and_makedirs
+  make_celix
 }
 
 main

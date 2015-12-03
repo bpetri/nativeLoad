@@ -2,7 +2,7 @@
 rootdir=$(pwd)
 
 # Check if NDK_HOME variabele is set
-checkndkhome() {
+check_ndk_home() {
   if [ -z "$NDK_HOME" ]; then
     echo "NDK_HOME variabele is not set!"
     exit 1
@@ -11,7 +11,7 @@ checkndkhome() {
 }
 
 # Make arm toolchain (armv7a and arm5)
-normaltoolchain() {
+normal_toolchain() {
   if [ -d "toolchain" ]; then
     echo "There's already a toolchain folder"
     exit 1
@@ -20,7 +20,7 @@ normaltoolchain() {
 }
 
 # Make aarch64 toolchain (armv8a)
-aarch64toolchain() {
+aarch64_toolchain() {
   if [ -d "toolchain64" ]; then
     echo "There's already a toolchain64 folder"
     exit 1
@@ -31,9 +31,9 @@ aarch64toolchain() {
 
 
 main() {
-  checkndkhome
-  normaltoolchain
-  aarch64toolchain
+  check_ndk_home
+  normal_toolchain
+  aarch64_toolchain
 }
 
 main
