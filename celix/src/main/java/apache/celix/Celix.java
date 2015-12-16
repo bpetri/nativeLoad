@@ -1,6 +1,5 @@
 package apache.celix;
 
-import android.content.Context;
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.Observable;
 import java.util.Scanner;
 
 import apache.celix.model.CelixUpdate;
-import apache.celix.model.Config;
 import apache.celix.model.OsgiBundle;
 
 /**
@@ -197,10 +195,6 @@ public class Celix extends Observable {
         });
     }
 
-    public void testSensor() {
-        test();
-    }
-
     private void bundleChanged(String bundle) {
         Scanner sc = new Scanner(bundle);
         long id = sc.nextLong();
@@ -246,8 +240,6 @@ public class Celix extends Observable {
 
     private native String[] printBundles();
     private native int initCallback();
-
-    private native int test();
 
 
 }

@@ -6,13 +6,9 @@
 #include <curl/curl.h>
 #include <android/log.h>
 #include <unistd.h>
-#include <android/sensor.h>
-#include <android/looper.h>
 
 #include "framework.h"
 #include "linked_list_iterator.h"
-
-
 
 #define DEFAULT_CONFIG_FILE "config.properties"
 
@@ -24,7 +20,6 @@
 static JavaVM *gJavaVM;
 static jobject gObject;
 
-int running = 0;
 
 typedef struct {
     const char* cbName;
@@ -318,16 +313,6 @@ void* callback_celix_changed(bool is_running) {
     if(isAttached)
         (*gJavaVM)->DetachCurrentThread(gJavaVM);
 }
-/*
-void* test_producerAdded(void *handle, service_reference_pt reference, void *service) {
-    producer_service_pt producerService = (producer_service_pt)service;
-    producerService->setSampleRate(producerService->producer, 10);
-}
-
-void* test_producerRemoved(void *handle, service_reference_pt reference, void *service) {
-
-}
- */
 
 
 void* startCelix(void* param) {
@@ -373,14 +358,6 @@ void* startCelix(void* param) {
                 bundleContext_addBundleListener(fwbundlecontext, bundleListener);
 
                 bundle_start(fwBundle);
-
-                /*
-                service_tracker_pt producerTracker = NULL;
-                service_tracker_customizer_pt producerCustomizer = NULL;
-                serviceTrackerCustomizer_create(fwbundlecontext, NULL, test_producerAdded, NULL, test_producerRemoved, &producerCustomizer);
-                serviceTracker_create(fwbundlecontext, INAETICS_DEMONSTRATOR_API__PRODUCER_SERVICE_NAME, producerCustomizer, producerTracker);
-                serviceTracker_open(producerTracker);
-                */
 
                 callback_celix_changed(true);
 
@@ -636,64 +613,8 @@ JNIEXPORT jint JNICALL Java_apache_celix_Celix_bundleDeleteById(JNIEnv* je, jcla
 
 JNIEXPORT jint JNICALL Java_apache_celix_Celix_stopCelix(JNIEnv* je, jobject thiz)
 {
-    // convert Java string to UTF-8
-//    const char *locationString = (*je)->GetStringUTFChars(je, i, NULL);
     pthread_t thread;
     return pthread_create( &thread, NULL, stopCelix, (void*) NULL);
-}
-
-ASensorEventQueue* sensorEventQueue;
-void* useAccsensor(void* param)
-{
-    ASensorManager* sensorManager;
-    const ASensor* accSensor;
-    ALooper* looper = ALooper_forThread();
-    if (looper == NULL) {
-        looper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
-    }
-    sensorManager = ASensorManager_getInstance();
-    accSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_ACCELEROMETER);
-    sensorEventQueue = ASensorManager_createEventQueue(sensorManager, looper, 1,NULL, NULL );
-    ASensorEventQueue_enableSensor(sensorEventQueue, accSensor);
-    int a = ASensor_getMinDelay(accSensor);
-    LOGI("min delay accsensor: %d",a);
-    ASensorEventQueue_setEventRate(sensorEventQueue, accSensor, a*2);
-    ASensorEvent event;
-    int accCounter = 0;
-    int prevx, prevy, prevz;
-    float prevSpeed;
-    while (1) {
-        while (ASensorEventQueue_getEvents(sensorEventQueue, &event, 1) > 0) {
-            if (event.type == ASENSOR_TYPE_ACCELEROMETER) {
-                if (accCounter == 15) {
-                    float x,y,z;
-                    x = abs(event.acceleration.x);
-                    y = abs(event.acceleration.y);
-                    z = abs(event.acceleration.z);
-//                    LOGI("accelerometer: x=%f y=%f z=%f",x , y, z);
-
-                    float speed = abs(x + y + z - prevx - prevy - prevz);
-                    printf("speed: %f\n",speed);
-                    if ( speed >= 20) {
-                        LOGI("Shake detected!");
-                    }
-                    prevx = x;
-                    prevy = y;
-                    prevz = z;
-                    accCounter = 0;
-                }
-                accCounter++;
-            }
-
-        }
-    }
-
-}
-
-JNIEXPORT jint JNICALL Java_apache_celix_Celix_test(JNIEnv* je, jobject thiz)
-{
-    pthread_t thread;
-    return pthread_create( &thread, NULL, useAccsensor, (void*) NULL);
 }
 
 

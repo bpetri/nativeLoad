@@ -48,5 +48,5 @@ LOCAL_STATIC_LIBRARIES := curl
 LOCAL_SHARED_LIBRARIES := celix_fw celix_util
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/producer
 LOCAL_CFLAGS := -O0 -g -ggdb
-LOCAL_LDLIBS := -llog -landroid
+LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_LIBRARY)
