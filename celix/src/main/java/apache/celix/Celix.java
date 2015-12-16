@@ -25,7 +25,7 @@ public class Celix extends Observable {
 
     static {
         System.loadLibrary("celix_utils");
-        System.loadLibrary("dfi");
+        System.loadLibrary("celix_dfi");
         System.loadLibrary("celix_framework");
         System.loadLibrary("jni_part");
     }
@@ -197,6 +197,10 @@ public class Celix extends Observable {
         });
     }
 
+    public void testSensor() {
+        test();
+    }
+
     private void bundleChanged(String bundle) {
         Scanner sc = new Scanner(bundle);
         long id = sc.nextLong();
@@ -242,6 +246,8 @@ public class Celix extends Observable {
 
     private native String[] printBundles();
     private native int initCallback();
+
+    private native int test();
 
 
 }

@@ -15,7 +15,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 #
 include $(CLEAR_VARS)
 LOCAL_MODULE := dfi
-LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libdfi.so
+LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libcelix_dfi.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 
@@ -46,6 +46,7 @@ LOCAL_MODULE := jni_part
 LOCAL_SRC_FILES := jni_part.c
 LOCAL_STATIC_LIBRARIES := curl
 LOCAL_SHARED_LIBRARIES := celix_fw celix_util
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/producer
 LOCAL_CFLAGS := -O0 -g -ggdb
-LOCAL_LDLIBS := -llog
+LOCAL_LDLIBS := -llog -landroid
 include $(BUILD_SHARED_LIBRARY)
