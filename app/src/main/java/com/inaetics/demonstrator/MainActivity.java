@@ -36,6 +36,8 @@ import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
@@ -142,13 +144,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 builder.setPositiveButton("Download", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ProgressDialog progress = new ProgressDialog(MainActivity.this);
-                        progress.setTitle("Downloading");
-                        progress.setMessage("Wait while downloading");
-                        progress.show();
-
-                        DownloadTask task = new DownloadTask(MainActivity.this, progress);
-                        task.execute(text.getText().toString());
+                        download(text.getText().toString());
                     }
                 });
 
@@ -163,6 +159,16 @@ public class MainActivity extends AppCompatActivity implements Observer {
         return super.onOptionsItemSelected(item);
     }
 
+    private void download(String url) {
+        ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Downloading");
+        progress.setMessage("Wait while downloading");
+        progress.show();
+
+        DownloadTask task = new DownloadTask(this, progress);
+        task.execute(url);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -171,33 +177,41 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 String content = result.getContents();
-                Scanner sc = new Scanner(content);
-                boolean autostart = false;
-                while (sc.hasNextLine()) {
-                    String[] keyValue = sc.nextLine().split("=");
-                    if (keyValue[0].equals("cosgi.auto.start.1")) {
-                        autostart = true;
-                        String startBundles = "";
-                        Scanner bscan = new Scanner(keyValue[1]);
-                        while (bscan.hasNext()) {
-                            startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
-                        }
-                        bscan.close();
-                        config.putProperty(keyValue[0], startBundles);
-                    } else {
-                        try {
-                            config.putProperty(keyValue[0], keyValue[1]);
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            //Ignore property there is no key/value combination
-                            Log.e("Scanner", "couldn't scan: " + Arrays.toString(keyValue));
+                try {
+                    URL url = new URL(content);
+                    // Is a url!
+                    download(content);
+                } catch (MalformedURLException e) {
+                    //Not an url
+                    Scanner sc = new Scanner(content);
+                    boolean autostart = false;
+                    while (sc.hasNextLine()) {
+                        String[] keyValue = sc.nextLine().split("=");
+                        if (keyValue[0].equals("cosgi.auto.start.1")) {
+                            autostart = true;
+                            String startBundles = "";
+                            Scanner bscan = new Scanner(keyValue[1]);
+                            while (bscan.hasNext()) {
+                                startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
+                            }
+                            bscan.close();
+                            config.putProperty(keyValue[0], startBundles);
+                        } else {
+                            try {
+                                config.putProperty(keyValue[0], keyValue[1]);
+                            } catch (ArrayIndexOutOfBoundsException ex) {
+                                //Ignore property there is no key/value combination
+                                Log.e("Scanner", "couldn't scan: " + Arrays.toString(keyValue));
+                            }
                         }
                     }
+                    sc.close();
+                    if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
+                        Celix.getInstance().startFramework(getFilesDir() + "/" + Config.CONFIG_PROPERTIES);
+                    }
+                    Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();
                 }
-                sc.close();
-                if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
-                    Celix.getInstance().startFramework(getFilesDir() + "/" + Config.CONFIG_PROPERTIES);
-                }
-                Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();
+
             }
         }
     }
