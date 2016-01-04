@@ -21,7 +21,6 @@ public class DialogItemAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
     List<Pair<String, Boolean>> items;
-    String[] keys;
 
     public DialogItemAdapter(Context context, String[] _items) {
         this.items = new ArrayList<>();
@@ -65,27 +64,18 @@ public class DialogItemAdapter extends BaseAdapter {
             // View holder pattern, find all views once, smoother scrolling
             holder = new ViewHolder();
             holder.dialogCheckbox = (CheckBox) convertView.findViewById(R.id.dialogCheckbox);
-            holder.dialogFileName = (TextView) convertView.findViewById(R.id.dialogFileName);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-
-//        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
-//            holder.bundleCheckbox.setVisibility(View.GONE);
-//            holder.buttonsLayout.setVisibility(View.VISIBLE);
-//        } else {
-//            holder.bundleCheckbox.setVisibility(View.VISIBLE);
-//            holder.buttonsLayout.setVisibility(View.GONE);
-//        }
 
         final Pair<String, Boolean> item = getItem(position);
 
         String fileName = item.first;
         boolean isChecked = item.second;
 
-        holder.dialogFileName.setText(fileName);
         holder.dialogCheckbox.setChecked(isChecked);
+        holder.dialogCheckbox.setText(fileName);
 
         holder.dialogCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +89,6 @@ public class DialogItemAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        TextView dialogFileName;
         CheckBox dialogCheckbox;
     }
 

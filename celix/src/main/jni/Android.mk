@@ -10,11 +10,11 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include/celix
 include $(PREBUILT_SHARED_LIBRARY)
 
 
-#
-# Prepare libdfi
-#
+#####################
+# Prepare celix dfi #
+#####################
 include $(CLEAR_VARS)
-LOCAL_MODULE := dfi
+LOCAL_MODULE := celix_dfi
 LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libcelix_dfi.so
 include $(PREBUILT_SHARED_LIBRARY)
 
@@ -24,7 +24,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 ###########################
 include $(CLEAR_VARS)
 LOCAL_MODULE := celix_fw
-LOCAL_SHARED_LIBRARIES := dfi
+LOCAL_SHARED_LIBRARIES := celix_dfi
 LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libcelix_framework.so
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include/celix
 include $(PREBUILT_SHARED_LIBRARY)
