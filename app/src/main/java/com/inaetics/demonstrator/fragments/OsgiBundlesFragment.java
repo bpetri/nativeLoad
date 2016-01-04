@@ -20,9 +20,6 @@ import com.inaetics.demonstrator.controller.OsgiBundlesAdapter;
 import com.inaetics.demonstrator.model.Model;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -90,7 +87,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
         Context context = getActivity();
         AlertDialog.Builder dialog = new AlertDialog.Builder(context,R.style.DialogTheme);
         dialog.setTitle("Select bundle(s)");
-        final String[] files = new File(model.getBundleLocation()).list();
+        String[] files = new File(model.getBundleLocation()).list();
 
         final DialogItemAdapter adapter = new DialogItemAdapter(context, files);
         dialog.setAdapter(adapter, null);
@@ -100,7 +97,6 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
             public void onClick(DialogInterface dialog, int which) {
                 String bundleLocation = model.getBundleLocation();
                 Celix celix = Celix.getInstance();
-
                 for (String fileName : adapter.getInstallBundles()) {
                     celix.installBundle(bundleLocation + "/" + fileName);
                 }
@@ -112,7 +108,6 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
             public void onClick(DialogInterface dialog, int which) {
                 String bundleLocation = model.getBundleLocation();
                 Celix celix = Celix.getInstance();
-
                 for (String fileName : adapter.getInstallBundles()) {
                     celix.installStartBundle(bundleLocation + "/" + fileName);
                 }
