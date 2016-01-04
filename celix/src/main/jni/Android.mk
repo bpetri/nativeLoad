@@ -10,11 +10,11 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include/celix
 include $(PREBUILT_SHARED_LIBRARY)
 
 
-#####################
-# Prepare celix dfi #
-#####################
+#
+# Prepare libdfi
+#
 include $(CLEAR_VARS)
-LOCAL_MODULE := celix_dfi
+LOCAL_MODULE := dfi
 LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libcelix_dfi.so
 include $(PREBUILT_SHARED_LIBRARY)
 
@@ -24,7 +24,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 ###########################
 include $(CLEAR_VARS)
 LOCAL_MODULE := celix_fw
-LOCAL_SHARED_LIBRARIES := celix_dfi
+LOCAL_SHARED_LIBRARIES := dfi
 LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libcelix_framework.so
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include/celix
 include $(PREBUILT_SHARED_LIBRARY)
@@ -35,7 +35,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := curl
 LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/libcurl.a
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/$(TARGET_ARCH_ABI)/curl
 include $(PREBUILT_STATIC_LIBRARY)
 
 ####################
@@ -46,6 +46,7 @@ LOCAL_MODULE := jni_part
 LOCAL_SRC_FILES := jni_part.c
 LOCAL_STATIC_LIBRARIES := curl
 LOCAL_SHARED_LIBRARIES := celix_fw celix_util
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/producer
 LOCAL_CFLAGS := -O0 -g -ggdb
 LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_LIBRARY)
