@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.inaetics.demonstrator" >
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.inaetics.demonstrator">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -27,7 +28,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.inaetics.demonstrator.ScanActivity"
+            tools:replace="android:screenOrientation"
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:label="@string/title_activity_scan"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"

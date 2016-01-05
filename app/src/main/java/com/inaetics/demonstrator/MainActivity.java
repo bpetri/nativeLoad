@@ -38,6 +38,7 @@ import com.inaetics.demonstrator.controller.MyPagerAdapter;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.model.MyConfig;
+import com.journeyapps.barcodescanner.CaptureActivity;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -93,12 +94,18 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         btn_start = (Button) findViewById(R.id.start_btn);
 
-        if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
+        if (celix.isCelixRunning()) {
             setRunning();
         } else {
             setStopped();
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Celix.getInstance().deleteObserver(this);
     }
 
     @Override
@@ -137,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 return true;
             case R.id.action_startQR:
                 new IntentIntegrator(this)
-                        .setCaptureActivity(ScanActivity.class)
+                        .setCaptureActivity(CaptureActivity.class)
                         .setOrientationLocked(false)
                         .initiateScan();
                 return true;
@@ -210,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                         }
                     }
                     sc.close();
-                    if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
+                    if (autostart && !Celix.getInstance().isCelixRunning()) {
                         Celix.getInstance().startFramework(config.getConfigPath());
                     }
                     Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();

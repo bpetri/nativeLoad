@@ -9,6 +9,7 @@ import com.inaetics.demonstrator.fragments.OsgiBundlesFragment;
 
 /**
  * Created by mjansen on 17-9-15.
+ * FragmentPagerAdapter so you can swipe to a other fragment
  */
 public class MyPagerAdapter extends FragmentPagerAdapter {
     private final String[] TITLES = {"Bundles", "Console"};

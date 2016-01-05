@@ -3,6 +3,7 @@ package com.inaetics.demonstrator.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import apache.celix.model.CelixUpdate;
 
 /**
  * Created by mjansen on 17-9-15.
+ * Fragment for showing the output of the Celix framework and bundles
  */
 public class ConsoleFragment extends Fragment implements Observer {
     private EditText console;
@@ -34,6 +36,12 @@ public class ConsoleFragment extends Fragment implements Observer {
         Celix.getInstance().addObserver(this);
 
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Celix.getInstance().deleteObserver(this);
     }
 
     @Override

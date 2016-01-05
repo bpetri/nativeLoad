@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
 import com.inaetics.demonstrator.R;
 
@@ -20,12 +19,19 @@ import java.util.List;
 public class DialogItemAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
-    List<Pair<String, Boolean>> items;
+    List<Pair> items;
 
+    /**
+     * Constructor of DialogItemAdapter
+     * Creates a new ArrayList from the given items and sets all boolean values to false.
+     * This means that all items are unchecked
+     * @param context Context for inflating the layout
+     * @param _items String[] holding all the bundle names.
+     */
     public DialogItemAdapter(Context context, String[] _items) {
         this.items = new ArrayList<>();
         for(String item : _items) {
-            items.add(new Pair<>(item, false));
+            items.add(new Pair(item, false));
         }
         inflater = LayoutInflater.from(context);
     }
@@ -36,7 +42,7 @@ public class DialogItemAdapter extends BaseAdapter {
     }
 
     @Override
-    public Pair<String, Boolean> getItem(int position) {
+    public Pair getItem(int position) {
         return items.get(position);
     }
 
@@ -45,11 +51,15 @@ public class DialogItemAdapter extends BaseAdapter {
         return 0;
     }
 
+    /**
+     * Method for retrieving all the selected bundles
+     * @return ArrayList with strings that represent the bundles
+     */
     public ArrayList<String> getInstallBundles() {
         ArrayList<String> result = new ArrayList<>();
-        for(Pair<String, Boolean> item : items) {
-            if(item.second) {
-                result.add(item.first);
+        for(Pair item : items) {
+            if(item.checked) {
+                result.add(item.bundle);
             }
         }
         return result;
@@ -69,10 +79,10 @@ public class DialogItemAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        final Pair<String, Boolean> item = getItem(position);
+        final Pair item = getItem(position);
 
-        String fileName = item.first;
-        boolean isChecked = item.second;
+        String fileName = item.bundle;
+        boolean isChecked = item.checked;
 
         holder.dialogCheckbox.setChecked(isChecked);
         holder.dialogCheckbox.setText(fileName);
@@ -81,7 +91,7 @@ public class DialogItemAdapter extends BaseAdapter {
             @Override
             public void onClick(View view) {
                 CheckBox box = (CheckBox) view;
-                item.second = box.isChecked();
+                item.checked = box.isChecked();
             }
         });
 
@@ -92,13 +102,16 @@ public class DialogItemAdapter extends BaseAdapter {
         CheckBox dialogCheckbox;
     }
 
-    private class Pair<K,V> {
-        public K first;
-        public V second;
+    /**
+     * Class for pairing a bundle to a boolean
+     */
+    private class Pair {
+        public String bundle;
+        public Boolean checked;
 
-        Pair(K first, V second) {
-            this.first = first;
-            this.second = second;
+        Pair(String bundle, boolean checked) {
+            this.bundle = bundle;
+            this.checked = checked;
         }
     }
 

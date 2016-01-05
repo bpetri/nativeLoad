@@ -29,6 +29,7 @@ import apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 27-10-15.
+ * Fragment for showing info of the installed/active OSGiBundles
  */
 public class OsgiBundlesFragment extends Fragment implements Observer {
     private OsgiBundlesAdapter adapter;
@@ -83,6 +84,15 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
         return rootview;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Celix.getInstance().deleteObserver(this);
+    }
+
+    /**
+     * Method for showing the dialog to install/start bundles
+     */
     private void showDialog() {
         Context context = getActivity();
         AlertDialog.Builder dialog = new AlertDialog.Builder(context,R.style.DialogTheme);

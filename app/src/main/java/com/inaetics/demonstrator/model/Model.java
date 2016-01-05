@@ -19,21 +19,18 @@ import apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 16-9-15.
+ * Class that holds most of the information of the application
  */
 public class Model extends Observable {
 
     private static Model self;
-    private ArrayList<File> localBundles;
     private boolean bundlesMoved;
     private ArrayList<OsgiBundle> osgiBundles;
     private MyConfig config;
     private String bundleLocation;
-    private String cpu_abi;
-    private BundleStatus celixStatus;
 
     private Model() {
         bundlesMoved = false;
-        localBundles = new ArrayList<>();
         osgiBundles = new ArrayList<>();
     }
 
@@ -41,6 +38,10 @@ public class Model extends Observable {
         config = new MyConfig(context);
     }
 
+    /**
+     * Method for retrieving all OSGi bundles that are available
+     * @return ArrayList of Osgibundles that are available
+     */
     public ArrayList<OsgiBundle> getOsgiBundles() {
         return osgiBundles;
     }
@@ -52,25 +53,38 @@ public class Model extends Observable {
         return self;
     }
 
+    /**
+     * Method to check if the bundles are moved
+     * @return true if bundles are moved, else false
+     */
     public boolean areBundlesMoved() {
         return bundlesMoved;
     }
 
-    public BundleStatus getCelixStatus() {
-        return celixStatus;
-    }
-
+    /**
+     * Method for retrieving the directory of all the Osgi bundles
+     * @return location of the directory were all the Osgi are located
+     */
     public String getBundleLocation() {
         return bundleLocation;
     }
 
+    /**
+     * Method to set the directory of all the Osgi bundles
+     * @param bundleLocation location of all the Osgi bundles
+     */
     public void setBundleLocation(String bundleLocation) {
         this.bundleLocation = bundleLocation;
     }
 
+    /**
+     * Method for retrieving the configuration
+     * @return MyConfig with configuration for Celix
+     */
     public MyConfig getConfig() {
         return config;
     }
+
     /**
      * Method for moving the files from the assets to the internal storage
      * so the C code can reach it
@@ -80,7 +94,7 @@ public class Model extends Observable {
         String[] files = null;
 
         //Get cpu_abi for SDK versions above API 21
-        cpu_abi = Build.CPU_ABI;
+        String cpu_abi = Build.CPU_ABI;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String[] abis = Build.SUPPORTED_ABIS;
             for (String ab : abis) {
@@ -116,7 +130,6 @@ public class Model extends Observable {
                 try {
                     InputStream in = assetManager.open("celix_bundles/" + cpu_abi + "/" + fileName);
                     if (moveBundle(in, bundleFile)) {
-                        localBundles.add(bundleFile);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -132,7 +145,7 @@ public class Model extends Observable {
      * Moves the File (bundle) from the Assets folder to the internal storage
      * @param in InputStream to read from
      * @param newFile File to write to
-     * @return
+     * @return true if bundles has been succesfuly moved, false if not
      */
     private boolean moveBundle(InputStream in, File newFile) {
         String fileName = newFile.getName();
@@ -152,10 +165,5 @@ public class Model extends Observable {
             Log.e("BundleMover", "ERROR: " + e.toString());
             return false;
         }
-    }
-
-
-    public String getCpuAbi() {
-        return cpu_abi;
     }
 }

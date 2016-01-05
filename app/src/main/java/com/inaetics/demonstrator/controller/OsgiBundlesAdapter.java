@@ -25,11 +25,18 @@ import apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 27-10-15.
+ * ArrayAdapter for showing the installed/active bundles in a list.
  */
 public class OsgiBundlesAdapter extends ArrayAdapter<OsgiBundle> {
     private int resource;
     private LayoutInflater inflater;
 
+    /**
+     * Constructor
+     * @param context to get the LayoutInflater
+     * @param resource which resource will be used for the item
+     * @param objects List of OsgiBundles that are installed/active
+     */
     public OsgiBundlesAdapter(Context context, int resource, List<OsgiBundle> objects) {
         super(context, resource, objects);
         this.resource = resource;
@@ -103,6 +110,9 @@ public class OsgiBundlesAdapter extends ArrayAdapter<OsgiBundle> {
         return convertView;
     }
 
+    /**
+     * Class for smooth scrolling through the list
+     */
     static class ViewHolder {
         ExpandableLayoutItem layout;
         FrameLayout header, content;

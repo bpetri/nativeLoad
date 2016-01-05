@@ -2,6 +2,7 @@ package com.inaetics.demonstrator.model;
 
 /**
  * Created by mjansen on 16-9-15.
+ * Enum for OSGi bundle statuses
  */
 public enum BundleStatus {
     BUNDLE_NOT_YET_INITIALIZED,

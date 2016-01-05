@@ -24,6 +24,9 @@ public class MyConfig extends Config {
         setupSettings();
     }
 
+    /**
+     * Adds all the standard properties that will be used by some of the Celix and INAETICS bundles
+     */
     private void setupSettings() {
         putProperty("RSA_PORT", "20888");
         putProperty("DISCOVERY_CFG_SERVER_PORT", "20999");
@@ -46,8 +49,7 @@ public class MyConfig extends Config {
 
 
     /**
-     * Retrieves the ip address of this phone
-     *
+     * Retrieves the IPv4 address of the phone
      * @return Ip address ( like 192.168.0.50 )
      */
     public String getLocalIpAddress() {
