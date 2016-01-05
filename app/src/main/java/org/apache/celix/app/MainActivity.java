@@ -80,15 +80,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         config = model.getConfig();
 
-        // Only one time!! After configuration change don't do it again.
-//        if (!model.areBundlesMoved()) {
-            File dirLocation = getExternalFilesDir(null);
-//            if (dirLocation == null) {
-//                dirLocation = getCacheDir();
-//            }
-            model.setBundleLocation(dirLocation.getAbsolutePath());
-//            model.moveBundles(getResources().getAssets());
-//        }
+        File dirLocation = getExternalFilesDir(null);
+        model.setBundleLocation(dirLocation.getAbsolutePath());
+
         btn_start = (Button) findViewById(R.id.start_btn);
 
         if (model.getCelixStatus() == BundleStatus.CELIX_RUNNING) {
