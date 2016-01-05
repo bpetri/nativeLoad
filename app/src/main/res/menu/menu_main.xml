@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_settings_editProperties"
-        android:title="@string/settings_editProperties"
+        android:title="@string/action_editProperties"
         android:orderInCategory="100"
         app:showAsAction="always"
         android:icon="@android:drawable/ic_menu_edit" />
@@ -18,9 +18,9 @@
 
     <item
         android:id="@+id/action_download"
-        android:title="Download"
+        android:title="@string/action_downloadBundle"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_more"
+        android:icon="@drawable/ic_menu_download"
         />
 </menu>
