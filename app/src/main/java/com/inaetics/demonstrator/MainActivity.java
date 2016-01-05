@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         alert.setMessage(msg);
         alert.setView(edittext);
 
-        alert.setPositiveButton("OK", positiveListener);
+        alert.setPositiveButton("Save", positiveListener);
 
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
