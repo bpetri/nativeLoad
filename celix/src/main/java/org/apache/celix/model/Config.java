@@ -40,25 +40,9 @@ public class Config {
             properties = stringToProperties(props);
         } else {
             properties = new Properties();
-            properties.put("RSA_PORT", "20888");
-            properties.put("DISCOVERY_CFG_SERVER_PORT", "20999");
-            properties.put("org.osgi.framework.storage.clean", "onFirstInit");
-            properties.put("LOGHELPER_ENABLE_STDOUT_FALLBACK", "true");
         }
 
         //Following variables will be set every startup
-        String ipAdr = getLocalIpAddress();
-        if (ipAdr != null) {
-            String[] ip = ipAdr.split("\\.");
-            properties.put("RSA_IP", ipAdr);
-            properties.put("DISCOVERY_CFG_SERVER_IP", ipAdr);
-            properties.put("deployment_admin_identification", "Android" + ip[ip.length - 1]);
-        } else {
-            Toast.makeText(context, "No ip address found! Are you connected?", Toast.LENGTH_LONG).show();
-            properties.put("deployment_admin_identification", "Android" + (int) (Math.random() * 745 + 255));
-        }
-        properties.put("deployment_cache_dir", context.getCacheDir().getAbsolutePath());
-        properties.put("org.osgi.framework.storage", context.getDir("cache", Context.MODE_PRIVATE).getAbsolutePath());
 
         writeProperties();
         prefs.edit().putString("celixConfig", propertiesToString()).apply();
@@ -175,9 +159,7 @@ public class Config {
      * Checks what bundles are checked and should be autostarted.
      * Autostart is a configuration property : cosgi.auto.start.1=....
      * Adds checked bundles to the autostart property
-     *
-     * @param autostart      All bundles
-     * @param bundleLocation Where are the bundles located
+     *@param locations ArrayList of strings containing locations of bundles that need to be started
      */
     public void setAutostart(ArrayList<String> locations) {
         String autostart = "";
