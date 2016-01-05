@@ -4,15 +4,18 @@
 
 package com.inaetics.demonstrator;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -34,6 +37,7 @@ import com.inaetics.demonstrator.controller.DownloadTask;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
 import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
+import com.inaetics.demonstrator.model.MyConfig;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -50,7 +54,7 @@ import apache.celix.model.Config;
 public class MainActivity extends AppCompatActivity implements Observer {
 
     private Model model;
-    private Config config;
+    private MyConfig config;
     private Button btn_start;
     private ViewPager pager;
 
@@ -207,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     }
                     sc.close();
                     if (autostart && model.getCelixStatus() != BundleStatus.CELIX_RUNNING) {
-                        Celix.getInstance().startFramework(getFilesDir() + "/" + Config.CONFIG_PROPERTIES);
+                        Celix.getInstance().startFramework(config.getConfigPath());
                     }
                     Toast.makeText(this, "Scanned QR", Toast.LENGTH_SHORT).show();
                 }
@@ -281,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 String str = "";
                 config.putProperty("cosgi.auto.start.1", str);
                 btn_start.setEnabled(false);
-                Celix.getInstance().startFramework(getFilesDir() + "/" + Config.CONFIG_PROPERTIES);
+                Celix.getInstance().startFramework(config.getConfigPath());
             }
 
         });

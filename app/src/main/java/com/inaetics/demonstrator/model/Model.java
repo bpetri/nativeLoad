@@ -26,7 +26,7 @@ public class Model extends Observable {
     private ArrayList<File> localBundles;
     private boolean bundlesMoved;
     private ArrayList<OsgiBundle> osgiBundles;
-    private Config config;
+    private MyConfig config;
     private String bundleLocation;
     private String cpu_abi;
     private BundleStatus celixStatus;
@@ -38,8 +38,7 @@ public class Model extends Observable {
     }
 
     public void setContext(Context context) {
-        config = new Config(context);
-
+        config = new MyConfig(context);
     }
 
     public ArrayList<OsgiBundle> getOsgiBundles() {
@@ -69,7 +68,7 @@ public class Model extends Observable {
         this.bundleLocation = bundleLocation;
     }
 
-    public Config getConfig() {
+    public MyConfig getConfig() {
         return config;
     }
     /**
