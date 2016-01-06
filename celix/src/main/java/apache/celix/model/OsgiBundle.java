@@ -2,6 +2,7 @@ package apache.celix.model;
 
 /**
  * Created by mjansen on 27-10-15.
+ * Class to represent a OsgiBundle containing all its' information
  */
 public class OsgiBundle {
     private String status;

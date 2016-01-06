@@ -13,6 +13,8 @@ import apache.celix.model.Config;
 
 /**
  * Created by marcojansen on 5-1-16.
+ * Used to extend the Config class from the celix library.
+ * Sets up standard settings and retrieves ip address.
  */
 public class MyConfig extends Config {
     private Context context;

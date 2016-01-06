@@ -16,6 +16,9 @@ import com.inaetics.demonstrator.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter used for the install dialog on the OsgiBundlesFragment.
+ */
 public class DialogItemAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;

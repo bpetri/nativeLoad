@@ -87,7 +87,7 @@ public class Model extends Observable {
 
     /**
      * Method for moving the files from the assets to the internal storage
-     * so the C code can reach it
+     * so the jni code can reach it
      */
     public void moveBundles(AssetManager assetManager) {
 

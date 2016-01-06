@@ -20,7 +20,7 @@ This wrapper allows you to:
 ## How to use
 
 Add this line to your build.gradle dependencies  
-`compile 'apache.celix:celix-wrapper:1.1@aar'`
+`compile 'apache.celix:celix-wrapper:1.2@aar'`
 
 ## Small example
 MainActivity is implementing Observer
@@ -50,13 +50,13 @@ protected void onCreate(Bundle savedInstanceState) {
 @Override
 public void update(Observable observable, Object data) {
     // Check if Celix started or stopped
-    if (data == CelixUpdate.CELIX_CHANGED) {
+    if (data == Update.CELIX_CHANGED) {
         // Celix started or stopped
         Boolean celixRunning = celix.isCelixRunning();
     }
 
     // Check if log changed
-    if (data == CelixUpdate.LOG_CHANGED) {
+    if (data == Update.LOG_CHANGED) {
         // Log changed, get newest line
         String newLine = celix.getStdio();
     }

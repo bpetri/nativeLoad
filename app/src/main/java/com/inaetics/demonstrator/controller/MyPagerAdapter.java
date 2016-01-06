@@ -23,6 +23,11 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
         return TITLES[position];
     }
 
+    /**
+     * Method called by pager
+     * @param position      0 = leftfragment, 1 = right fragment
+     * @return              Fragment that should be on this position.
+     */
     @Override
     public Fragment getItem(int position) {
         switch (position) {

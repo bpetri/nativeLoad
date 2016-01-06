@@ -24,12 +24,13 @@ import java.util.Observable;
 import java.util.Observer;
 
 import apache.celix.Celix;
-import apache.celix.model.CelixUpdate;
+import apache.celix.model.Update;
 import apache.celix.model.OsgiBundle;
 
 /**
  * Created by mjansen on 27-10-15.
  * Fragment for showing info of the installed/active OSGiBundles
+ * Also an option to open a dialog with bundles which are locally available and which can be installed.
  */
 public class OsgiBundlesFragment extends Fragment implements Observer {
     private OsgiBundlesAdapter adapter;
@@ -137,6 +138,11 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
 
     }
 
+    /**
+     * Observes the Celix instance, updates the list if a bundle has been changed/installed.
+     * @param observable        The observable ( Celix in this case )
+     * @param o                 Data send from update call
+     */
     @Override
     public void update(Observable observable, final Object o) {
         if (o instanceof OsgiBundle) {
@@ -160,7 +166,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
                 model.getOsgiBundles().add(newBundle);
                 adapter.notifyDataSetChanged();
             }
-        } else if (o == CelixUpdate.CELIX_CHANGED) {
+        } else if (o == Update.CELIX_CHANGED) {
             if(Celix.getInstance().isCelixRunning()) {
                 fab.show();
             } else {

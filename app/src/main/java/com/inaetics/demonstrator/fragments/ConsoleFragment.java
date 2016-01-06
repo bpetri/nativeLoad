@@ -3,7 +3,6 @@ package com.inaetics.demonstrator.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import apache.celix.Celix;
-import apache.celix.model.CelixUpdate;
+import apache.celix.model.Update;
 
 /**
  * Created by mjansen on 17-9-15.
@@ -38,15 +37,24 @@ public class ConsoleFragment extends Fragment implements Observer {
         return rootView;
     }
 
+    /**
+     * Delete observer when view gets destroyed
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         Celix.getInstance().deleteObserver(this);
     }
 
+    /**
+     * Observes the Celix Instance. If log has changed it will request the new lines
+     * and append this to the console.
+     * @param observable        The observable ( Celix in this case )
+     * @param data              Data send with this update call
+     */
     @Override
     public void update(Observable observable, Object data) {
-        if (data == CelixUpdate.LOG_CHANGED) {
+        if (data == Update.LOG_CHANGED) {
             final String newLines = Celix.getInstance().getStdio();
             console.append(newLines);
             if (console.getText().length() > 3000) {

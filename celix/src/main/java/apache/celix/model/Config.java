@@ -140,10 +140,6 @@ public class Config {
         putProperty("cosgi.auto.start.1", autostart);
     }
 
-    /**
-     *
-     * @return
-     */
     public String getConfigPath() {
         return configPath;
     }

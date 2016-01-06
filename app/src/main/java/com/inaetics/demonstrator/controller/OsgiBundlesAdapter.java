@@ -6,17 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andexert.expandablelayout.library.ExpandableLayoutItem;
 import com.inaetics.demonstrator.R;
-import com.inaetics.demonstrator.model.BundleStatus;
 
 import java.util.List;
 

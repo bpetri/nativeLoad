@@ -4,18 +4,15 @@
 
 package com.inaetics.demonstrator;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -35,7 +32,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.inaetics.demonstrator.controller.DownloadTask;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
-import com.inaetics.demonstrator.model.BundleStatus;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.model.MyConfig;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -50,8 +46,8 @@ import java.util.Scanner;
 
 
 import apache.celix.Celix;
-import apache.celix.model.CelixUpdate;
-import apache.celix.model.Config;
+import apache.celix.model.Update;
+
 public class MainActivity extends AppCompatActivity implements Observer {
 
     private Model model;
@@ -105,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Stop observing when destroyed
         Celix.getInstance().deleteObserver(this);
     }
 
@@ -170,6 +167,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Method to start a progress dialog and a download task.
+     * @param url
+     */
     private void download(String url) {
         ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("Downloading");
@@ -180,6 +181,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
         task.execute(url);
     }
 
+    /**
+     * Method called when QR-code scanner has been triggered and finished.
+     * If a qr-code is scanned it will process the content.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -229,7 +234,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     /**
      * Dialog used to show the settings
-     *
      * @param edittext         Edittext which contains all the settings
      * @param title            Title of the dialog
      * @param msg              Message of the dialog
@@ -318,9 +322,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
     };
 
+    /**
+     * Observes a Celix instance. Updates UI when celix has been started/stopped (Changed)
+     * @param observable        Celix instance
+     * @param data              Information about what has changed
+     */
     @Override
     public void update(Observable observable, Object data) {
-        if(data == CelixUpdate.CELIX_CHANGED) {
+        if(data == Update.CELIX_CHANGED) {
             if(Celix.getInstance().isCelixRunning()) {
                 setRunning();
             } else {

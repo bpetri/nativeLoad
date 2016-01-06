@@ -29,6 +29,11 @@ public class DownloadTask extends AsyncTask<String,Void,Void> {
         this.context = context;
     }
 
+    /**
+     * The downloading background task
+     * @param params    First param should be the link where to download from
+     * @return          Null.(Void)
+     */
     @Override
     protected Void doInBackground(String... params) {
         String link = params[0];
@@ -78,12 +83,21 @@ public class DownloadTask extends AsyncTask<String,Void,Void> {
         return null;
     }
 
+    /**
+     * If the downloading failed, progress will be updated and a toast will be showed stating
+     * it failed.
+     * @param values
+     */
     @Override
     protected void onProgressUpdate(Void... values) {
         super.onProgressUpdate(values);
         Toast.makeText(context, "Downloading failed!", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * If downloading went successful, the progress dialog will be dismissed.
+     * @param aVoid
+     */
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
