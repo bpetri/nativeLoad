@@ -22,7 +22,7 @@ import java.util.List;
 public class DialogItemAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
-    List<Pair> items;
+    private List<Pair> items;
 
     /**
      * Constructor of DialogItemAdapter

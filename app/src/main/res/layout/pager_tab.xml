@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:text="Start Celix"
         android:id="@+id/start_btn"
-        android:background="@color/celix_blue"
+        android:background="@color/android_green"
         android:textColor="@android:color/white"/>
 
 </LinearLayout>

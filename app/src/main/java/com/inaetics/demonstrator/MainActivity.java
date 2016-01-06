@@ -4,15 +4,18 @@
 
 package com.inaetics.demonstrator;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Model model;
     private MyConfig config;
     private Button btn_start;
-    private ViewPager pager;
+    private static final int USE_CAMERA_PERMISSION = 123;
 
 
     @Override
@@ -66,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         Celix celix = Celix.getInstance();
         celix.addObserver(this);
 
-        pager = (ViewPager) findViewById(R.id.pager);
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         pager.setAdapter(pagerAdapter);
@@ -130,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             case R.id.action_settings_editProperties:
                 final EditText edittext = new EditText(this.getApplicationContext());
                 String props = config.propertiesToString();
-                showInputDialog(edittext, "Edit Properties", "", props, new DialogInterface.OnClickListener() {
+                showInputDialog(edittext, "Edit Properties", props, new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -140,14 +143,19 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 });
                 return true;
             case R.id.action_startQR:
-                new IntentIntegrator(this)
-                        .setCaptureActivity(CaptureActivity.class)
-                        .setOrientationLocked(false)
-                        .initiateScan();
+                int hasCameraPermission = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA);
+                if (hasCameraPermission != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[] {Manifest.permission.CAMERA},USE_CAMERA_PERMISSION);
+                } else {
+                    new IntentIntegrator(this)
+                            .setCaptureActivity(CaptureActivity.class)
+                            .setOrientationLocked(false)
+                            .initiateScan();
+                }
                 return true;
             case R.id.action_download:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-                final EditText text = new EditText(this);
+                final EditText text = new EditText(this.getApplicationContext());
                 builder.setView(text);
                 builder.setPositiveButton("Download", new DialogInterface.OnClickListener() {
                     @Override
@@ -168,8 +176,30 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     /**
+     * On Android 6+ (api 23+) we have to ask for permissions
+     * @param requestCode       code send with permission request
+     * @param permissions       list with permissions
+     * @param grantResults      results that have been granted
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case USE_CAMERA_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    new IntentIntegrator(this)
+                            .setCaptureActivity(CaptureActivity.class)
+                            .setOrientationLocked(false)
+                            .initiateScan();
+                } else {
+                    Toast.makeText(this, "No camera permission for QR-code scanner!",Toast.LENGTH_LONG).show();;
+                }
+
+        }
+    }
+
+    /**
      * Method to start a progress dialog and a download task.
-     * @param url
+     * @param url   Url where to download from
      */
     private void download(String url) {
         ProgressDialog progress = new ProgressDialog(this);
@@ -194,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             } else {
                 String content = result.getContents();
                 try {
-                    URL url = new URL(content);
+                    new URL(content);
                     // Is a url!
                     download(content);
                 } catch (MalformedURLException e) {
@@ -236,11 +266,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
      * Dialog used to show the settings
      * @param edittext         Edittext which contains all the settings
      * @param title            Title of the dialog
-     * @param msg              Message of the dialog
      * @param text             Text inside the edittext
      * @param positiveListener Onclicklistener for the change button
      */
-    private void showInputDialog(final EditText edittext, String title, String msg, String text, DialogInterface.OnClickListener positiveListener) {
+    private void showInputDialog(final EditText edittext, String title, String text, DialogInterface.OnClickListener positiveListener) {
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this, R.style.DialogTheme);
 
@@ -251,7 +280,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
 
         alert.setTitle(title);
-        alert.setMessage(msg);
         alert.setView(edittext);
 
         alert.setPositiveButton("Save", positiveListener);
@@ -271,13 +299,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
      * Changes button, onclicklistener to a stop button.
      */
     private void setRunning() {
-        btn_start.setText("STOP");
+        btn_start.setText("Stop");
         btn_start.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Celix.getInstance().stopFramework();
                 btn_start.setEnabled(false);
+                btn_start.setText("Stopping");
             }
         });
         btn_start.setEnabled(true);
@@ -289,13 +318,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
      */
     private void setStopped() {
         btn_start.setText("Start");
-        btn_start.setBackgroundColor(ContextCompat.getColor(this, R.color.celix_blue));
+        btn_start.setBackgroundColor(ContextCompat.getColor(this, R.color.android_green));
 
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String str = "";
                 config.putProperty("cosgi.auto.start.1", str);
                 btn_start.setEnabled(false);
+                btn_start.setText("Starting");
                 Celix.getInstance().startFramework(config.getConfigPath());
             }
 

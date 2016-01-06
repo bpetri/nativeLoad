@@ -15,7 +15,7 @@ import java.util.Properties;
  * Contains a properties object with the same information as the config.properties file
  */
 public class Config {
-    public static final String CONFIG_PROPERTIES = "config.properties";
+    private static final String CONFIG_PROPERTIES = "config.properties";
     private Properties properties;
     private Context context;
     private String configPath;
@@ -115,8 +115,7 @@ public class Config {
 
     /**
      * Translates the properties object to a String in format : key=value
-     *
-     * @return
+     * @return String representation of the properties object
      */
     public String propertiesToString() {
         String propStr = "";
@@ -136,8 +135,7 @@ public class Config {
         for (String loc : locations) {
             autostart += loc + " ";
         }
-        autostart.trim();
-        putProperty("cosgi.auto.start.1", autostart);
+        putProperty("cosgi.auto.start.1", autostart.trim());
     }
 
     public String getConfigPath() {

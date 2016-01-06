@@ -86,7 +86,7 @@ public class DownloadTask extends AsyncTask<String,Void,Void> {
     /**
      * If the downloading failed, progress will be updated and a toast will be showed stating
      * it failed.
-     * @param values
+     * @param values    Is Void
      */
     @Override
     protected void onProgressUpdate(Void... values) {
@@ -96,7 +96,7 @@ public class DownloadTask extends AsyncTask<String,Void,Void> {
 
     /**
      * If downloading went successful, the progress dialog will be dismissed.
-     * @param aVoid
+     * @param aVoid     Is Void
      */
     @Override
     protected void onPostExecute(Void aVoid) {

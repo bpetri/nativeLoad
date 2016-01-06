@@ -67,9 +67,9 @@ public class MyConfig extends Config {
                 }
             }
         } catch (Exception e) {
-            Log.e("Config", "Error while retrieving IP Address: " + e.toString(), e);
+            Log.e("Config", "Error while retrieving IP Address: " + e.getMessage());
+            e.printStackTrace();
         }
-
         return null;
     }
 

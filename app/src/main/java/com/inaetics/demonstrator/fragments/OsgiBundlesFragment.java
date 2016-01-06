@@ -34,19 +34,18 @@ import apache.celix.model.OsgiBundle;
  */
 public class OsgiBundlesFragment extends Fragment implements Observer {
     private OsgiBundlesAdapter adapter;
-    private ExpandableLayoutListView list;
     private FloatingActionButton fab;
     private Model model;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootview = inflater.inflate(R.layout.osgi_bundles_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.osgi_bundles_fragment, container, false);
 
         model = Model.getInstance();
         Celix.getInstance().addObserver(this);
-        list = (ExpandableLayoutListView) rootview.findViewById(R.id.osgi_listview);
-        fab = (FloatingActionButton) rootview.findViewById(R.id.fab);
+        ExpandableLayoutListView list = (ExpandableLayoutListView) rootView.findViewById(R.id.osgi_listview);
+        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
 
         adapter = new OsgiBundlesAdapter(getActivity(), R.layout.osgi_bundles_row, model.getOsgiBundles());
         list.setAdapter(adapter);
@@ -82,7 +81,7 @@ public class OsgiBundlesFragment extends Fragment implements Observer {
 
         fab.hide();
 
-        return rootview;
+        return rootView;
     }
 
     @Override

@@ -7,20 +7,20 @@
         android:title="@string/action_editProperties"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_edit" />
+        android:icon="@drawable/ic_mode_edit_white_48dp" />
 
     <item
         android:id="@+id/action_startQR"
         android:title="@string/action_qr"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_camera" />
+        android:icon="@drawable/ic_photo_camera_white_48dp" />
 
     <item
         android:id="@+id/action_download"
         android:title="@string/action_downloadBundle"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@drawable/ic_menu_download"
+        android:icon="@drawable/ic_file_download_white_48dp"
         />
 </menu>

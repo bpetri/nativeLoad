@@ -224,7 +224,7 @@ public class Celix extends Observable {
 
     /**
      * Callback method, is being called from jni_part.c when a bundle has been changed/installed
-     * @param bundle
+     * @param bundle    BundleString which contains all the information of this bundle
      */
     private void bundleChanged(String bundle) {
         Scanner sc = new Scanner(bundle);
@@ -237,13 +237,12 @@ public class Celix extends Observable {
         }
         sc.close();
 
-        OsgiBundle osgiBundle = new OsgiBundle(symbolicName, status, id, location);
-        final OsgiBundle finalOsgiBundle = osgiBundle;
+        final OsgiBundle osgiBundle = new OsgiBundle(symbolicName, status, id, location);
         handler.post(new Runnable() {
             @Override
             public void run() {
                 setChanged();
-                notifyObservers(finalOsgiBundle);
+                notifyObservers(osgiBundle);
 
             }
         });

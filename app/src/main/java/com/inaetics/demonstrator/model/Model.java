@@ -10,10 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
 
-import apache.celix.model.Config;
 import apache.celix.model.OsgiBundle;
 
 
@@ -100,7 +98,7 @@ public class Model extends Observable {
             for (String ab : abis) {
                 try {
                     files = assetManager.list("celix_bundles/" + ab);
-                    if (files != null && files.length > 0) {
+                    if (files.length > 0) {
                         cpu_abi = ab;
                         break;
                     }
@@ -112,7 +110,7 @@ public class Model extends Observable {
             //Get cpu_abi for SDK version below API 21
             try {
                 files = assetManager.list("celix_bundles/" + Build.CPU_ABI);
-                if (files == null || files.length == 0) {
+                if (files.length == 0) {
                     files = assetManager.list("celix_bundles/" + Build.CPU_ABI2);
                     cpu_abi = Build.CPU_ABI2;
                 }
@@ -129,8 +127,7 @@ public class Model extends Observable {
                 File bundleFile = new File(bundleLocation + "/" + fileName);
                 try {
                     InputStream in = assetManager.open("celix_bundles/" + cpu_abi + "/" + fileName);
-                    if (moveBundle(in, bundleFile)) {
-                    }
+                    moveBundle(in,bundleFile);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -147,7 +144,7 @@ public class Model extends Observable {
      * @param newFile File to write to
      * @return true if bundles has been succesfuly moved, false if not
      */
-    private boolean moveBundle(InputStream in, File newFile) {
+    private void moveBundle(InputStream in, File newFile) {
         String fileName = newFile.getName();
         try {
             FileOutputStream out = new FileOutputStream(newFile);
@@ -160,10 +157,9 @@ public class Model extends Observable {
             out.flush();
             out.close();
             Log.i("BundleMover", fileName + " copied to " + bundleLocation);
-            return true;
         } catch (Exception e) {
-            Log.e("BundleMover", "ERROR: " + e.toString());
-            return false;
+            Log.e("BundleMover", "ERROR: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

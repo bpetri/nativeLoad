@@ -3,17 +3,25 @@
     <!-- Base application theme. -->
     <style name="CustomTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!--   your app branding color for the app bar -->
-        <item name="colorPrimary">#0288D1</item>
+        <item name="colorPrimary">@color/android_green</item>
         <!--   darker variant for the status bar and contextual app bars -->
-        <item name="colorPrimaryDark">#0277BD</item>
+        <item name="colorPrimaryDark">@color/android_green_dark</item>
         <!--   theme UI controls like checkboxes and text fields -->
-        <item name="colorAccent">@android:color/holo_red_light</item>>
+        <item name="colorAccent">@android:color/holo_red_light</item>
+        <item name="android:editTextStyle">@style/EditTextStyle</item>
     </style>
 
     <style name="DialogTheme" parent="android:Theme.Holo.Light.Dialog">
         <!-- No backgrounds, titles or window float -->
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="colorAccent">@color/android_green</item>
+        <item name="android:textColor">@color/android_green</item>
+    </style>
+
+    <style name="EditTextStyle" parent="android:Widget.EditText">
+        <item name="colorControlActivated">@color/android_green</item>
+        <item name="colorControlHighlight">@color/android_green</item>
     </style>
 
     <style name="floating_action_button">
