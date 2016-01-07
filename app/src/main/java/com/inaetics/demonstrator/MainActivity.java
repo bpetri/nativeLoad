@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -132,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         switch (item.getItemId()) {
             case R.id.action_settings_editProperties:
                 final EditText edittext = new EditText(this.getApplicationContext());
+                edittext.getBackground().setColorFilter(ContextCompat.getColor(this, R.color.android_green), PorterDuff.Mode.SRC_ATOP);
                 String props = config.propertiesToString();
                 showInputDialog(edittext, "Edit Properties", props, new DialogInterface.OnClickListener() {
 
@@ -156,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             case R.id.action_download:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
                 final EditText text = new EditText(this.getApplicationContext());
+                text.getBackground().setColorFilter(ContextCompat.getColor(this, R.color.android_green), PorterDuff.Mode.SRC_ATOP);
                 builder.setView(text);
                 builder.setPositiveButton("Download", new DialogInterface.OnClickListener() {
                     @Override
