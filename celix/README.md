@@ -4,7 +4,8 @@ This is the Android Library used for communication with the Celix framework.
 This library acts as a wrapper around Apache Celix which is written in C.  
 All the framework files are included in this library project.   
 The Apache Celix repository : https://github.com/apache/celix  
-Apache Celix website : https://celix.apache.org/
+Apache Celix website : https://celix.apache.org/  
+Bintray location of library : https://bintray.com/marcojansen/apache-celix-android-wrapper/apache_celix_wrapper/view
 
 
 This wrapper allows you to:
