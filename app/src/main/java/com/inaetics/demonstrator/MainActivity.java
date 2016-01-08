@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings_editProperties:
-                final EditText edittext = new EditText(this.getApplicationContext());
+                final EditText edittext = new EditText(this);
                 edittext.getBackground().setColorFilter(ContextCompat.getColor(this, R.color.android_green), PorterDuff.Mode.SRC_ATOP);
                 String props = config.propertiesToString();
                 showInputDialog(edittext, "Edit Properties", props, new DialogInterface.OnClickListener() {
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 return true;
             case R.id.action_download:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-                final EditText text = new EditText(this.getApplicationContext());
+                final EditText text = new EditText(this);
                 text.getBackground().setColorFilter(ContextCompat.getColor(this, R.color.android_green), PorterDuff.Mode.SRC_ATOP);
                 builder.setView(text);
                 builder.setPositiveButton("Download", new DialogInterface.OnClickListener() {
@@ -278,7 +278,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         if (text != null) {
             edittext.setText(text);
-            edittext.setTextColor(ContextCompat.getColor(this,android.R.color.black));
             edittext.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         }
 
