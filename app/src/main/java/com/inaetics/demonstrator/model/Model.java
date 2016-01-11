@@ -26,6 +26,7 @@ public class Model extends Observable {
     private ArrayList<OsgiBundle> osgiBundles;
     private MyConfig config;
     private String bundleLocation;
+    private String cpu_abi;
 
     private Model() {
         bundlesMoved = false;
@@ -119,7 +120,7 @@ public class Model extends Observable {
             }
         }
         Log.e("Bundles", "Using " + cpu_abi + " bundles");
-
+        this.cpu_abi = cpu_abi;
 
         if (files != null) {
             //Move bundles from assets to internal storage (/data/data/com.inaetics.demonstrator/celix_bundles
@@ -161,5 +162,9 @@ public class Model extends Observable {
             Log.e("BundleMover", "ERROR: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public String getCpu_abi() {
+        return cpu_abi;
     }
 }

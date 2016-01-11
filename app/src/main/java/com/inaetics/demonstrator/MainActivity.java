@@ -79,9 +79,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         pager.setOffscreenPageLimit(2);
 
         model = Model.getInstance();
-        model.setContext(this);
-
-        config = model.getConfig();
 
         // Only one time!! After configuration change don't do it again.
         if (!model.areBundlesMoved()) {
@@ -93,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
             model.moveBundles(getResources().getAssets());
         }
         btn_start = (Button) findViewById(R.id.start_btn);
+        model.setContext(this);
+
+        config = model.getConfig();
 
         if (celix.isCelixRunning()) {
             setRunning();
@@ -245,7 +245,11 @@ public class MainActivity extends AppCompatActivity implements Observer {
                             }
                             bscan.close();
                             config.putProperty(keyValue[0], startBundles);
-                        } else {
+                        }
+                        else if(keyValue[0].equals("deployment_admin_identification")) {
+                            config.putProperty(keyValue[0], keyValue[1] + "_" + model.getCpu_abi());
+                        }
+                        else {
                             try {
                                 config.putProperty(keyValue[0], keyValue[1]);
                             } catch (ArrayIndexOutOfBoundsException ex) {
@@ -324,8 +328,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String str = "";
-                config.putProperty("cosgi.auto.start.1", str);
+//                String str = "";
+//                config.putProperty("cosgi.auto.start.1", str);
                 btn_start.setEnabled(false);
                 btn_start.setText("Starting");
                 Celix.getInstance().startFramework(config.getConfigPath());
