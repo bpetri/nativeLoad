@@ -37,13 +37,10 @@ public class MyConfig extends Config {
         //Following variables will be set every startup
         String ipAdr = getLocalIpAddress();
         if (ipAdr != null) {
-            String[] ip = ipAdr.split("\\.");
             putProperty("RSA_IP", ipAdr);
             putProperty("DISCOVERY_CFG_SERVER_IP", ipAdr);
-            putProperty("deployment_admin_identification", "Android" + ip[ip.length - 1]);
         } else {
             Toast.makeText(context, "No ip address found! Are you connected?", Toast.LENGTH_LONG).show();
-            putProperty("deployment_admin_identification", "Android" + (int) (Math.random() * 745 + 255));
         }
         putProperty("deployment_cache_dir", context.getCacheDir().getAbsolutePath());
         putProperty("org.osgi.framework.storage", context.getDir("cache", Context.MODE_PRIVATE).getAbsolutePath());
