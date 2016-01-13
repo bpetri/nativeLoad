@@ -203,26 +203,27 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     boolean autostart = false;
                     while (sc.hasNextLine()) {
                         String[] keyValue = sc.nextLine().split("=");
-                        if (keyValue[0].equals("cosgi.auto.start.1")) {
-                            autostart = true;
-                            String startBundles = "";
-                            Scanner bscan = new Scanner(keyValue[1]);
-                            while (bscan.hasNext()) {
-                                startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
-                            }
-                            bscan.close();
-                            config.putProperty(keyValue[0], startBundles);
-                        }
-                        else if(keyValue[0].equals("deployment_admin_identification")) {
-                            config.putProperty(keyValue[0], keyValue[1] + "_" + model.getCpu_abi());
-                        }
-                        else {
-                            try {
-                                config.putProperty(keyValue[0], keyValue[1]);
-                            } catch (ArrayIndexOutOfBoundsException ex) {
-                                //Ignore property there is no key/value combination
-                                Log.e("Scanner", "couldn't scan: " + Arrays.toString(keyValue));
-                            }
+                        switch(keyValue[0]) {
+                            case "cosgi.auto.start.1":
+                                autostart = true;
+                                String startBundles = "";
+                                Scanner bscan = new Scanner(keyValue[1]);
+                                while (bscan.hasNext()) {
+                                    startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
+                                }
+                                bscan.close();
+                                config.putProperty(keyValue[0], startBundles);
+                                break;
+                            case "deployment_admin_identification":
+                                config.putProperty(keyValue[0], keyValue[1] + "_" + model.getCpu_abi());
+                                break;
+                            default:
+                                try {
+                                    config.putProperty(keyValue[0], keyValue[1]);
+                                } catch (ArrayIndexOutOfBoundsException ex) {
+                                    //Ignore property there is no key/value combination
+                                    Log.e("Scanner", "couldn't scan: " + Arrays.toString(keyValue));
+                                }
                         }
                     }
                     sc.close();
@@ -307,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     // Used to determine if the ip has changed.
-    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.v("Network", "network changes detected");

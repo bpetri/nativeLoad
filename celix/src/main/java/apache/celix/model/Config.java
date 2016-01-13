@@ -17,7 +17,7 @@ import java.util.Properties;
 public class Config {
     private static final String CONFIG_PROPERTIES = "config.properties";
     private Properties properties;
-    private Context context;
+    private final Context context;
     private String configPath;
 
     public Config(Context context) {

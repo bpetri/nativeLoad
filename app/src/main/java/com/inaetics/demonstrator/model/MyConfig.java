@@ -17,7 +17,7 @@ import apache.celix.model.Config;
  * Sets up standard settings and retrieves ip address.
  */
 public class MyConfig extends Config {
-    private Context context;
+    private final Context context;
 
 
     public MyConfig(Context context) {

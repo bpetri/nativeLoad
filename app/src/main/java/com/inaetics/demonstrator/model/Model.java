@@ -143,7 +143,6 @@ public class Model extends Observable {
      * Moves the File (bundle) from the Assets folder to the internal storage
      * @param in InputStream to read from
      * @param newFile File to write to
-     * @return true if bundles has been succesfuly moved, false if not
      */
     private void moveBundle(InputStream in, File newFile) {
         String fileName = newFile.getName();
