@@ -4,19 +4,16 @@
 
 package com.inaetics.demonstrator;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -38,7 +35,6 @@ import com.inaetics.demonstrator.controller.DownloadTask;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.model.MyConfig;
-import com.journeyapps.barcodescanner.CaptureActivity;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -57,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Model model;
     private MyConfig config;
     private Button btn_start;
-    private static final int USE_CAMERA_PERMISSION = 123;
 
 
     @Override
@@ -145,15 +140,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 });
                 return true;
             case R.id.action_startQR:
-                int hasCameraPermission = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA);
-                if (hasCameraPermission != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[] {Manifest.permission.CAMERA},USE_CAMERA_PERMISSION);
-                } else {
                     new IntentIntegrator(this)
-                            .setCaptureActivity(CaptureActivity.class)
-                            .setOrientationLocked(false)
+                            .setOrientationLocked(true)
                             .initiateScan();
-                }
                 return true;
             case R.id.action_download:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
@@ -176,28 +165,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * On Android 6+ (api 23+) we have to ask for permissions
-     * @param requestCode       code send with permission request
-     * @param permissions       list with permissions
-     * @param grantResults      results that have been granted
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case USE_CAMERA_PERMISSION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    new IntentIntegrator(this)
-                            .setCaptureActivity(CaptureActivity.class)
-                            .setOrientationLocked(false)
-                            .initiateScan();
-                } else {
-                    Toast.makeText(this, "No camera permission for QR-code scanner!",Toast.LENGTH_LONG).show();;
-                }
-
-        }
     }
 
     /**
