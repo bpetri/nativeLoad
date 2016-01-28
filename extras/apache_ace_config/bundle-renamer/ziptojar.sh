@@ -22,7 +22,7 @@ for dir in */ ; do
     version=`cat META-INF/MANIFEST.MF | grep 'Bundle-Version' | cut -d' ' -f2 | tr -d '\n' | tr -d '\r'`
     bundleFile="${symbolicName}.jar"
     #echo "BUNDLEFILE is ${bundleFile}"
-    jar cfm ../../../jars/${bundleFile} META-INF/MANIFEST.MF lib*.so
+    jar cfm ../../../jars/${bundleFile} META-INF/MANIFEST.MF lib*.so *.descriptor
     cd ..
     rm -rf t
   done

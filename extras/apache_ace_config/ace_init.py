@@ -44,7 +44,7 @@ if len(sys.argv) < 3 :
 
 
 #connect to ace and create workspace
-conn = httplib.HTTPConnection("localhost:8080")
+conn = httplib.HTTPConnection("192.168.0.50:8080")
 conn.request("POST", "/client/work")
 print conn
 response = conn.getresponse()
@@ -199,7 +199,7 @@ for distributionArch in distributionArchs:
    distributions = distributionArch.iter("distribution")
    for distribution in distributions:
       distributionDesc = distribution.attrib["name"]
-      distributionName = "%s_%s" % (distribution.attrib["name"], cpu_arch)
+      distributionName = "%s_%s" % (distributionDesc, cpu_arch)
       distributionAttr = { "name" : distributionName, "description" : distributionDesc }
       distributionTags = { "arch" : cpu_arch }
       createAceEntityEntry(conn, loc, "distribution", distributionAttr, distributionTags)
@@ -227,12 +227,22 @@ for targetArch in targetArchs:
    targets = targetArch.iter("target")
    for target in targets:
 
-      distributions = target.iter("distribution")
-      for distribution in distributions:
-         #Create distribution2target
-         distributionName = "%s_%s" % (distribution.attrib["name"], cpu_arch)
-         d2tAttr = { "leftCardinality" : 1, "leftEndpoint" : "(name=%s)" % distributionName, "rightCardinality" : 1000, "rightEndpoint" : "(&(target.role=%s)(target.cpu_arch=%s))" % (target.attrib["role"], cpu_arch)}
-         createAceEntityEntry(conn, loc, "distribution2target", d2tAttr)
+      targetDesc = target.attrib["name"]
+      targetName = "%s_%s" % (targetDesc, cpu_arch)
+      targetAttr = { "id" : targetName, "autoapprove" : "true" }
+      createAceEntityEntry(conn, loc, "target", targetAttr, {})
+
+    #   Create only targets and no distribution2targets
+    #   Create distribution2targets through the gui of Ace
+
+    #   distributions = target.iter("distribution")
+    #   for distribution in distributions:
+    #      Create distribution2target
+    #      distributionName = "%s_%s" % (distribution.attrib["name"], cpu_arch)
+    #      d2tAttr = { "leftCardinality" : 1, "leftEndpoint" : "(name=%s)" % distributionName, "rightCardinality" : 1000, "rightEndpoint" : "(id=%s)" % targetName}
+    #      createAceEntityEntry(conn, loc, "distribution2target", d2tAttr)
+
+
 
 
 #activate workspace

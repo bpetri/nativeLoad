@@ -1,155 +1,72 @@
 <config>
     <features arch="armeabi-v7a">
         <feature name="remoteservices">
-            <artifact name="remote_service_admin_http"/>
+            <artifact name="remote_service_admin_dfi"/>
             <artifact name="discovery_etcd"/>
             <artifact name="topology_manager"/>
         </feature>
-        <feature name="statsprovider">
-            <artifact name="StatsProvider_endpoint"/>
-        </feature>
         <feature name="processor">
-            <artifact name="Processor"/>
-            <artifact name="SampleQueue_proxy"/>
-        </feature>
-        <feature name="queue">
-            <artifact name="SampleQueue_endpoint"/>
-            <artifact name="SampleQueue"/>
+            <artifact name="org.inaetics.demonstrator.api.processor.Processor"/>
         </feature>
         <feature name="producer">
-            <artifact name="Producer"/>
-            <artifact name="SampleQueue_proxy"/>
+            <artifact name="org.inaetics.demonstrator.api.producer.Producer"/>
         </feature>
-    </features>
-    <features arch="linux-x86_64">
-        <feature name="remoteservices">
-            <artifact name="remote_service_admin_http"/>
-            <artifact name="discovery_etcd"/>
-            <artifact name="topology_manager"/>
+        <feature name="shake_detection">
+            <artifact name="org.inaetics.demonstrator.android.shakedetection"/>
         </feature>
-        <feature name="statsprovider">
-            <artifact name="StatsProvider_endpoint"/>
-        </feature>
-        <feature name="processor">
-            <artifact name="Processor"/>
-            <artifact name="SampleQueue_proxy"/>
-        </feature>
-        <feature name="queue">
-            <artifact name="SampleQueue_endpoint"/>
-            <artifact name="SampleQueue"/>
-        </feature>
-        <feature name="producer">
-            <artifact name="Producer"/>
-            <artifact name="SampleQueue_proxy"/>
-        </feature>
+
     </features>
     <features arch="armeabi">
         <feature name="remoteservices">
-            <artifact name="remote_service_admin_http"/>
+            <artifact name="remote_service_admin_dfi"/>
             <artifact name="discovery_etcd"/>
             <artifact name="topology_manager"/>
         </feature>
-        <feature name="statsprovider">
-            <artifact name="StatsProvider_endpoint"/>
-        </feature>
         <feature name="processor">
-            <artifact name="Processor"/>
-            <artifact name="SampleQueue_proxy"/>
-        </feature>
-        <feature name="queue">
-            <artifact name="SampleQueue_endpoint"/>
-            <artifact name="SampleQueue"/>
+            <artifact name="org.inaetics.demonstrator.api.processor.Processor"/>
         </feature>
         <feature name="producer">
-            <artifact name="Producer"/>
-            <artifact name="SampleQueue_proxy"/>
+            <artifact name="org.inaetics.demonstrator.api.producer.Producer"/>
+        </feature>
+        <feature name="shake_detection">
+            <artifact name="org.inaetics.demonstrator.android.shakedetection"/>
         </feature>
     </features>
 
     <distributions arch="armeabi-v7a">
         <distribution name="processor">
             <feature name="processor"/>
-            <feature name="statsprovider"/>
-            <feature name="remoteservices"/>
-        </distribution>
-        <distribution name="queue">
-            <feature name="queue"/>
-            <feature name="statsprovider"/>
             <feature name="remoteservices"/>
         </distribution>
         <distribution name="producer">
             <feature name="producer"/>
-            <feature name="statsprovider"/>
-            <feature name="remoteservices"/>
-        </distribution>
-    </distributions>
-    <distributions arch="linux-x86_64">
-        <distribution name="processor">
-            <feature name="processor"/>
-            <feature name="statsprovider"/>
-            <feature name="remoteservices"/>
-        </distribution>
-        <distribution name="queue">
-            <feature name="queue"/>
-            <feature name="statsprovider"/>
-            <feature name="remoteservices"/>
-        </distribution>
-        <distribution name="producer">
-            <feature name="producer"/>
-            <feature name="statsprovider"/>
+            <feature name="shake_detection"/>
             <feature name="remoteservices"/>
         </distribution>
     </distributions>
     <distributions arch="armeabi">
         <distribution name="processor">
             <feature name="processor"/>
-            <feature name="statsprovider"/>
-            <feature name="remoteservices"/>
-        </distribution>
-        <distribution name="queue">
-            <feature name="queue"/>
-            <feature name="statsprovider"/>
             <feature name="remoteservices"/>
         </distribution>
         <distribution name="producer">
             <feature name="producer"/>
-            <feature name="statsprovider"/>
+            <feature name="shake_detection"/>
             <feature name="remoteservices"/>
         </distribution>
     </distributions>
 
 
     <targets arch="armeabi-v7a">
-        <target role="processor">
-            <distribution name="processor"/>
+        <target name="group1">
         </target>
-        <target role="queue">
-            <distribution name="queue"/>
-        </target>
-        <target role="producer">
-            <distribution name="producer"/>
-        </target>
-    </targets>
-    <targets arch="linux-x86_64">
-        <target role="processor">
-            <distribution name="processor"/>
-        </target>
-        <target role="queue">
-            <distribution name="queue"/>
-        </target>
-        <target role="producer">
-            <distribution name="producer"/>
+        <target name="group2">
         </target>
     </targets>
     <targets arch="armeabi">
-        <target role="processor">
-            <distribution name="processor"/>
+        <target name="group1">
         </target>
-        <target role="queue">
-            <distribution name="queue"/>
-        </target>
-        <target role="producer">
-            <distribution name="producer"/>
+        <target name="group2">
         </target>
     </targets>
 </config>
