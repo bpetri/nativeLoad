@@ -4,19 +4,16 @@
 
 package com.inaetics.demonstrator;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -38,7 +35,6 @@ import com.inaetics.demonstrator.controller.DownloadTask;
 import com.inaetics.demonstrator.controller.MyPagerAdapter;
 import com.inaetics.demonstrator.model.Model;
 import com.inaetics.demonstrator.model.MyConfig;
-import com.journeyapps.barcodescanner.CaptureActivity;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -57,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Model model;
     private MyConfig config;
     private Button btn_start;
-    private static final int USE_CAMERA_PERMISSION = 123;
 
 
     @Override
@@ -145,15 +140,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 });
                 return true;
             case R.id.action_startQR:
-                int hasCameraPermission = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA);
-                if (hasCameraPermission != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[] {Manifest.permission.CAMERA},USE_CAMERA_PERMISSION);
-                } else {
                     new IntentIntegrator(this)
-                            .setCaptureActivity(CaptureActivity.class)
-                            .setOrientationLocked(false)
+                            .setOrientationLocked(true)
                             .initiateScan();
-                }
                 return true;
             case R.id.action_download:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
@@ -176,28 +165,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * On Android 6+ (api 23+) we have to ask for permissions
-     * @param requestCode       code send with permission request
-     * @param permissions       list with permissions
-     * @param grantResults      results that have been granted
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case USE_CAMERA_PERMISSION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    new IntentIntegrator(this)
-                            .setCaptureActivity(CaptureActivity.class)
-                            .setOrientationLocked(false)
-                            .initiateScan();
-                } else {
-                    Toast.makeText(this, "No camera permission for QR-code scanner!",Toast.LENGTH_LONG).show();;
-                }
-
-        }
     }
 
     /**
@@ -236,26 +203,27 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     boolean autostart = false;
                     while (sc.hasNextLine()) {
                         String[] keyValue = sc.nextLine().split("=");
-                        if (keyValue[0].equals("cosgi.auto.start.1")) {
-                            autostart = true;
-                            String startBundles = "";
-                            Scanner bscan = new Scanner(keyValue[1]);
-                            while (bscan.hasNext()) {
-                                startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
-                            }
-                            bscan.close();
-                            config.putProperty(keyValue[0], startBundles);
-                        }
-                        else if(keyValue[0].equals("deployment_admin_identification")) {
-                            config.putProperty(keyValue[0], keyValue[1] + "_" + model.getCpu_abi());
-                        }
-                        else {
-                            try {
-                                config.putProperty(keyValue[0], keyValue[1]);
-                            } catch (ArrayIndexOutOfBoundsException ex) {
-                                //Ignore property there is no key/value combination
-                                Log.e("Scanner", "couldn't scan: " + Arrays.toString(keyValue));
-                            }
+                        switch(keyValue[0]) {
+                            case "cosgi.auto.start.1":
+                                autostart = true;
+                                String startBundles = "";
+                                Scanner bscan = new Scanner(keyValue[1]);
+                                while (bscan.hasNext()) {
+                                    startBundles += model.getBundleLocation() + "/" + bscan.next() + " ";
+                                }
+                                bscan.close();
+                                config.putProperty(keyValue[0], startBundles);
+                                break;
+                            case "deployment_admin_identification":
+                                config.putProperty(keyValue[0], keyValue[1] + "_" + model.getCpu_abi());
+                                break;
+                            default:
+                                try {
+                                    config.putProperty(keyValue[0], keyValue[1]);
+                                } catch (ArrayIndexOutOfBoundsException ex) {
+                                    //Ignore property there is no key/value combination
+                                    Log.e("Scanner", "couldn't scan: " + Arrays.toString(keyValue));
+                                }
                         }
                     }
                     sc.close();
@@ -340,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     // Used to determine if the ip has changed.
-    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.v("Network", "network changes detected");

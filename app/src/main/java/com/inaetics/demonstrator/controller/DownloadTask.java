@@ -21,8 +21,8 @@ import java.net.URL;
  * AsyncTask to download bundles from an url to the desired bundle location.
  */
 public class DownloadTask extends AsyncTask<String,Void,Void> {
-    private ProgressDialog dialog;
-    private Context context;
+    private final ProgressDialog dialog;
+    private final Context context;
 
     public DownloadTask(Context context, ProgressDialog dialog) {
         this.dialog = dialog;

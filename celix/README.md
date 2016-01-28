@@ -21,7 +21,7 @@ This wrapper allows you to:
 ## How to use
 
 Add this line to your build.gradle dependencies  
-`compile 'apache.celix:celix-wrapper:1.2@aar'`
+`compile 'apache.celix:celix-wrapper:2.0@aar'`
 
 ## Small example
 MainActivity is implementing Observer

@@ -249,7 +249,6 @@ void* callback_to_bundleChanged(long id, bundle_state_e state, char * name, char
 
     char str[256];
     snprintf(str, 256, "%ld %s %s %s", id, stateString, name, location);
-    puts(str);
     JNIEnv* je;
     int isAttached = 0;
     int status = (*gJavaVM)->GetEnv(gJavaVM, (void**) &je, JNI_VERSION_1_4);

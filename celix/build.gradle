@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 ext {
     PUBLISH_GROUP_ID = 'apache.celix'
     PUBLISH_ARTIFACT_ID = 'celix-wrapper'
-    PUBLISH_VERSION = '1.2'
+    PUBLISH_VERSION = '2.0'
 }
 
 android {

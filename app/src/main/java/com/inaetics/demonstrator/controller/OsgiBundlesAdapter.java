@@ -23,8 +23,8 @@ import apache.celix.model.OsgiBundle;
  * ArrayAdapter for showing the installed/active bundles in a list.
  */
 public class OsgiBundlesAdapter extends ArrayAdapter<OsgiBundle> {
-    private int resource;
-    private LayoutInflater inflater;
+    private final int resource;
+    private final LayoutInflater inflater;
 
     /**
      * Constructor

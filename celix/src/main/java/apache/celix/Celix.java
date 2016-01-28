@@ -21,7 +21,7 @@ import apache.celix.model.OsgiBundle;
 public class Celix extends Observable {
     private static Celix self;
     private String stdio;
-    private Handler handler;
+    private final Handler handler;
     private boolean celixRunning = false;
 
     //Load libraries
@@ -183,7 +183,7 @@ public class Celix extends Observable {
      * @return      String with logs.
      */
     public String getStdio() {
-        String result = new String(stdio);
+        String result = stdio;
         stdio = "";
         return result;
     }
